@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Profile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="script.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:#fff;
+  color:#111;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  padding:14px;
+  box-sizing:border-box;
+}
+.wrap{ width:420px; max-width:100%; }
+
+.top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 2px;
+  position:sticky;
+  top:0;
+  background:#fff;
+  z-index:10;
+}
+
+.title{ font-weight:900; }
+.dots{
+  width:40px;height:40px;
+  border-radius:12px;
+  border:1px solid #e5e5e5;
+  background:#000;
+  color:#fff;
+  font-size:20px;
+  cursor:pointer;
+}
+
+.menu{
+  position:absolute;
+  right:14px;
+  top:58px;
+  background:#fff;
+  border:1px solid #e5e5e5;
+  border-radius:14px;
+  box-shadow:0 12px 30px rgba(0,0,0,0.12);
+  overflow:hidden;
+  display:none;
+  min-width:180px;
+}
+
+.menu button{
+  width:100%;
+  padding:12px 14px;
+  border:none;
+  background:#fff;
+  text-align:left;
+  cursor:pointer;
+  font-weight:700;
+}
+.menu button:hover{ background:#f4f4f4; }
+.menu .danger{ color:#dc3545; }
+
+.card{
+  margin-top:12px;
+  background:#f4f4f4;
+  border:1px solid #ededed;
+  border-radius:16px;
+  padding:14px;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  margin-top:8px;
+  font-weight:700;
+}
+.muted{ color:#666; font-weight:600; }
+
+.back{
+  margin-top:12px;
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:14px;
+  background:#000;
+  color:#fff;
+  font-weight:900;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="title">Profile</div>
+    <button class="dots" onclick="toggleMenu()">⋮</button>
+  </div>
+
+  <div class="menu" id="menu">
+    <button onclick="goPage('settings.html')">⚙ Settings</button>
+    <button onclick="goPage('help.html')">❓ Help</button>
+    <button class="danger" onclick="logout()">🚪 Logout</button>
+  </div>
+
+  <div class="card">
+    <div class="row"><span class="muted">User</span><span id="u">-</span></div>
+    <div class="row"><span class="muted">Balance</span><span>₹ <span id="b">0</span></span></div>
+  </div>
+
+  <button class="back" onclick="goPage('dashboard.html')">⬅ Back</button>
+
+</div>
+
+<script>
+if(!sessionStorage.getItem("user")) window.location="index.html";
+
+function goPage(p){ window.location=p; }
+
+function toggleMenu(){
+  let m=document.getElementById("menu");
+  m.style.display = (m.style.display==="block") ? "none" : "block";
+}
+
+/* touch anywhere -> menu close */
+document.addEventListener("click", (e)=>{
+  let m=document.getElementById("menu");
+  if(!m) return;
+  if(e.target.classList.contains("dots")) return;
+  if(m.contains(e.target)) return;
+  m.style.display="none";
+});
+
+document.getElementById("u").innerText = sessionStorage.getItem("user") || "User";
+
+/* balance show: backend/local whichever your script.js provides */
+(async ()=>{
+  try{
+    if(typeof loadBalance === "function"){
+      // dashboard uses it; here we just reuse by fetching API quickly:
+      // If your script.js already sets #balance only on dashboard, we do manual fetch:
+      const API="http://127.0.0.1:5000";
+      let user=sessionStorage.getItem("user");
+      let r=await fetch(API+"/balance/"+user);
+      let d=await r.json();
+      document.getElementById("b").innerText = d.balance ?? 0;
+    }else{
+      document.getElementById("b").innerText = localStorage.getItem("balance") || 0;
+    }
+  }catch{
+    document.getElementById("b").innerText = localStorage.getItem("balance") || 0;
+  }
+})();
+</script>
+
+</body>
+</html>

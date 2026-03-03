@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>❓ Help & Support - ST PAY</title>
+  <script src="script.js"></script>
+
+  <style>
+    body{
+      margin:0;
+      font-family:'Segoe UI',sans-serif;
+      min-height:100vh;
+      background:#ffffff;
+      color:#111;
+      display:flex;
+      justify-content:center;
+      padding:14px;
+      box-sizing:border-box;
+    }
+    .app{ width:420px; max-width:100%; }
+
+    .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:8px 0 12px 0;
+      position:sticky;
+      top:0;
+      background:#fff;
+      z-index:5;
+    }
+    .title{ font-weight:900; letter-spacing:0.4px; }
+
+    .btn{
+      border:none;
+      background:#000;
+      color:#fff;
+      font-weight:800;
+      border-radius:12px;
+      padding:10px 12px;
+      cursor:pointer;
+    }
+    .btnGray{
+      background:#f2f2f2;
+      color:#111;
+      border:1px solid #e5e5e5;
+      font-weight:800;
+      border-radius:12px;
+      padding:10px 12px;
+      cursor:pointer;
+    }
+
+    .card{
+      background:#f4f4f4;
+      border:1px solid #e7e7e7;
+      border-radius:18px;
+      padding:14px;
+      box-shadow:0 10px 24px rgba(0,0,0,0.08);
+      margin-top:10px;
+    }
+
+    .search{
+      display:flex;
+      gap:10px;
+      margin-top:10px;
+    }
+    .search input{
+      flex:1;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid #d8d8d8;
+      background:#fff;
+      outline:none;
+      font-size:14px;
+      box-sizing:border-box;
+    }
+
+    .sectionTitle{
+      margin-top:14px;
+      font-weight:900;
+      font-size:14px;
+    }
+
+    /* 3-outline row */
+    .rowItem{
+      margin-top:10px;
+      background:#fff;
+      border:1px solid #e7e7e7;            /* outline 1 */
+      border-left:4px solid #dcdcdc;        /* outline 2 */
+      border-radius:16px;
+      padding:12px 12px;
+      box-shadow:0 6px 14px rgba(0,0,0,0.06);/* outline 3 */
+      cursor:pointer;
+      user-select:none;
+    }
+
+    .rowHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      font-weight:900;
+    }
+    .rowHead .left{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      min-width:0;
+    }
+    .ico{
+      width:34px; height:34px;
+      border-radius:12px;
+      background:#000;
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:16px;
+      flex:0 0 34px;
+    }
+    .arrow{font-size:18px;color:#444;font-weight:900;}
+    .desc{
+      margin-top:8px;
+      color:#555;
+      font-size:13px;
+      line-height:1.45;
+      display:none;
+    }
+    .rowItem.open .desc{ display:block; }
+
+    .grid{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+    }
+    .tile{
+      background:#000;
+      color:#fff;
+      border-radius:16px;
+      padding:12px;
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 10px 24px rgba(0,0,0,0.12);
+    }
+    .tile small{
+      display:block;
+      margin-top:6px;
+      font-weight:600;
+      opacity:0.8;
+    }
+
+    .note{
+      margin-top:10px;
+      font-size:12px;
+      color:#666;
+      line-height:1.45;
+    }
+
+    .footerBtns{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+    }
+    .footerBtns .btn,
+    .footerBtns .btnGray{ flex:1; }
+
+    @media(max-width:360px){
+      .grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+  <div class="top">
+    <div class="title">❓ Help & Support</div>
+    <button class="btn" onclick="back()">Back</button>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:900;">How can we help you?</div>
+
+    <div class="search">
+      <input id="q" placeholder="Search help topics..." oninput="filterFAQ()">
+      <button class="btnGray" onclick="clearSearch()">Clear</button>
+    </div>
+
+    <div class="sectionTitle">Quick Actions</div>
+    <div class="grid">
+      <div class="tile" onclick="go('transaction.html')">💸 Payment Help
+        <small>Issues with sending money</small>
+      </div>
+      <div class="tile" onclick="go('receive.html')">⬇ Receive Help
+        <small>UPI ID / QR issues</small>
+      </div>
+      <div class="tile" onclick="go('filetransfer.html')">📎 File Transfer
+        <small>Send docs / media</small>
+      </div>
+      <div class="tile" onclick="go('settings.html')">⚙ Settings
+        <small>Privacy & security</small>
+      </div>
+    </div>
+
+    <div class="sectionTitle">FAQ</div>
+
+    <!-- FAQ items -->
+    <div class="rowItem faq" data-text="login otp not coming otp auto fill">
+      <div class="rowHead" onclick="toggle(this)">
+        <div class="left"><div class="ico">🔐</div>OTP Login not working</div>
+        <div class="arrow">›</div>
+      </div>
+      <div class="desc">
+        Demo app-la OTP console/alert la show aagum. Real SMS illa.<br>
+        ✅ OTP send pannitu notification tap pannina auto-fill varum (demo).<br>
+        If permission problem: browser refresh + allow popups.
+      </div>
+    </div>
+
+    <div class="rowItem faq" data-text="payment failed backend not reachable server error 404">
+      <div class="rowHead" onclick="toggle(this)">
+        <div class="left"><div class="ico">💸</div>Payment failed / Backend not reachable</div>
+        <div class="arrow">›</div>
+      </div>
+      <div class="desc">
+        Flask backend run aaganu confirm pannu:<br>
+        <b>python app.py</b> → should show <b>http://127.0.0.1:5000</b><br>
+        Then frontend la fetch API correct-a point aaganum.<br>
+        ⚠️ Netlify la host pannina backend localhost connect aagathu (CORS + server location).
+      </div>
+    </div>
+
+    <div class="rowItem faq" data-text="scan camera not opening permission https live server">
+      <div class="rowHead" onclick="toggle(this)">
+        <div class="left"><div class="ico">📷</div>Scan page camera open aagala</div>
+        <div class="arrow">›</div>
+      </div>
+      <div class="desc">
+        Camera access only <b>https</b> or <b>localhost</b> la work aagum.<br>
+        ✅ VS Code Live Server: <b>http://127.0.0.1:5500/scan.html</b><br>
+        ❌ file:// open pannina camera permission varadhu.
+      </div>
+    </div>
+
+    <div class="rowItem faq" data-text="history missing not showing add money payments files">
+      <div class="rowHead" onclick="toggle(this)">
+        <div class="left"><div class="ico">📜</div>History show aagala</div>
+        <div class="arrow">›</div>
+      </div>
+      <div class="desc">
+        History localStorage la save aagum. Browser cache clear pannina data poidum.<br>
+        ✅ Latest history.html page la Pay/File/AddMoney tabs irukum.<br>
+        Same browser + same origin (localhost/5500) use pannunga.
+      </div>
+    </div>
+
+    <div class="rowItem faq" data-text="file transfer video audio image document types">
+      <div class="rowHead" onclick="toggle(this)">
+        <div class="left"><div class="ico">📎</div>File transfer options (video/audio/docs)</div>
+        <div class="arrow">›</div>
+      </div>
+      <div class="desc">
+        File upload input types set pannina different options varum.<br>
+        (Next step) naan filetransfer.html la categories + preview add pannidren.
+      </div>
+    </div>
+
+    <div class="rowItem faq" data-text="security safe secure upi pin password tips">
+      <div class="rowHead" onclick="toggle(this)">
+        <div class="left"><div class="ico">🛡️</div>Security tips</div>
+        <div class="arrow">›</div>
+      </div>
+      <div class="desc">
+        ✅ OTP / PIN share pannatha.<br>
+        ✅ Unknown links click pannatha.<br>
+        ✅ Public Wi-Fi la payments avoid pannu.<br>
+        ✅ Logout after use (especially demo shared PC).
+      </div>
+    </div>
+
+    <div class="sectionTitle">Contact</div>
+    <div class="rowItem">
+      <div class="rowHead" onclick="toggle(this)">
+        <div class="left"><div class="ico">☎</div>Support details</div>
+        <div class="arrow">›</div>
+      </div>
+      <div class="desc">
+        📧 Email: <b>support@stpay.demo</b><br>
+        ☎ Phone: <b>+91 90000 00000</b> (demo)<br>
+        ⏰ Working: Mon–Sat 9AM–6PM<br><br>
+        *This is demo info. Real API connect panna next step.*
+      </div>
+    </div>
+
+    <div class="footerBtns">
+      <button class="btnGray" onclick="reportIssue()">Report Issue</button>
+      <button class="btn" onclick="go('dashboard.html')">Go Home</button>
+    </div>
+
+    <div class="note">
+      ✅ Demo project: localStorage based.<br>
+      Next: backend connect + real OTP provider (Twilio/fast2sms/email) integrate pannalam.
+    </div>
+  </div>
+
+</div>
+
+<script>
+  if(!sessionStorage.getItem("user")){
+    window.location="index.html";
+  }
+
+  function back(){ window.location="dashboard.html"; }
+  function go(p){ window.location = p; }
+
+  function toggle(head){
+    const item = head.closest(".rowItem");
+    item.classList.toggle("open");
+  }
+
+  function clearSearch(){
+    document.getElementById("q").value="";
+    filterFAQ();
+  }
+
+  function filterFAQ(){
+    const q = (document.getElementById("q").value || "").toLowerCase().trim();
+    document.querySelectorAll(".faq").forEach(el=>{
+      const t = (el.getAttribute("data-text") || "").toLowerCase();
+      el.style.display = (!q || t.includes(q)) ? "block" : "none";
+    });
+  }
+
+  function reportIssue(){
+    const msg =
+`ST PAY Issue Report (demo)
+User: ${sessionStorage.getItem("user") || "User"}
+Time: ${new Date().toLocaleString()}
+Problem: (type here)`;
+
+    // copy template to clipboard
+    navigator.clipboard?.writeText(msg);
+    alert("Issue template copied ✔\nPaste it in your notes or message.");
+  }
+</script>
+
+</body>
+</html>

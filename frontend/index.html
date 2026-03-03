@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ST PAY - Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+/* ===== BACKGROUND (ADDED) ===== */
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#111;
+  padding:16px;
+  box-sizing:border-box;
+
+  /* Background image + soft gradient overlay (added) */
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.92)),
+    url("https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=1600&q=60");
+  background-size:cover;
+  background-position:center;
+  background-attachment:fixed;
+}
+
+/* floating glow circles (added) */
+.glow{
+  position:fixed;
+  inset:auto;
+  width:220px;height:220px;
+  border-radius:50%;
+  background:rgba(0,0,0,0.08);
+  filter:blur(2px);
+  z-index:0;
+  animation:float 14s linear infinite;
+}
+.glow.g1{left:8%; top:18%; background:rgba(0,198,255,0.15); animation-duration:18s;}
+.glow.g2{right:10%; top:55%; background:rgba(0,0,0,0.10); animation-duration:22s;}
+.glow.g3{left:35%; bottom:10%; background:rgba(52,199,89,0.12); animation-duration:20s;}
+
+@keyframes float{
+  0%{transform:translateY(0px) translateX(0px) scale(1);}
+  50%{transform:translateY(-18px) translateX(10px) scale(1.03);}
+  100%{transform:translateY(0px) translateX(0px) scale(1);}
+}
+
+/* ===== BOX ===== */
+.box{
+  width:380px;
+  max-width:95vw;
+  background:rgba(244,244,244,0.92);
+  border-radius:18px;
+  padding:22px;
+  box-shadow:0 14px 40px rgba(0,0,0,.16);
+  position:relative;
+  z-index:1;
+  border:1px solid rgba(0,0,0,0.08);
+  backdrop-filter: blur(10px);
+}
+
+h2{margin:0 0 10px 0;}
+
+/* Header row with logo (added) */
+.headRow{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin-bottom:8px;
+}
+.logoWrap{
+  width:44px;height:44px;
+  border-radius:14px;
+  background:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 10px 25px rgba(0,0,0,0.18);
+}
+.logoWrap svg{width:26px;height:26px;display:block;}
+.brandTitle{
+  display:flex;
+  flex-direction:column;
+  line-height:1.1;
+}
+.brandTitle b{font-size:16px;}
+.brandTitle span{font-size:12px;color:#555;font-weight:700;}
+
+/* inputs */
+input,select,button{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  box-sizing:border-box;
+  margin-top:10px;
+}
+input,select{
+  border:1px solid #cfcfcf;
+  background:#fff;
+  outline:none;
+}
+input:focus, select:focus{
+  border-color:#000;
+  box-shadow:0 0 0 3px rgba(0,0,0,0.08);
+}
+
+/* buttons */
+button{
+  border:none;
+  background:#000;
+  color:#fff;
+  font-weight:800;
+  cursor:pointer;
+  transition:0.2s;
+}
+button:hover{opacity:0.92;transform:translateY(-1px);}
+
+.small{font-size:12px;color:#666;margin-top:10px;}
+.notification{
+  position:fixed;
+  top:18px;
+  right:18px;
+  background:#000;
+  color:#fff;
+  padding:12px 14px;
+  border-radius:12px;
+  display:none;
+  cursor:pointer;
+  z-index:3;
+  box-shadow:0 12px 30px rgba(0,0,0,0.20);
+}
+.success{color:#1a7f37;font-weight:800;}
+.fail{color:#c62828;font-weight:800;}
+
+/* tiny footer chip (added) */
+.chip{
+  display:inline-block;
+  margin-top:10px;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#fff;
+  border:1px solid #e5e5e5;
+  color:#333;
+  font-size:12px;
+  font-weight:800;
+}
+</style>
+</head>
+<body>
+
+<!-- glow elements (added only) -->
+<div class="glow g1"></div>
+<div class="glow g2"></div>
+<div class="glow g3"></div>
+
+<div class="notification" id="otpNotify" onclick="autoFillOTP()">📩 OTP Received! Tap to Auto-Fill</div>
+
+<div class="box">
+
+  <!-- header with blockchain/lock logo (added) -->
+  <div class="headRow">
+    <div class="logoWrap" aria-label="Blockchain Lock Logo">
+      <!-- inline SVG: chain + lock (no external file needed) -->
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8.5 9.5h-1A3.5 3.5 0 0 0 4 13v1a3.5 3.5 0 0 0 3.5 3.5h1"
+              stroke="#00C6FF" stroke-width="2" stroke-linecap="round"/>
+        <path d="M15.5 9.5h1A3.5 3.5 0 0 1 20 13v1a3.5 3.5 0 0 1-3.5 3.5h-1"
+              stroke="#00C6FF" stroke-width="2" stroke-linecap="round"/>
+        <path d="M9 12h6" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <path d="M15.5 14.5V13a3.5 3.5 0 0 0-7 0v1.5"
+              stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <path d="M8.5 14.5h7v5h-7v-5Z" stroke="#fff" stroke-width="2" />
+      </svg>
+    </div>
+    <div class="brandTitle">
+      <b>🔐 ST PAY OTP Login</b>
+      <span>Blockchain-style secure demo</span>
+    </div>
+  </div>
+
+  <!-- ✅ choose real username -->
+  <select id="userSelect">
+    <option value="">Select User</option>
+    <option>Vivek</option>
+    <option>Arun</option>
+    <option>Bala</option>
+    <option>Kavi</option>
+    <option>Deepa</option>
+  </select>
+
+  <input type="email" id="email" placeholder="Enter email (demo)">
+
+  <button onclick="sendOTP()">Send OTP</button>
+
+  <input id="otp" placeholder="Enter OTP" inputmode="numeric" maxlength="6">
+
+  <button onclick="verifyLogin()">Verify & Login</button>
+
+  <div id="status" class="small"></div>
+
+  <div class="small">Demo OTP alert + console la varum.</div>
+  <div class="chip">✅ Works with backend users.json</div>
+</div>
+
+<script src="script.js"></script>
+<script>
+let otpCode="";
+
+function setStatus(msg,type){
+  const s=document.getElementById("status");
+  s.className="small";
+  if(type==="ok") s.classList.add("success");
+  if(type==="bad") s.classList.add("fail");
+  s.innerText=msg;
+}
+
+function sendOTP(){
+  const email=document.getElementById("email").value.trim();
+  const user=document.getElementById("userSelect").value.trim();
+
+  if(!user){
+    setStatus("Select user first ❌","bad"); return;
+  }
+  if(!email){
+    setStatus("Enter email ❌","bad"); return;
+  }
+
+  otpCode=String(Math.floor(100000 + Math.random()*900000));
+  console.log("Demo OTP:", otpCode);
+  alert("Demo OTP: " + otpCode);
+
+  setStatus("OTP Sent ✔","ok");
+
+  // notification after 2 sec
+  setTimeout(()=>{
+    document.getElementById("otpNotify").style.display="block";
+    setTimeout(()=> document.getElementById("otpNotify").style.display="none", 7000);
+  },2000);
+}
+
+function autoFillOTP(){
+  document.getElementById("otp").value = otpCode;
+  document.getElementById("otpNotify").style.display="none";
+  setStatus("OTP Auto-Filled ✔","ok");
+}
+
+function verifyLogin(){
+  const entered=document.getElementById("otp").value.trim();
+  const user=document.getElementById("userSelect").value.trim();
+
+  if(!otpCode){
+    setStatus("Send OTP first ❌","bad"); return;
+  }
+  if(entered !== otpCode){
+    setStatus("Invalid OTP ❌","bad"); return;
+  }
+
+  // ✅ FIX: store REAL username (important for backend)
+  sessionStorage.setItem("user", user);
+
+  setStatus("Login Success ✔ Redirecting...","ok");
+  setTimeout(()=> window.location="dashboard.html", 700);
+}
+</script>
+
+</body>
+</html>

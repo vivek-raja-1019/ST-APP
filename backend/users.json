@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Aravind",
+    "password": "123",
+    "balance": 5100.0
+  },
+  {
+    "name": "gojo",
+    "password": "123",
+    "balance": 4000
+  },
+  {
+    "name": "rosyy",
+    "password": "123",
+    "balance": 4000.0
+  },
+  {
+    "name": "Vivek",
+    "password": "123",
+    "balance": 4900.0
+  },
+  {
+    "name": "advika",
+    "password": "123",
+    "balance": 2000
+  }
+]
