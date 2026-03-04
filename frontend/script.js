@@ -1,6 +1,6 @@
 // frontend/script.js
 
-const API = "http://127.0.0.1:5000";
+const API = "https://st-app-29gb.onrender.com";
 
 function requireLogin(){
   const u = (sessionStorage.getItem("user") || "").trim();
