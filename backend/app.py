@@ -180,6 +180,9 @@ def reset_demo():
     _write_json(USERS_FILE, demo)
     _write_json(HISTORY_FILE, [])
     return jsonify({"ok": True, "message": "Demo data reset successfully"})
-
+import os
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    app.run(
+        host="0.0.0.0",
+         port=int(os.environ.get("PORT",5000))
+    )
