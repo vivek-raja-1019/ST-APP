@@ -341,7 +341,7 @@ async function shareUPI(){
 /* ========= BALANCE FETCH (FIXED ENDPOINT) ========= */
 (async ()=>{
   try{
-    const API="http://127.0.0.1:5000";
+    fetch(API + "/api/balance/" + encodeURIComponent(user))
     const r=await fetch(API+"/api/balance/"+encodeURIComponent(user));
     const d=await r.json().catch(()=>({}));
     if(r.ok && d.ok){
