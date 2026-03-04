@@ -7,21 +7,19 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.join(os.path.dirname(BASE_DIR), "frontend")
 
 USERS_FILE = os.path.join(BASE_DIR, "users.json")
-HISTORY_FILE = os.path.join(BASE_DIR, "history.json")
+HISTORY_FILE  = os.path.join(BASE_DIR, "history.json")
 
 app = Flask(__name__, static_folder=None)
-CORS(app)
+
+# ✅ CORS stronger (preflight OPTIONS also ok)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
 
 def _read_json(path, default):
     try:
-        # if file not exists -> create with default
         if not os.path.exists(path):
             return default
-
-        # if file exists but empty -> treat as default
         if os.path.getsize(path) == 0:
             return default
-
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     except Exception:
@@ -32,7 +30,6 @@ def _write_json(path, data):
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 def _ensure_files():
-    # ✅ create users.json if missing or empty
     if (not os.path.exists(USERS_FILE)) or os.path.getsize(USERS_FILE) == 0:
         demo = [
             {"name": "Aravind", "password": "123", "balance": 5000},
@@ -43,11 +40,15 @@ def _ensure_files():
         ]
         _write_json(USERS_FILE, demo)
 
-    # ✅ create history.json if missing or empty
     if (not os.path.exists(HISTORY_FILE)) or os.path.getsize(HISTORY_FILE) == 0:
         _write_json(HISTORY_FILE, [])
 
 _ensure_files()
+
+# ✅ ADDED: health check (browser la open pannitu confirm pannalaam)
+@app.get("/api/health")
+def api_health():
+    return jsonify({"ok": True, "message": "Backend is running", "time": datetime.now().isoformat()})
 
 # ---------- Frontend serving ----------
 @app.get("/")
@@ -59,7 +60,6 @@ def serve_frontend(filename):
     return send_from_directory(FRONTEND_DIR, filename)
 
 # ---------- Helpers ----------
-# ✅ FIX: case-insensitive find
 def find_user(users, name):
     name = (name or "").strip().lower()
     for u in users:
@@ -82,7 +82,6 @@ def api_login():
     if not u or (u.get("password") != password):
         return jsonify({"error": "Invalid credentials"}), 401
 
-    # return stored name (original case)
     return jsonify({"ok": True, "name": u.get("name"), "balance": u.get("balance", 0)})
 
 # ---------- API: get balance ----------
@@ -107,8 +106,12 @@ def api_users():
     return jsonify({"ok": True, "users": safe_users})
 
 # ---------- API: send money ----------
-@app.post("/send")
+@app.route("/send", methods=["POST", "OPTIONS"])
 def send_money():
+    # ✅ OPTIONS preflight ok
+    if request.method == "OPTIONS":
+        return jsonify({"ok": True})
+
     data = request.get_json(force=True)
     sender = (data.get("sender") or "").strip()
     receiver = (data.get("receiver") or "").strip()
@@ -136,19 +139,17 @@ def send_money():
     if float(s.get("balance", 0)) < amount:
         return jsonify({"error": "Insufficient balance"}), 400
 
-    # ✅ update balances
     s["balance"] = float(s.get("balance", 0)) - amount
     r["balance"] = float(r.get("balance", 0)) + amount
     _write_json(USERS_FILE, users)
 
-    # ✅ history update
     history = _read_json(HISTORY_FILE, [])
     txn_id = "TXN" + datetime.now().strftime("%Y%m%d%H%M%S")
     history.append({
         "type": "pay",
         "id": txn_id,
-        "sender": s.get("name"),     # store original case
-        "receiver": r.get("name"),   # store original case
+        "sender": s.get("name"),
+        "receiver": r.get("name"),
         "amount": amount,
         "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     })
@@ -180,9 +181,8 @@ def reset_demo():
     _write_json(USERS_FILE, demo)
     _write_json(HISTORY_FILE, [])
     return jsonify({"ok": True, "message": "Demo data reset successfully"})
-import os
+
 if __name__ == "__main__":
-    app.run(
-        host="0.0.0.0",
-         port=int(os.environ.get("PORT",5000))
-    )
+    # ✅ Local testing: debug=True helps show exact crash in terminal
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
