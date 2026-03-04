@@ -3,7 +3,9 @@
 <head>
 <title>💰 Secure Transaction</title>
 
+<!-- keep your existing include (DON'T remove) -->
 <script src="script.js"></script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -68,7 +70,9 @@ box-shadow:0 12px 30px rgba(0,0,0,0.2);display:none;cursor:pointer;z-index:100;
 <h2>💰 Secure Transaction</h2>
 
 <div id="formSection">
-  <input id="receiver" placeholder="Receiver name">
+  <!-- ✅ receiver suggestions (prevents "Receiver not found") -->
+  <input id="receiver" list="userList" placeholder="Receiver name (select from list)">
+  <datalist id="userList"></datalist>
 
   <div class="row2">
     <input id="receiverId" placeholder="Receiver UPI / Phone (optional)">
@@ -95,13 +99,14 @@ box-shadow:0 12px 30px rgba(0,0,0,0.2);display:none;cursor:pointer;z-index:100;
 
   <textarea id="note" placeholder="Note (optional)"></textarea>
 
-  <!-- schedule UI keep pannrom, but date/time receipt la show panna maatom -->
+  <!-- keep schedule UI, but receipt la date/time show panna maatom -->
   <input id="schedule" type="datetime-local" placeholder="Schedule (optional)">
 
   <button onclick="sendSecure()">Pay Securely</button>
   <button onclick="back()">Back</button>
 
   <div class="small">Tip: Pay click panna OTP verification varum (demo).</div>
+  <div class="small" id="apiHint" style="display:none;"></div>
 </div>
 
 <div class="loader" id="loader"></div>
@@ -115,7 +120,7 @@ box-shadow:0 12px 30px rgba(0,0,0,0.2);display:none;cursor:pointer;z-index:100;
 <div class="otpBox" id="otpBox">
   <div><span class="badge">OTP</span> Enter OTP to confirm</div>
   <div class="otpRow">
-    <input id="otpInput" maxlength="6" placeholder="------">
+    <input id="otpInput" maxlength="6" inputmode="numeric" placeholder="------">
     <button onclick="verifyOTP()">Verify</button>
   </div>
   <div class="small">Demo OTP alert + console la varum. Notification click panna auto-fill.</div>
@@ -133,7 +138,14 @@ box-shadow:0 12px 30px rgba(0,0,0,0.2);display:none;cursor:pointer;z-index:100;
     return;
   }
 
-  const API = "http://127.0.0.1:5000";
+  // ✅ safest API base:
+  // If you open pages via backend (recommended) -> API is same origin (127.0.0.1:5000)
+  // If you open via live server -> fallback to 127.0.0.1:5000
+  const API = (location.origin && location.origin.includes("127.0.0.1:5000")) ? location.origin : "http://127.0.0.1:5000";
+  const apiHint = document.getElementById("apiHint");
+  apiHint.style.display = "block";
+  apiHint.innerText = "API: " + API + " (open via 127.0.0.1:5000 best)";
+
   let otpCode = "";
   let pendingPayload = null;
 
@@ -164,18 +176,50 @@ box-shadow:0 12px 30px rgba(0,0,0,0.2);display:none;cursor:pointer;z-index:100;
     if(type==="ok") s.classList.add("success");
     if(type==="bad") s.classList.add("fail");
   }
-  function showForm(){
-    document.getElementById("formSection").style.display="block";
+  function showForm(){ document.getElementById("formSection").style.display="block"; }
+  function hideForm(){ document.getElementById("formSection").style.display="none"; }
+  function showOTP(){ document.getElementById("otpBox").style.display="block"; }
+  function hideOTP(){ document.getElementById("otpBox").style.display="none"; }
+
+  // ✅ robust history save (common + per-user + base64 compatibility)
+  function pushHistory(item){
+    const user = sessionStorage.getItem("user") || "User";
+
+    let h=[];
+    try{ h = JSON.parse(localStorage.getItem("history") || "[]"); }catch(e){ h=[]; }
+    if(!Array.isArray(h)) h=[];
+    h.push(item);
+    localStorage.setItem("history", JSON.stringify(h));
+
+    let hu=[];
+    try{ hu = JSON.parse(localStorage.getItem("history_"+user) || "[]"); }catch(e){ hu=[]; }
+    if(!Array.isArray(hu)) hu=[];
+    hu.push(item);
+    localStorage.setItem("history_"+user, JSON.stringify(hu));
+
+    // base64 (if your older history page expects it)
+    try{ localStorage.setItem("history_"+user, btoa(JSON.stringify(hu))); }catch(e){}
   }
-  function hideForm(){
-    document.getElementById("formSection").style.display="none";
+
+  // ✅ load users list for suggestions (prevents Receiver not found)
+  async function loadUsers(){
+    try{
+      const res = await fetch(API + "/api/users");
+      const data = await res.json().catch(()=> ({}));
+      if(res.ok && data.ok && Array.isArray(data.users)){
+        const dl = document.getElementById("userList");
+        dl.innerHTML = "";
+        data.users.forEach(u=>{
+          const opt = document.createElement("option");
+          opt.value = u.name;
+          dl.appendChild(opt);
+        });
+      }
+    }catch(e){
+      // ignore (server offline)
+    }
   }
-  function showOTP(){
-    document.getElementById("otpBox").style.display="block";
-  }
-  function hideOTP(){
-    document.getElementById("otpBox").style.display="none";
-  }
+  loadUsers();
 
   // ✅ IMPORTANT: attach global functions so onclick always works
   window.sendSecure = function(){
@@ -186,6 +230,7 @@ box-shadow:0 12px 30px rgba(0,0,0,0.2);display:none;cursor:pointer;z-index:100;
     showStatus("", "");
     resetStages();
     hideOTP();
+    otpNotify.style.display="none";
 
     // collect
     let receiver = document.getElementById("receiver").value.trim();
@@ -196,7 +241,13 @@ box-shadow:0 12px 30px rgba(0,0,0,0.2);display:none;cursor:pointer;z-index:100;
     let note = document.getElementById("note").value.trim();
     let schedule = document.getElementById("schedule").value;
 
-    let sender = sessionStorage.getItem("user");
+    let sender = (sessionStorage.getItem("user") || "").trim();
+
+    if(!sender){
+      alert("Login again. sessionStorage user missing.");
+      window.location="index.html";
+      return;
+    }
 
     if(!receiver || !amount || Number(amount)<=0){
       alert("Enter valid details");
@@ -227,7 +278,6 @@ box-shadow:0 12px 30px rgba(0,0,0,0.2);display:none;cursor:pointer;z-index:100;
         console.log("Demo OTP:", otpCode);
         alert("Demo OTP: " + otpCode);
 
-        // show otp ui
         showOTP();
         showStatus("Enter OTP to confirm payment", "");
         otpNotify.style.display="block";
@@ -246,6 +296,12 @@ box-shadow:0 12px 30px rgba(0,0,0,0.2);display:none;cursor:pointer;z-index:100;
     }
     if(entered !== otpCode){
       showStatus("❌ Invalid OTP", "bad");
+      return;
+    }
+    if(!pendingPayload){
+      showStatus("❌ Something went wrong. Try again.", "bad");
+      showForm();
+      resetStages();
       return;
     }
 
@@ -269,28 +325,30 @@ box-shadow:0 12px 30px rgba(0,0,0,0.2);display:none;cursor:pointer;z-index:100;
 
       if(!res.ok || data.error){
         showStatus("❌ Failed: " + (data.error || "Server error"), "bad");
+        // show form again so user can edit receiver
         showForm();
         resetStages();
         return;
       }
 
-      // ✅ Save history in localStorage (date only history la)
+      // ✅ Save history (date/time receipt la show pannala; history la mattum store)
       const txnId = data.id || ("TXN"+Date.now());
-      const history = JSON.parse(localStorage.getItem("history") || "[]");
-      history.push({
+      pushHistory({
         type:"pay",
         id: txnId,
+        sender: pendingPayload.sender,
         receiver: pendingPayload.receiver,
         amount: Number(pendingPayload.amount),
-        payMethod: pendingPayload.extra.pay,
+        method: pendingPayload.extra.pay,
+        category: pendingPayload.extra.category,
         note: pendingPayload.extra.note || "",
+        receiverId: pendingPayload.extra.receiverId || "",
         date: new Date().toLocaleString()
       });
-      localStorage.setItem("history", JSON.stringify(history));
 
       showStatus("✔ Transaction Success", "ok");
 
-      // ✅ Receipt la date/time REMOVE (user request)
+      // ✅ Receipt la date/time REMOVE
       const box=document.getElementById("receiptBox");
       box.style.display="block";
       box.innerHTML =
