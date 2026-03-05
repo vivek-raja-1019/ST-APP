@@ -1,159 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📷 Scan & Pay - ST PAY</title>
-
-  <!-- ZXing QR Scanner -->
-  <script src="https://unpkg.com/@zxing/library@latest"></script>
-
-  <style>
-    body{
-      margin:0;
-      font-family:'Segoe UI',sans-serif;
-      min-height:100vh;
-      background:#ffffff;
-      color:#111;
-      display:flex;
-      justify-content:center;
-      padding:14px;
-      box-sizing:border-box;
-    }
-
-    .app{
-      width:420px;
-      max-width:100%;
-    }
-
-    .top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:8px 0 12px 0;
-      position:sticky;
-      top:0;
-      background:#fff;
-      z-index:5;
-    }
-
-    .title{
-      font-weight:900;
-      letter-spacing:0.4px;
-    }
-
-    .btn{
-      border:none;
-      background:#000;
-      color:#fff;
-      font-weight:800;
-      border-radius:12px;
-      padding:10px 12px;
-      cursor:pointer;
-    }
-    .btn:active{transform:scale(0.99);}
-
-    .card{
-      background:#f4f4f4;
-      border:1px solid #e7e7e7;
-      border-radius:18px;
-      padding:12px;
-      box-shadow:0 10px 24px rgba(0,0,0,0.08);
-    }
-
-    .videoWrap{
-      margin-top:10px;
-      border-radius:16px;
-      overflow:hidden;
-      background:#000;
-      border:1px solid #e7e7e7;
-    }
-
-    video{
-      width:100%;
-      height:320px;
-      object-fit:cover;
-      background:#000;
-      display:block;
-    }
-
-    .row{
-      display:flex;
-      gap:10px;
-      margin-top:12px;
-    }
-    .row .btn{flex:1;}
-
-    .status{
-      margin-top:12px;
-      font-size:13px;
-      color:#444;
-      line-height:1.4;
-    }
-
-    .resultBox{
-      margin-top:12px;
-      padding:12px;
-      border-radius:14px;
-      background:#fff;
-      border:1px solid #e7e7e7;
-      display:none;
-    }
-
-    .resultBox b{display:block;margin-bottom:6px;}
-    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px;}
-
-    .hint{
-      margin-top:10px;
-      font-size:12px;
-      color:#666;
-    }
-
-    @media(max-width:420px){
-      video{height:360px;}
-    }
-  </style>
-</head>
-
-<body>
-  <div class="app">
-
-    <div class="top">
-      <div class="title">📷 Scan & Pay</div>
-      <button class="btn" onclick="back()">Back</button>
-    </div>
-
-    <div class="card">
-      <div style="font-weight:800;">Camera</div>
-      <div class="hint">
-        ✅ Mobile-la camera permission allow pannu.  
-        ⚠️ file:// don't open . Live Server / localhost / https use pannu.
-      </div>
-
-      <div class="videoWrap">
-        <video id="preview" playsinline></video>
-      </div>
-
-      <div class="row">
-        <button class="btn" onclick="startScan()">Start</button>
-        <button class="btn" onclick="stopScan()">Stop</button>
-      </div>
-
-      <div class="status" id="status">Ready. Tap <b>Start</b>.</div>
-
-      <div class="resultBox" id="resultBox">
-        <b>Scanned Data</b>
-        <div class="mono" id="resultText"></div>
-        <div class="row" style="margin-top:10px;">
-          <button class="btn" onclick="payNow()">Pay</button>
-          <button class="btn" onclick="copyResult()">Copy</button>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
 <script>
   // session check
   if(!sessionStorage.getItem("user")){
@@ -163,8 +7,12 @@
   const codeReader = new ZXing.BrowserMultiFormatReader();
   let currentDeviceId = null;
   let lastScannedText = "";
+  let isScanning = false;
 
   async function startScan(){
+    if(isScanning) return;   // ✅ prevent double start
+    isScanning = true;
+
     lastScannedText = "";
     setStatus("Starting camera...");
 
@@ -172,6 +20,7 @@
       const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
       if(!devices || devices.length === 0){
         setStatus("❌ No camera found.");
+        isScanning = false;
         return;
       }
 
@@ -186,11 +35,10 @@
         "preview",
         (result, err) => {
           if(result){
-            lastScannedText = result.getText();
+            lastScannedText = (result.getText() || "").trim(); // ✅ trim
             showResult(lastScannedText);
             setStatus("✅ QR scanned! Tap Pay or Copy.");
-            // Auto stop after first scan
-            stopScan();
+            stopScan(); // Auto stop after first scan
           }
         }
       );
@@ -198,16 +46,17 @@
       setStatus("📷 Camera ON. Point to QR...");
 
     }catch(e){
-      // Common errors: NotAllowedError, NotFoundError
       setStatus("❌ Camera permission denied / not available. Use Live Server or HTTPS. ("+ (e.name || "Error") +")");
+      isScanning = false;
     }
   }
 
   function stopScan(){
     try{
       codeReader.reset();
-      setStatus("Camera stopped.");
     }catch(e){}
+    isScanning = false; // ✅ release lock
+    setStatus("Camera stopped.");
   }
 
   function showResult(text){
@@ -226,9 +75,8 @@
   function payNow(){
     if(!lastScannedText){ alert("No scan data"); return; }
 
-    // QR text could be UPI ID / name / any string
-    // We'll store it and open transaction page
-    sessionStorage.setItem("quick_receiver", lastScannedText);
+    // store receiver and open transaction page
+    sessionStorage.setItem("quick_receiver", lastScannedText); // ✅ already trimmed
     window.location = "transaction.html";
   }
 
@@ -242,10 +90,8 @@
   }
 
   // auto start when page opens (nice for mobile)
-  window.onload = () => {
-    startScan();
-  };
-</script>
+  window.addEventListener("load", () => startScan());
 
-</body>
-</html>
+  // ✅ important: stop camera when leaving page
+  window.addEventListener("beforeunload", () => stopScan());
+</script>
