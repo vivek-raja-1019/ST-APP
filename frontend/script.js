@@ -16,7 +16,7 @@ if (
 
 // Render / production
 else {
-  API = location.origin;
+  API = location.origin +"/api";
 }
 
 console.log("API BASE:", API);
