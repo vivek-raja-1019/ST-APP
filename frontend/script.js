@@ -1,62 +1,85 @@
 // frontend/script.js
 
-// ✅ Use ONLY ONE API everywhere
-const API = "https://st-app-29gb.onrender.com";
+/* ------------------------------
+   API BASE (AUTO DETECT)
+   ------------------------------ */
 
-// ---------- Common ----------
+let API;
+
+// Local development
+if (
+  location.hostname === "127.0.0.1" ||
+  location.hostname === "localhost"
+) {
+  API = "http://127.0.0.1:5000";
+}
+
+// Render / production
+else {
+  API = location.origin;
+}
+
+console.log("API BASE:", API);
+
+
+/* ------------------------------
+   LOGIN CHECK
+   ------------------------------ */
+
 function requireLogin(){
   const u = (sessionStorage.getItem("user") || "").trim();
-  if(!u || u === "loggedIn"){
+
+  if(!u){
     window.location = "index.html";
     return false;
   }
+
   return true;
 }
 
-function logout(){
-  sessionStorage.clear();
-  window.location = "index.html";
-}
 
-// ---------- Backend health check (NEW) ----------
-async function pingBackend(){
-  try{
-    // backend la /api/history iruku, atha ping pannu (GET)
-    const r = await fetch(`${API}/api/history`, { method:"GET" });
-    return r.ok;
-  }catch(e){
-    return false;
-  }
-}
+/* ------------------------------
+   LOAD BALANCE
+   ------------------------------ */
 
-// ---------- Balance ----------
 async function loadBalance(){
-  try{
-    const u = (sessionStorage.getItem("user") || "").trim();
-    if(!u || u === "loggedIn") return;
 
-    const res = await fetch(`${API}/api/balance/${encodeURIComponent(u)}`);
-    const data = await res.json().catch(()=> ({}));
+  try{
+
+    const user = sessionStorage.getItem("user");
+    if(!user) return;
+
+    const res = await fetch(`${API}/api/balance/${encodeURIComponent(user)}`);
+
+    const data = await res.json();
+
     if(res.ok && data.ok){
+
       const el = document.getElementById("balance");
-      if(el) el.innerText = data.balance ?? 0;
+
+      if(el){
+        el.innerText = data.balance;
+      }
+
     }
+
   }catch(e){
-    // ignore
+
+    console.log("Balance load error", e);
+
   }
+
 }
 
-// ---------- Pay (NEW helper) ----------
-async function sendMoney(sender, receiver, amount){
-  const res = await fetch(`${API}/send`, {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ sender, receiver, amount })
-  });
 
-  const data = await res.json().catch(()=> ({}));
-  if(!res.ok || data.error){
-    throw new Error(data.error || "Server error");
-  }
-  return data; // {ok, id, sender_balance, receiver_balance}
+/* ------------------------------
+   LOGOUT
+   ------------------------------ */
+
+function logout(){
+
+  sessionStorage.clear();
+
+  window.location = "index.html";
+
 }
