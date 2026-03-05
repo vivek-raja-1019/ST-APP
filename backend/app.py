@@ -3,186 +3,268 @@ from flask_cors import CORS
 import os, json
 from datetime import datetime
 
+# ---------------- PATHS ----------------
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-FRONTEND_DIR = os.path.join(os.path.dirname(BASE_DIR), "frontend")
+PROJECT_DIR = os.path.dirname(BASE_DIR)
+
+FRONTEND_DIR = os.path.join(PROJECT_DIR, "frontend")
 
 USERS_FILE = os.path.join(BASE_DIR, "users.json")
-HISTORY_FILE  = os.path.join(BASE_DIR, "history.json")
+HISTORY_FILE = os.path.join(BASE_DIR, "history.json")
+
+# ---------------- APP ----------------
 
 app = Flask(__name__, static_folder=None)
+CORS(app)
 
-# ✅ CORS stronger (preflight OPTIONS also ok)
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
+# ---------------- JSON HELPERS ----------------
 
-def _read_json(path, default):
+def read_json(path, default):
     try:
         if not os.path.exists(path):
             return default
+
         if os.path.getsize(path) == 0:
             return default
+
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
-    except Exception:
+
+    except:
         return default
 
-def _write_json(path, data):
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
 
-def _ensure_files():
-    if (not os.path.exists(USERS_FILE)) or os.path.getsize(USERS_FILE) == 0:
-        demo = [
+def write_json(path, data):
+
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+
+# ---------------- CREATE FILES ----------------
+
+def ensure_files():
+
+    if not os.path.exists(USERS_FILE):
+
+        users = [
             {"name": "Aravind", "password": "123", "balance": 5000},
             {"name": "gojo", "password": "123", "balance": 4000},
             {"name": "rosyy", "password": "123", "balance": 3000},
             {"name": "Vivek", "password": "123", "balance": 6000},
             {"name": "advika", "password": "123", "balance": 2000},
         ]
-        _write_json(USERS_FILE, demo)
 
-    if (not os.path.exists(HISTORY_FILE)) or os.path.getsize(HISTORY_FILE) == 0:
-        _write_json(HISTORY_FILE, [])
+        write_json(USERS_FILE, users)
 
-_ensure_files()
 
-# ✅ ADDED: health check (browser la open pannitu confirm pannalaam)
-@app.get("/api/health")
-def api_health():
-    return jsonify({"ok": True, "message": "Backend is running", "time": datetime.now().isoformat()})
+    if not os.path.exists(HISTORY_FILE):
+        write_json(HISTORY_FILE, [])
 
-# ---------- Frontend serving ----------
-@app.get("/")
-def home():
-    return send_from_directory(FRONTEND_DIR, "index.html")
 
-@app.get("/<path:filename>")
-def serve_frontend(filename):
-    return send_from_directory(FRONTEND_DIR, filename)
+ensure_files()
 
-# ---------- Helpers ----------
+# ---------------- USER FIND ----------------
+
 def find_user(users, name):
-    name = (name or "").strip().lower()
+
+    name = (name or "").lower().strip()
+
     for u in users:
-        if (u.get("name") or "").strip().lower() == name:
+
+        if (u.get("name") or "").lower() == name:
             return u
+
     return None
 
-# ---------- API: login ----------
+
+# ---------------- FRONTEND ROUTES ----------------
+
+@app.get("/")
+def index():
+    return send_from_directory(FRONTEND_DIR, "index.html")
+
+
+@app.get("/<path:path>")
+def serve_file(path):
+
+    file_path = os.path.join(FRONTEND_DIR, path)
+
+    if os.path.exists(file_path):
+        return send_from_directory(FRONTEND_DIR, path)
+
+    return send_from_directory(FRONTEND_DIR, "index.html")
+
+
+# ---------------- HEALTH ----------------
+
+@app.get("/api/health")
+def health():
+    return jsonify({"ok": True})
+
+
+# ---------------- LOGIN ----------------
+
 @app.post("/api/login")
-def api_login():
+def login():
+
     data = request.get_json(force=True)
+
     name = (data.get("name") or "").strip()
     password = (data.get("password") or "").strip()
 
-    if not name or not password:
-        return jsonify({"error": "name/password required"}), 400
+    users = read_json(USERS_FILE, [])
 
-    users = _read_json(USERS_FILE, [])
     u = find_user(users, name)
-    if not u or (u.get("password") != password):
+
+    if not u or u.get("password") != password:
+
         return jsonify({"error": "Invalid credentials"}), 401
 
-    return jsonify({"ok": True, "name": u.get("name"), "balance": u.get("balance", 0)})
+    return jsonify({
+        "ok": True,
+        "name": u["name"],
+        "balance": u["balance"]
+    })
 
-# ---------- API: get balance ----------
+
+# ---------------- USERS ----------------
+
+@app.get("/api/users")
+def users():
+
+    users = read_json(USERS_FILE, [])
+
+    safe = []
+
+    for u in users:
+
+        safe.append({
+            "name": u["name"],
+            "balance": u["balance"]
+        })
+
+    return jsonify({"ok": True, "users": safe})
+
+
+# ---------------- BALANCE ----------------
+
 @app.get("/api/balance/<username>")
-def api_balance(username):
-    users = _read_json(USERS_FILE, [])
+def balance(username):
+
+    users = read_json(USERS_FILE, [])
+
     u = find_user(users, username)
+
     if not u:
         return jsonify({"error": "User not found"}), 404
-    return jsonify({"ok": True, "balance": u.get("balance", 0)})
 
-# ---------- API: list users (password hidden) ----------
-@app.get("/api/users")
-def api_users():
-    users = _read_json(USERS_FILE, [])
-    safe_users = []
-    for u in users:
-        safe_users.append({
-            "name": u.get("name"),
-            "balance": u.get("balance", 0)
-        })
-    return jsonify({"ok": True, "users": safe_users})
+    return jsonify({
+        "ok": True,
+        "balance": u["balance"]
+    })
 
-# ---------- API: send money ----------
-@app.route("/send", methods=["POST", "OPTIONS"])
-def send_money():
-    # ✅ OPTIONS preflight ok
-    if request.method == "OPTIONS":
-        return jsonify({"ok": True})
+
+# ---------------- SEND MONEY ----------------
+
+@app.post("/send")
+def send():
 
     data = request.get_json(force=True)
+
     sender = (data.get("sender") or "").strip()
     receiver = (data.get("receiver") or "").strip()
-    amount_raw = data.get("amount")
+    amount = float(data.get("amount") or 0)
 
-    try:
-        amount = float(amount_raw)
-    except Exception:
-        return jsonify({"error": "Invalid amount"}), 400
+    users = read_json(USERS_FILE, [])
 
-    if not sender or not receiver:
-        return jsonify({"error": "sender/receiver required"}), 400
-    if amount <= 0:
-        return jsonify({"error": "Amount must be > 0"}), 400
-
-    users = _read_json(USERS_FILE, [])
     s = find_user(users, sender)
     r = find_user(users, receiver)
 
     if not s:
         return jsonify({"error": "Sender not found"}), 404
+
     if not r:
         return jsonify({"error": "Receiver not found"}), 404
 
-    if float(s.get("balance", 0)) < amount:
+    if s["balance"] < amount:
         return jsonify({"error": "Insufficient balance"}), 400
 
-    s["balance"] = float(s.get("balance", 0)) - amount
-    r["balance"] = float(r.get("balance", 0)) + amount
-    _write_json(USERS_FILE, users)
+    s["balance"] -= amount
+    r["balance"] += amount
 
-    history = _read_json(HISTORY_FILE, [])
-    txn_id = "TXN" + datetime.now().strftime("%Y%m%d%H%M%S")
-    history.append({
+    write_json(USERS_FILE, users)
+
+    history = read_json(HISTORY_FILE, [])
+
+    txn = {
         "type": "pay",
-        "id": txn_id,
-        "sender": s.get("name"),
-        "receiver": r.get("name"),
+        "id": "TXN" + datetime.now().strftime("%Y%m%d%H%M%S"),
+        "sender": s["name"],
+        "receiver": r["name"],
         "amount": amount,
         "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    })
-    _write_json(HISTORY_FILE, history)
+    }
+
+    history.append(txn)
+
+    write_json(HISTORY_FILE, history)
 
     return jsonify({
         "ok": True,
-        "id": txn_id,
+        "id": txn["id"],
         "sender_balance": s["balance"],
         "receiver_balance": r["balance"]
     })
 
-# ---------- API: history ----------
-@app.get("/api/history")
-def api_history():
-    history = _read_json(HISTORY_FILE, [])
-    return jsonify({"ok": True, "history": history})
 
-# ---------- API: reset demo data ----------
-@app.post("/api/reset-demo")
-def reset_demo():
-    demo = [
-        {"name": "Aravind", "password": "123", "balance": 5000},
-        {"name": "gojo", "password": "123", "balance": 4000},
-        {"name": "rosyy", "password": "123", "balance": 3000},
-        {"name": "Vivek", "password": "123", "balance": 6000},
-        {"name": "advika", "password": "123", "balance": 2000},
-    ]
-    _write_json(USERS_FILE, demo)
-    _write_json(HISTORY_FILE, [])
-    return jsonify({"ok": True, "message": "Demo data reset successfully"})
+# ---------------- HISTORY ----------------
+
+@app.get("/api/history")
+def history():
+
+    history = read_json(HISTORY_FILE, [])
+
+    return jsonify({
+        "ok": True,
+        "history": history
+    })
+
+
+# ---------------- ADD MONEY ----------------
+
+@app.post("/api/addmoney")
+def addmoney():
+
+    data = request.get_json(force=True)
+
+    username = (data.get("username") or "").strip()
+    amount = float(data.get("amount") or 0)
+
+    users = read_json(USERS_FILE, [])
+
+    u = find_user(users, username)
+
+    if not u:
+        return jsonify({"error": "User not found"}), 404
+
+    u["balance"] += amount
+
+    write_json(USERS_FILE, users)
+
+    return jsonify({
+        "ok": True,
+        "balance": u["balance"]
+    })
+
+
+# ---------------- RUN ----------------
 
 if __name__ == "__main__":
-    # ✅ Local testing: debug=True helps show exact crash in terminal
+
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+
+    app.run(
+        host="0.0.0.0",
+        port=port
+    )
