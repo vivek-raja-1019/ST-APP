@@ -192,6 +192,9 @@ button:hover{opacity:0.92;transform:translateY(-1px);}
 
   <input type="email" id="email" placeholder="Enter email (demo)">
 
+  <!-- ✅ ADDED: password input (NO remove anything) -->
+  <input type="password" id="password" placeholder="Enter password (demo: 123)">
+
   <button onclick="sendOTP()">Send OTP</button>
 
   <input id="otp" placeholder="Enter OTP" inputmode="numeric" maxlength="6">
@@ -206,14 +209,20 @@ button:hover{opacity:0.92;transform:translateY(-1px);}
 
 <script src="script.js"></script>
 <script>
-let otpCode="";
+let otpCode = (sessionStorage.getItem("otpCode") || "");
 
+/* status helper */
 function setStatus(msg,type){
   const s=document.getElementById("status");
   s.className="small";
   if(type==="ok") s.classList.add("success");
   if(type==="bad") s.classList.add("fail");
   s.innerText=msg;
+}
+
+/* simple email validation */
+function isValidEmail(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function sendOTP(){
@@ -226,8 +235,13 @@ function sendOTP(){
   if(!email){
     setStatus("Enter email ❌","bad"); return;
   }
+  if(!isValidEmail(email)){
+    setStatus("Enter valid email ❌","bad"); return;
+  }
 
-  otpCode=String(Math.floor(100000 + Math.random()*900000));
+  otpCode = String(Math.floor(100000 + Math.random()*900000));
+  sessionStorage.setItem("otpCode", otpCode);
+
   console.log("Demo OTP:", otpCode);
   alert("Demo OTP: " + otpCode);
 
@@ -246,9 +260,17 @@ function autoFillOTP(){
   setStatus("OTP Auto-Filled ✔","ok");
 }
 
-function verifyLogin(){
+/*
+  ✅ FIXED + ADDED:
+  - stores real username
+  - stores password in sessionStorage ("pass") for dashboard balance unlock
+  - optional backend verify: if backend exists, it checks /api/login (POST)
+    if backend not available -> OTP-only login (demo)
+*/
+async function verifyLogin(){
   const entered=document.getElementById("otp").value.trim();
   const user=document.getElementById("userSelect").value.trim();
+  const password=document.getElementById("password").value.trim();
 
   if(!otpCode){
     setStatus("Send OTP first ❌","bad"); return;
@@ -256,9 +278,41 @@ function verifyLogin(){
   if(entered !== otpCode){
     setStatus("Invalid OTP ❌","bad"); return;
   }
+  if(!password){
+    setStatus("Enter password ❌","bad"); return;
+  }
 
-  // ✅ FIX: store REAL username (important for backend)
+  // ✅ store for whole app
   sessionStorage.setItem("user", user);
+  sessionStorage.setItem("pass", password);   // IMPORTANT: balance unlock password
+  sessionStorage.removeItem("otpCode");       // optional cleanup
+  otpCode = "";
+
+  // ✅ try backend verify (NO break if backend missing)
+  try{
+    // uses API from script.js if available
+    if(typeof API !== "undefined"){
+      const res = await fetch(`${API}/api/login`, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ name:user, password })
+      });
+
+      // if server provides json
+      const data = await res.json().catch(()=> ({}));
+
+      // if backend says fail -> block login
+      if(!res.ok || (data && data.ok === false)){
+        sessionStorage.removeItem("user");
+        sessionStorage.removeItem("pass");
+        setStatus("Wrong username/password ❌","bad");
+        return;
+      }
+    }
+  }catch(e){
+    // backend not running -> OTP-only login (demo)
+    console.log("Backend login check skipped:", e);
+  }
 
   setStatus("Login Success ✔ Redirecting...","ok");
   setTimeout(()=> window.location="dashboard.html", 700);

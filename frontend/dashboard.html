@@ -1,224 +1,234 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>ST PAY - Dashboard</title>
+  <title>ST PAY - Dashboard</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="script.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="script.js"></script>
 
-<style>
-:root{
-  --bg:#ffffff;
-  --text:#111;
-  --card:#000;
-  --cardText:#fff;
-  --muted:#666;
-  --shadow: rgba(0,0,0,0.10);
-}
+  <style>
+  :root{
+    --bg:#ffffff;
+    --text:#111;
+    --card:#000;
+    --cardText:#fff;
+    --muted:#666;
+    --shadow: rgba(0,0,0,0.10);
+  }
 
-body{
-  margin:0;
-  font-family:'Segoe UI',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  padding:14px;
-  box-sizing:border-box;
-}
+  body{
+    margin:0;
+    font-family:'Segoe UI',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:14px;
+    box-sizing:border-box;
+  }
 
-.app{ width:420px; max-width:100%; }
+  .app{ width:420px; max-width:100%; }
 
-.topbar{
-  position:sticky;
-  top:0;
-  background:var(--bg);
-  padding:10px 0 12px 0;
-  z-index:5;
-}
+  .topbar{
+    position:sticky;
+    top:0;
+    background:var(--bg);
+    padding:10px 0 12px 0;
+    z-index:5;
+  }
 
-.titleRow{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-}
+  .titleRow{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
 
-.brand{ font-weight:800; letter-spacing:0.5px; }
+  .brand{ font-weight:800; letter-spacing:0.5px; }
 
-.pill{
-  background:#f2f2f2;
-  border:1px solid #e5e5e5;
-  padding:6px 10px;
-  border-radius:999px;
-  font-size:12px;
-  color:var(--muted);
-}
+  .pill{
+    background:#f2f2f2;
+    border:1px solid #e5e5e5;
+    padding:6px 10px;
+    border-radius:999px;
+    font-size:12px;
+    color:var(--muted);
+  }
 
-.search{
-  margin-top:10px;
-  display:flex;
-  gap:8px;
-}
+  .search{
+    margin-top:10px;
+    display:flex;
+    gap:8px;
+  }
 
-.search input{
-  flex:1;
-  padding:12px 12px;
-  border-radius:12px;
-  border:1px solid #e5e5e5;
-  outline:none;
-  font-size:14px;
-}
+  .search input{
+    flex:1;
+    padding:12px 12px;
+    border-radius:12px;
+    border:1px solid #e5e5e5;
+    outline:none;
+    font-size:14px;
+  }
 
-.search button{
-  padding:12px 14px;
-  border-radius:12px;
-  border:none;
-  background:var(--card);
-  color:var(--cardText);
-  font-weight:700;
-  cursor:pointer;
-}
+  .search button{
+    padding:12px 14px;
+    border-radius:12px;
+    border:none;
+    background:var(--card);
+    color:var(--cardText);
+    font-weight:700;
+    cursor:pointer;
+  }
 
-.card{
-  background:var(--card);
-  color:var(--cardText);
-  border-radius:16px;
-  padding:14px;
-  box-shadow:0 8px 22px var(--shadow);
-}
+  .card{
+    background:var(--card);
+    color:var(--cardText);
+    border-radius:16px;
+    padding:14px;
+    box-shadow:0 8px 22px var(--shadow);
+  }
 
-.balanceCard{ margin-top:10px; }
+  .balanceCard{ margin-top:10px; }
 
-.balanceTop{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-}
+  .balanceTop{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+  }
 
-.balanceLabel{ font-size:12px; opacity:0.8; }
-.balanceValue{ font-size:22px; font-weight:800; margin-top:6px; }
+  .balanceLabel{ font-size:12px; opacity:0.8; }
 
-.quickGrid{
-  margin-top:12px;
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
-}
+  /* UPDATED to support masked + real balance in one row */
+  .balanceValue{
+    font-size:22px;
+    font-weight:800;
+    margin-top:6px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
 
-.qItem{
-  background:var(--card);
-  color:var(--cardText);
-  border-radius:14px;
-  padding:10px 8px;
-  text-align:center;
-  cursor:pointer;
-  user-select:none;
-  box-shadow:0 8px 22px var(--shadow);
-  font-weight:700;
-  font-size:12px;
-}
+  .quickGrid{
+    margin-top:12px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+  }
 
-.qIcon{
-  width:28px; height:28px;
-  margin:0 auto 6px auto;
-  display:block;
-}
+  .qItem{
+    background:var(--card);
+    color:var(--cardText);
+    border-radius:14px;
+    padding:10px 8px;
+    text-align:center;
+    cursor:pointer;
+    user-select:none;
+    box-shadow:0 8px 22px var(--shadow);
+    font-weight:700;
+    font-size:12px;
+  }
 
-.sectionTitle{
-  margin:16px 2px 10px 2px;
-  font-weight:800;
-  font-size:14px;
-}
+  .qIcon{
+    width:28px; height:28px;
+    margin:0 auto 6px auto;
+    display:block;
+  }
 
-/* PEOPLE */
-.people{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
-}
+  .sectionTitle{
+    margin:16px 2px 10px 2px;
+    font-weight:800;
+    font-size:14px;
+  }
 
-.person{
-  background:#f4f4f4;
-  border:1px solid #ededed;
-  border-radius:14px;
-  padding:10px 8px;
-  text-align:center;
-  cursor:pointer;
-}
+  /* PEOPLE */
+  .people{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+  }
 
-.avatar{
-  width:44px;height:44px;
-  border-radius:50%;
-  color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:900;
-  margin:0 auto 6px auto;
-}
+  .person{
+    background:#f4f4f4;
+    border:1px solid #ededed;
+    border-radius:14px;
+    padding:10px 8px;
+    text-align:center;
+    cursor:pointer;
+  }
 
-.pName{ font-size:12px; font-weight:700; }
+  .avatar{
+    width:44px;height:44px;
+    border-radius:50%;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:900;
+    margin:0 auto 6px auto;
+  }
 
-/* Manage list */
-.actionsList{
-  margin-top:10px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
+  .pName{ font-size:12px; font-weight:700; }
 
-/* Manage rows */
-.actionRow{
-  background:#f7f7f7;
-  border:1px solid #e7e7e7;
-  border-left:4px solid #dcdcdc;
-  border-radius:16px;
-  padding:12px 14px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  cursor:pointer;
-  box-shadow:0 6px 14px rgba(0,0,0,0.06);
-}
+  /* Manage list */
+  .actionsList{
+    margin-top:10px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
 
-.actionLeft{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
+  /* ===== icons + 3 outline for manage rows ===== */
+  .actionRow{
+    background:#f7f7f7;
+    border:1px solid #e7e7e7;              /* outline 1 */
+    border-left:4px solid #dcdcdc;          /* outline 2 */
+    border-radius:16px;
+    padding:12px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    cursor:pointer;
+    box-shadow:0 6px 14px rgba(0,0,0,0.06); /* outline 3 */
+  }
 
-.miniIcon{
-  width:34px;
-  height:34px;
-  border-radius:12px;
-  background:#000;
-  color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:16px;
-  flex:0 0 34px;
-}
+  .actionLeft{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
 
-.actionText b{font-size:14px;}
-.actionText span{color:var(--muted); font-size:12px;}
+  .miniIcon{
+    width:34px;
+    height:34px;
+    border-radius:12px;
+    background:#000;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:16px;
+    flex:0 0 34px;
+  }
 
-.arrow{
-  font-size:18px;
-  color:#444;
-  font-weight:900;
-}
+  .actionText b{font-size:14px;}
+  .actionText span{color:var(--muted); font-size:12px;}
 
-.hidden{display:none !important;}
+  .arrow{
+    font-size:18px;
+    color:#444;
+    font-weight:900;
+  }
+  /* ===== END ADDED ===== */
 
-@media (max-width:360px){
-  .quickGrid{grid-template-columns:repeat(3,1fr);}
-  .people{grid-template-columns:repeat(3,1fr);}
-}
-</style>
+  .hidden{display:none !important;}
+
+  @media (max-width:360px){
+    .quickGrid{grid-template-columns:repeat(3,1fr);}
+    .people{grid-template-columns:repeat(3,1fr);}
+  }
+  </style>
 </head>
 
 <body onload="initDashboard()">
@@ -237,17 +247,27 @@ body{
     </div>
   </div>
 
+  <!-- BALANCE CARD (UPDATED: hidden by default + password to reveal) -->
   <div class="card balanceCard">
     <div class="balanceTop">
       <div>
         <div class="balanceLabel">Available balance</div>
-        <div class="balanceValue">₹ <span id="balance">****</span></div>
+
+        <!-- default: masked -->
+        <div class="balanceValue">
+          <span id="balanceMasked">₹ •••••</span>
+          <span id="balanceWrap" class="hidden">₹ <span id="balance">0</span></span>
+        </div>
       </div>
-      <div class="pill" id="userPill">User</div>
+
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="pill" style="cursor:pointer;" id="balBtn" onclick="toggleBalanceLock()">🔒 Show</button>
+        <div class="pill" id="userPill">User</div>
+      </div>
     </div>
   </div>
 
-  <!-- QUICK ACTIONS -->
+  <!-- QUICK ACTIONS (all clickable to pages) -->
   <div class="quickGrid" id="featureGrid">
     <div class="qItem feature" data-label="transaction pay send money" onclick="goPage('transaction.html')">
       <img class="qIcon" alt="pay" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='64' height='64' rx='14' fill='%2300c6ff'/><path d='M16 30h32v18H16z' fill='%23000'/><path d='M20 26h24v6H20z' fill='%23fff'/></svg>">
@@ -366,74 +386,26 @@ body{
 </div>
 
 <script>
-/* ======================================
-   Session & Balance Security (PIN: 1234)
-   - Nothing removed, only added security
-   ====================================== */
-
+/* --------- BASIC LOGIN CHECK --------- */
 if(!sessionStorage.getItem("user")){
   window.location="index.html";
 }
 
 function goPage(page){ window.location = page; }
 
-/* PIN protection only for showing balance (demo) */
-const BALANCE_PIN = "1234";
-const PIN_KEY = "balance_unlocked"; // sessionStorage flag
-
-function ensureBalanceUnlocked(){
-  const unlocked = sessionStorage.getItem(PIN_KEY) === "yes";
-  if(unlocked) return true;
-
-  const pin = prompt("Enter PIN to view balance:");
-  if(pin === null) return false;
-
-  if(String(pin).trim() === BALANCE_PIN){
-    sessionStorage.setItem(PIN_KEY, "yes");
-    return true;
-  }else{
-    alert("Wrong PIN");
-    return false;
-  }
-}
-
-/* Wrap loadBalance() so balance always refreshes and shows */
-async function safeLoadBalance(){
-  // keep hidden if not unlocked
-  const balEl = document.getElementById("balance");
-  if(!ensureBalanceUnlocked()){
-    if(balEl) balEl.innerText = "****";
-    return;
-  }
-
-  // if script.js provides loadBalance(), call it
-  if(typeof loadBalance === "function"){
-    try{
-      await loadBalance();
-    }catch(e){
-      // If loadBalance throws, keep safe fallback
-    }
-  }
-}
-
-/* Ensure balance updates even after transaction */
-let balanceTimer = null;
-
+/* --------- INIT --------- */
 function initDashboard(){
+  // Load real balance from your script.js if available
+  if(typeof loadBalance === "function"){ loadBalance(); }
+
   let u = sessionStorage.getItem("user") || "User";
   document.getElementById("userPill").innerText = u;
 
-  // First load
-  safeLoadBalance();
-
-  // Refresh when user returns to tab
-  window.addEventListener("focus", () => safeLoadBalance());
-
-  // Refresh every 2 seconds (demo style)
-  if(balanceTimer) clearInterval(balanceTimer);
-  balanceTimer = setInterval(() => safeLoadBalance(), 2000);
+  // Always start masked
+  setBalanceVisible(false);
 }
 
+/* --------- SEARCH --------- */
 function applySearch(){
   let q = (document.getElementById("searchBox").value || "").trim().toLowerCase();
 
@@ -453,9 +425,73 @@ function clearSearch(){
   applySearch();
 }
 
+/* --------- QUICK PAY --------- */
 function quickPay(name){
   sessionStorage.setItem("quick_receiver", name);
   goPage("transaction.html");
+}
+
+/* ================================
+   BALANCE LOCK (PASSWORD REVEAL)
+   ================================ */
+
+/*
+  🔐 How it works:
+  - Balance masked by default.
+  - Click "Show" -> asks password.
+  - Password check:
+      1) If you stored user password in sessionStorage as "pass", it will use that.
+      2) Else it falls back to: "123" (demo)
+  - After showing, click again to hide.
+*/
+
+function getDashboardPassword(){
+  // Option A: if your login page stores password
+  const p = (sessionStorage.getItem("pass") || "").trim();
+  if(p) return p;
+
+  // Option B: demo fallback
+  return "123";
+}
+
+function setBalanceVisible(show){
+  const masked = document.getElementById("balanceMasked");
+  const wrap = document.getElementById("balanceWrap");
+  const btn = document.getElementById("balBtn");
+
+  if(show){
+    masked.classList.add("hidden");
+    wrap.classList.remove("hidden");
+    btn.innerText = "👁️ Hide";
+  }else{
+    wrap.classList.add("hidden");
+    masked.classList.remove("hidden");
+    btn.innerText = "🔒 Show";
+  }
+
+  sessionStorage.setItem("balance_visible", show ? "1" : "0");
+}
+
+function toggleBalanceLock(){
+  const currentlyVisible = sessionStorage.getItem("balance_visible") === "1";
+
+  // If visible -> hide directly
+  if(currentlyVisible){
+    setBalanceVisible(false);
+    return;
+  }
+
+  // If hidden -> ask password
+  const entered = prompt("Enter password to show balance:");
+  if(entered === null) return; // user cancelled
+
+  const correct = getDashboardPassword();
+  if(entered === correct){
+    setBalanceVisible(true);
+  }else{
+    alert("Wrong password! Balance still hidden.");
+    setBalanceVisible(false);
+  }
 }
 </script>
 
