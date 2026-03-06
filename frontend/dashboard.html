@@ -100,7 +100,6 @@
 
   .balanceLabel{ font-size:12px; opacity:0.8; }
 
-  /* UPDATED to support masked + real balance in one row */
   .balanceValue{
     font-size:22px;
     font-weight:800;
@@ -142,7 +141,6 @@
     font-size:14px;
   }
 
-  /* PEOPLE */
   .people{
     display:grid;
     grid-template-columns:repeat(4,1fr);
@@ -171,7 +169,6 @@
 
   .pName{ font-size:12px; font-weight:700; }
 
-  /* Manage list */
   .actionsList{
     margin-top:10px;
     display:flex;
@@ -179,18 +176,17 @@
     gap:10px;
   }
 
-  /* ===== icons + 3 outline for manage rows ===== */
   .actionRow{
     background:#f7f7f7;
-    border:1px solid #e7e7e7;              /* outline 1 */
-    border-left:4px solid #dcdcdc;          /* outline 2 */
+    border:1px solid #e7e7e7;
+    border-left:4px solid #dcdcdc;
     border-radius:16px;
     padding:12px 14px;
     display:flex;
     align-items:center;
     justify-content:space-between;
     cursor:pointer;
-    box-shadow:0 6px 14px rgba(0,0,0,0.06); /* outline 3 */
+    box-shadow:0 6px 14px rgba(0,0,0,0.06);
   }
 
   .actionLeft{
@@ -220,7 +216,6 @@
     color:#444;
     font-weight:900;
   }
-  /* ===== END ADDED ===== */
 
   .hidden{display:none !important;}
 
@@ -247,13 +242,11 @@
     </div>
   </div>
 
-  <!-- BALANCE CARD (UPDATED: hidden by default + password to reveal) -->
   <div class="card balanceCard">
     <div class="balanceTop">
       <div>
         <div class="balanceLabel">Available balance</div>
 
-        <!-- default: masked -->
         <div class="balanceValue">
           <span id="balanceMasked">₹ •••••</span>
           <span id="balanceWrap" class="hidden">₹ <span id="balance">0</span></span>
@@ -267,7 +260,6 @@
     </div>
   </div>
 
-  <!-- QUICK ACTIONS (all clickable to pages) -->
   <div class="quickGrid" id="featureGrid">
     <div class="qItem feature" data-label="transaction pay send money" onclick="goPage('transaction.html')">
       <img class="qIcon" alt="pay" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='64' height='64' rx='14' fill='%2300c6ff'/><path d='M16 30h32v18H16z' fill='%23000'/><path d='M20 26h24v6H20z' fill='%23fff'/></svg>">
@@ -388,21 +380,28 @@
 <script>
 /* --------- BASIC LOGIN CHECK --------- */
 if(!sessionStorage.getItem("user")){
-  window.location="index.html";
+  window.location = "index.html";
 }
 
-function goPage(page){ window.location = page; }
+function goPage(page){
+  window.location = page;
+}
 
 /* --------- INIT --------- */
-function initDashboard(){
-  // Load real balance from your script.js if available
-  if(typeof loadBalance === "function"){ loadBalance(); }
-
-  let u = sessionStorage.getItem("user") || "User";
+async function initDashboard(){
+  let u = (sessionStorage.getItem("user") || "User").trim();
   document.getElementById("userPill").innerText = u;
 
-  // Always start masked
   setBalanceVisible(false);
+
+  if(typeof loadBalance === "function"){
+    await loadBalance();
+  }
+
+  const bal = document.getElementById("balance");
+  if(bal && !bal.innerText.trim()){
+    bal.innerText = "0";
+  }
 }
 
 /* --------- SEARCH --------- */
@@ -431,26 +430,10 @@ function quickPay(name){
   goPage("transaction.html");
 }
 
-/* ================================
-   BALANCE LOCK (PASSWORD REVEAL)
-   ================================ */
-
-/*
-  🔐 How it works:
-  - Balance masked by default.
-  - Click "Show" -> asks password.
-  - Password check:
-      1) If you stored user password in sessionStorage as "pass", it will use that.
-      2) Else it falls back to: "123" (demo)
-  - After showing, click again to hide.
-*/
-
+/* --------- BALANCE LOCK --------- */
 function getDashboardPassword(){
-  // Option A: if your login page stores password
   const p = (sessionStorage.getItem("pass") || "").trim();
   if(p) return p;
-
-  // Option B: demo fallback
   return "123";
 }
 
@@ -459,10 +442,12 @@ function setBalanceVisible(show){
   const wrap = document.getElementById("balanceWrap");
   const btn = document.getElementById("balBtn");
 
+  if(!masked || !wrap || !btn) return;
+
   if(show){
     masked.classList.add("hidden");
     wrap.classList.remove("hidden");
-    btn.innerText = "👁️ Hide";
+    btn.innerText = "👁 Hide";
   }else{
     wrap.classList.add("hidden");
     masked.classList.remove("hidden");
@@ -475,18 +460,21 @@ function setBalanceVisible(show){
 function toggleBalanceLock(){
   const currentlyVisible = sessionStorage.getItem("balance_visible") === "1";
 
-  // If visible -> hide directly
   if(currentlyVisible){
     setBalanceVisible(false);
     return;
   }
 
-  // If hidden -> ask password
   const entered = prompt("Enter password to show balance:");
-  if(entered === null) return; // user cancelled
+  if(entered === null) return;
 
   const correct = getDashboardPassword();
-  if(entered === correct){
+
+  if(String(entered).trim() === String(correct).trim()){
+    const bal = document.getElementById("balance");
+    if(bal && !bal.innerText.trim()){
+      bal.innerText = "0";
+    }
     setBalanceVisible(true);
   }else{
     alert("Wrong password! Balance still hidden.");

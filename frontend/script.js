@@ -16,7 +16,7 @@ if (
 
 // Render / production
 else {
-  API = location.origin +"/api";
+  API = location.origin;   // FIXED
 }
 
 console.log("API BASE:", API);
@@ -26,10 +26,10 @@ console.log("API BASE:", API);
    LOGIN CHECK
 ------------------------------ */
 
-function requireLogin(){
+function requireLogin() {
   const u = (sessionStorage.getItem("user") || "").trim();
 
-  if(!u){
+  if (!u) {
     window.location = "index.html";
     return false;
   }
@@ -42,80 +42,92 @@ function requireLogin(){
    LOAD BALANCE
 ------------------------------ */
 
-async function loadBalance(){
-
-  try{
-
-    const user = sessionStorage.getItem("user");
-    if(!user) return;
+async function loadBalance() {
+  try {
+    const user = (sessionStorage.getItem("user") || "").trim();
+    if (!user) return;
 
     const res = await fetch(`${API}/api/balance/${encodeURIComponent(user)}`);
-
     const data = await res.json();
 
-    if(res.ok && data.ok){
+    console.log("Balance API response:", data);
 
-      const el = document.getElementById("balance");
+    const el = document.getElementById("balance");
 
-      if(el){
-        el.innerText = data.balance;
+    if (res.ok && data.ok) {
+      if (el) {
+        el.innerText = data.balance ?? 0;
       }
-
+    } else {
+      if (el) {
+        el.innerText = "0";
+      }
+      console.log("Balance load failed");
     }
 
-  }catch(e){
-
+  } catch (e) {
     console.log("Balance load error", e);
 
+    const el = document.getElementById("balance");
+    if (el) {
+      el.innerText = "0";
+    }
   }
-
 }
 
 
 /* ------------------------------
-   BALANCE LOCK SYSTEM (NEW)
+   BALANCE LOCK SYSTEM
 ------------------------------ */
 
-function toggleBalanceLock(){
-
+function setBalanceVisibility(show) {
   const masked = document.getElementById("balanceMasked");
   const real = document.getElementById("balanceWrap");
   const btn = document.getElementById("balBtn");
 
-  const visible = sessionStorage.getItem("balance_visible") === "1";
+  if (!masked || !real || !btn) return;
 
-  // hide if already visible
-  if(visible){
-
+  if (show) {
+    masked.classList.add("hidden");
+    real.classList.remove("hidden");
+    btn.innerText = "👁 Hide";
+    sessionStorage.setItem("balance_visible", "1");
+  } else {
     masked.classList.remove("hidden");
     real.classList.add("hidden");
     btn.innerText = "🔒 Show";
+    sessionStorage.setItem("balance_visible", "0");
+  }
+}
 
-    sessionStorage.setItem("balance_visible","0");
+function toggleBalanceLock() {
+  const visible = sessionStorage.getItem("balance_visible") === "1";
 
+  // already visible -> hide
+  if (visible) {
+    setBalanceVisibility(false);
     return;
-
   }
 
   // ask password
   const pass = prompt("Enter password to view balance");
+  if (pass === null) return;
 
-  const correctPass = sessionStorage.getItem("pass") || "123";
+  const correctPass = (sessionStorage.getItem("pass") || "123").trim();
 
-  if(pass === correctPass){
+  if (pass.trim() === correctPass) {
+    const el = document.getElementById("balance");
 
-    masked.classList.add("hidden");
-    real.classList.remove("hidden");
-    btn.innerText = "👁 Hide";
+    // fallback in case balance still empty
+    if (el && !el.innerText.trim()) {
+      el.innerText = "0";
+    }
 
-    sessionStorage.setItem("balance_visible","1");
-
-  }else{
-
+    setBalanceVisibility(true);
+  } else {
     alert("Wrong password");
-
+    setBalanceVisibility(false);
   }
-
 }
 
 
@@ -123,10 +135,7 @@ function toggleBalanceLock(){
    LOGOUT
 ------------------------------ */
 
-function logout(){
-
+function logout() {
   sessionStorage.clear();
-
   window.location = "index.html";
-
-} 
+}
