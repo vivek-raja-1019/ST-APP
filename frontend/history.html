@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📜 History - ST PAY</title>
+  <script src="script.js"></script>
+
+  <style>
+    body{
+      margin:0;
+      font-family:'Segoe UI',sans-serif;
+      min-height:100vh;
+      background:#ffffff;
+      color:#111;
+      display:flex;
+      justify-content:center;
+      padding:14px;
+      box-sizing:border-box;
+    }
+    .app{ width:420px; max-width:100%; }
+
+    .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:8px 0 12px 0;
+      position:sticky;
+      top:0;
+      background:#fff;
+      z-index:5;
+    }
+    .title{ font-weight:900; letter-spacing:0.4px; }
+
+    .btn{
+      border:none;
+      background:#000;
+      color:#fff;
+      font-weight:800;
+      border-radius:12px;
+      padding:10px 12px;
+      cursor:pointer;
+    }
+    .btnGray{
+      background:#f2f2f2;
+      color:#111;
+      border:1px solid #e5e5e5;
+    }
+
+    .card{
+      background:#f4f4f4;
+      border:1px solid #e7e7e7;
+      border-radius:18px;
+      padding:14px;
+      box-shadow:0 10px 24px rgba(0,0,0,0.08);
+      margin-top:10px;
+    }
+
+    .tabs{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .tab{
+      padding:8px 10px;
+      border-radius:999px;
+      background:#fff;
+      border:1px solid #e5e5e5;
+      font-weight:800;
+      font-size:12px;
+      cursor:pointer;
+    }
+    .tab.active{
+      background:#000;
+      color:#fff;
+      border-color:#000;
+    }
+
+    .filters{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+    }
+    .filters input, .filters select{
+      flex:1;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid #d8d8d8;
+      background:#fff;
+      outline:none;
+      box-sizing:border-box;
+      font-size:13px;
+    }
+
+    .list{ margin-top:12px; display:flex; flex-direction:column; gap:10px; }
+
+    /* 3-outline row style */
+    .item{
+      background:#fff;
+      border:1px solid #e7e7e7;              /* outline 1 */
+      border-left:4px solid #dcdcdc;          /* outline 2 */
+      border-radius:16px;
+      padding:12px 12px;
+      box-shadow:0 6px 14px rgba(0,0,0,0.06); /* outline 3 */
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .left{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      flex:1;
+      min-width:0;
+    }
+
+    .ico{
+      width:34px; height:34px;
+      border-radius:12px;
+      background:#000;
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:16px;
+      flex:0 0 34px;
+    }
+
+    .meta{
+      flex:1;
+      min-width:0;
+    }
+    .meta b{
+      display:block;
+      font-size:13px;
+      margin-bottom:2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .meta .sub{
+      color:#666;
+      font-size:12px;
+      line-height:1.35;
+    }
+    .meta .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:11px;
+    }
+
+    .actions{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .miniBtn{
+      border:none;
+      background:#000;
+      color:#fff;
+      font-weight:800;
+      border-radius:10px;
+      padding:8px 10px;
+      cursor:pointer;
+      font-size:12px;
+    }
+    .miniBtn.gray{
+      background:#f2f2f2;
+      color:#111;
+      border:1px solid #e5e5e5;
+    }
+    .miniBtn.danger{
+      background:#c62828;
+    }
+
+    .empty{
+      text-align:center;
+      color:#666;
+      font-weight:800;
+      padding:18px 10px;
+    }
+
+    .footerRow{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+    }
+    .footerRow .btn{ flex:1; }
+
+    .hint{
+      margin-top:10px;
+      font-size:12px;
+      color:#666;
+      line-height:1.4;
+    }
+
+    /* ADDED: small top stats row */
+    .statRow{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+    .stat{
+      flex:1;
+      min-width:120px;
+      background:#fff;
+      border:1px solid #e5e5e5;
+      border-radius:14px;
+      padding:10px 12px;
+      font-weight:900;
+      box-shadow:0 6px 14px rgba(0,0,0,0.06);
+    }
+    .stat small{
+      display:block;
+      font-weight:800;
+      color:#666;
+      margin-top:4px;
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+  <div class="top">
+    <div class="title">📜 History</div>
+    <button class="btn" onclick="back()">Back</button>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:900;">All activities</div>
+    <div class="hint">Payments / Files / Add Money ellame inga show aagum.</div>
+
+    <!-- ADDED: stats -->
+    <div class="statRow">
+      <div class="stat">₹ <span id="totalPaid">0</span><small>Total Paid</small></div>
+      <div class="stat"><span id="totalFiles">0</span><small>Files Sent</small></div>
+      <div class="stat"><span id="totalCount">0</span><small>Total Records</small></div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="all" onclick="setTab('all')">All</div>
+      <div class="tab" data-tab="pay" onclick="setTab('pay')">Payments</div>
+      <div class="tab" data-tab="file" onclick="setTab('file')">Files</div>
+      <div class="tab" data-tab="addmoney" onclick="setTab('addmoney')">Add Money</div>
+    </div>
+
+    <div class="filters">
+      <input id="q" placeholder="Search name / note / file / id..." oninput="render()">
+      <input id="d" type="date" onchange="render()">
+    </div>
+
+    <div class="list" id="list"></div>
+
+    <div class="footerRow">
+      <button class="btn btnGray" onclick="exportJSON()">Export</button>
+      <button class="btn" onclick="clearAll()">Clear All</button>
+    </div>
+
+    <!-- ADDED: backend hint -->
+    <div class="hint">
+      Backend history: <b id="backendStatus">loading...</b>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  if(!sessionStorage.getItem("user")){
+    window.location="index.html";
+  }
+
+  const API = "http://127.0.0.1:5000"; /* ADDED */
+  const username = sessionStorage.getItem("user") || "User";
+  let activeTab = "all";
+
+  /* ADDED: cache backend history */
+  let backendHistory = [];  // from /api/history
+
+  function back(){ window.location="dashboard.html"; }
+
+  function setTab(t){
+    activeTab = t;
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    document.querySelector(`.tab[data-tab="${t}"]`)?.classList.add("active");
+    render();
+  }
+
+  /* ---------- History Load: supports multiple formats ---------- */
+  function safeParseJSON(s, fallback){
+    try{ return JSON.parse(s); }catch(e){ return fallback; }
+  }
+
+  /* ADDED: normalize backend history -> same format */
+  function normalizeBackendHistory(arr){
+    if(!Array.isArray(arr)) return [];
+    return arr.map(h=>{
+      // backend: {type:"pay", id, sender, receiver, amount, date}
+      return {
+        type: h.type || "pay",
+        id: h.id || "",
+        sender: h.sender || "",
+        receiver: h.receiver || "",
+        amount: h.amount || 0,
+        method: h.method || "UPI",
+        note: h.note || "",
+        date: h.date || ""
+      };
+    });
+  }
+
+  function loadHistoryMerged(){
+    let merged = [];
+
+    // 0) BACKEND history (ADDED)
+    // show only this user related payments (sender or receiver)
+    if(Array.isArray(backendHistory) && backendHistory.length){
+      const bh = backendHistory.filter(x=>{
+        // keep only records that are related to current user
+        const s = (x.sender || "").toLowerCase();
+        const r = (x.receiver || "").toLowerCase();
+        const u = (username || "").toLowerCase();
+        return s === u || r === u;
+      });
+      merged = merged.concat(bh);
+    }
+
+    // 1) common key: history (array)
+    const h1 = safeParseJSON(localStorage.getItem("history") || "[]", []);
+    if(Array.isArray(h1)) merged = merged.concat(h1);
+
+    // 2) per-user key: history_<username> (plain JSON array)
+    const h2 = safeParseJSON(localStorage.getItem("history_"+username) || "[]", []);
+    if(Array.isArray(h2)) merged = merged.concat(h2);
+
+    // 3) per-user key: history_<username> (base64 JSON) - your old page used this
+    const enc = localStorage.getItem("history_"+username);
+    if(enc){
+      try{
+        const dec = atob(enc);
+        const h3 = safeParseJSON(dec, []);
+        if(Array.isArray(h3)) merged = merged.concat(h3);
+      }catch(e){}
+    }
+
+    // normalize objects (existing logic kept)
+    merged = merged.map((x)=>{
+      if(x && typeof x === "object" && !x.type && x.receiver && x.amount){
+        return {
+          type:"pay",
+          id: x.id || ("TXN"+Date.now()),
+          receiver: x.receiver,
+          amount: x.amount,
+          method: x.payMethod || x.method || "UPI",
+          date: x.date || new Date().toLocaleString(),
+          note: x.note || ""
+        };
+      }
+
+      if(x && typeof x === "object" && x.type === "file"){
+        return {
+          type:"file",
+          receiver: x.receiver || "Unknown",
+          file: x.file || "file",
+          date: x.date || new Date().toLocaleString()
+        };
+      }
+
+      if(x && typeof x === "object" && x.type === "addmoney"){
+        return {
+          type:"addmoney",
+          amount: x.amount || 0,
+          method: x.method || "UPI",
+          note: x.note || "",
+          date: x.date || new Date().toLocaleString()
+        };
+      }
+
+      return x;
+    });
+
+    merged = merged.filter(Boolean);
+
+    // Remove duplicates (ADDED): same id
+    const seen = new Set();
+    const unique = [];
+    for(const it of merged){
+      const key = (it && it.id) ? String(it.id) : JSON.stringify(it);
+      if(seen.has(key)) continue;
+      seen.add(key);
+      unique.push(it);
+    }
+
+    unique.reverse(); // latest top (keep your behavior)
+    return unique;
+  }
+
+  function saveHistoryUnified(arr){
+    localStorage.setItem("history", JSON.stringify(arr));
+    localStorage.setItem("history_"+username, JSON.stringify(arr));
+    try{
+      localStorage.setItem("history_"+username, btoa(JSON.stringify(arr)));
+    }catch(e){}
+  }
+
+  function iconFor(t){
+    if(t==="pay") return "💸";
+    if(t==="file") return "📎";
+    if(t==="addmoney") return "➕";
+    return "🧾";
+  }
+
+  function titleFor(x){
+    // backend pay includes sender/receiver, show better title
+    if(x.type==="pay"){
+      const s = x.sender ? x.sender : username;
+      const r = x.receiver || x.receiverName || x.receiver;
+      if((s||"").toLowerCase() === (username||"").toLowerCase()){
+        return `Paid ₹${x.amount} to ${r || "User"}`;
+      }else{
+        return `Received ₹${x.amount} from ${s || "User"}`;
+      }
+    }
+    if(x.type==="file") return `File sent to ${x.receiver}`;
+    if(x.type==="addmoney") return `Added ₹${x.amount} to wallet`;
+    return "Activity";
+  }
+
+  function subFor(x){
+    if(x.type==="pay"){
+      return `${x.date} • Method: ${x.method || "UPI"}${x.note ? " • Note: "+x.note : ""}${x.id ? " • ID: "+x.id : ""}`;
+    }
+    if(x.type==="file"){
+      return `${x.date} • File: ${x.file}`;
+    }
+    if(x.type==="addmoney"){
+      return `${x.date} • Method: ${x.method || "UPI"}${x.note ? " • Note: "+x.note : ""}`;
+    }
+    return x.date || "";
+  }
+
+  function matchesTab(x){
+    if(activeTab==="all") return true;
+    return x.type === activeTab;
+  }
+
+  /* ADDED: Payments tab la only current user records */
+  function matchesUserScope(x){
+    if(x.type !== "pay") return true;
+    const u = (username || "").toLowerCase();
+    const s = (x.sender || "").toLowerCase();
+    const r = (x.receiver || "").toLowerCase();
+    // If sender/receiver present, enforce scope
+    if(s || r){
+      return s === u || r === u;
+    }
+    return true;
+  }
+
+  function matchesQuery(x, q){
+    if(!q) return true;
+    const s = (JSON.stringify(x) || "").toLowerCase();
+    return s.includes(q);
+  }
+
+  function matchesDate(x, d){
+    if(!d) return true;
+    const s = (x.date || "").toLowerCase();
+    return s.includes(d) || s.includes(d.split("-").reverse().join("/"));
+  }
+
+  function removeAt(idx){
+    // NOTE: This removes from LOCAL saved history only.
+    // Backend file won't be deleted from here (no endpoint).
+    const all = loadHistoryMerged();
+    all.splice(idx,1);
+    saveHistoryUnified(all.reverse());
+    render();
+  }
+
+  function clearAll(){
+    if(confirm("Clear all LOCAL history? (Backend history will still show)")){
+      saveHistoryUnified([]);
+      render();
+    }
+  }
+
+  function exportJSON(){
+    const all = loadHistoryMerged().reverse();
+    const blob = new Blob([JSON.stringify(all, null, 2)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "stpay_history.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  /* ADDED: stats update */
+  function updateStats(all){
+    let totalPaid = 0;
+    let totalFiles = 0;
+    all.forEach(x=>{
+      if(x.type==="pay"){
+        // count only payments done by this user
+        const u = (username||"").toLowerCase();
+        const s = (x.sender||"").toLowerCase();
+        if(!s || s===u){
+          totalPaid += Number(x.amount || 0);
+        }
+      }
+      if(x.type==="file") totalFiles += 1;
+    });
+
+    document.getElementById("totalPaid").innerText = Math.round(totalPaid);
+    document.getElementById("totalFiles").innerText = totalFiles;
+    document.getElementById("totalCount").innerText = all.length;
+  }
+
+  function render(){
+    const q = (document.getElementById("q").value || "").trim().toLowerCase();
+    const d = (document.getElementById("d").value || "").trim();
+
+    const all = loadHistoryMerged();
+    updateStats(all);
+
+    const filtered = all
+      .map((x, i)=>({x,i}))
+      .filter(o=>matchesTab(o.x))
+      .filter(o=>matchesUserScope(o.x)) /* ADDED */
+      .filter(o=>matchesQuery(o.x, q))
+      .filter(o=>matchesDate(o.x, d));
+
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+
+    if(filtered.length === 0){
+      list.innerHTML = `<div class="empty">No records found</div>`;
+      return;
+    }
+
+    filtered.forEach(({x,i})=>{
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div class="left">
+          <div class="ico">${iconFor(x.type)}</div>
+          <div class="meta">
+            <b>${titleFor(x)}</b>
+            <div class="sub">${subFor(x)}</div>
+            ${x.id ? `<div class="sub mono">${x.id}</div>` : ``}
+          </div>
+        </div>
+        <div class="actions">
+          <button class="miniBtn danger" onclick="removeAt(${i})">Remove</button>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  /* ADDED: fetch backend history first */
+  async function fetchBackendHistory(){
+    try{
+      const res = await fetch(API + "/api/history");
+      const data = await res.json().catch(()=> ({}));
+      if(res.ok && data.ok){
+        backendHistory = normalizeBackendHistory(data.history || []);
+        document.getElementById("backendStatus").innerText = "connected ✅";
+      }else{
+        document.getElementById("backendStatus").innerText = "not available ⚠";
+      }
+    }catch(e){
+      document.getElementById("backendStatus").innerText = "server offline ⚠";
+    }
+  }
+
+  window.onload = async ()=>{
+    await fetchBackendHistory();
+    render();
+  };
+</script>
+
+</body>
+</html>

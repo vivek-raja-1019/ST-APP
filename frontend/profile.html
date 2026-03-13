@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Profile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="script.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:#fff;
+  color:#111;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  padding:14px;
+  box-sizing:border-box;
+}
+.wrap{ width:420px; max-width:100%; }
+
+.top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 2px;
+  position:sticky;
+  top:0;
+  background:#fff;
+  z-index:10;
+}
+
+.title{ font-weight:900; }
+.dots{
+  width:40px;height:40px;
+  border-radius:12px;
+  border:1px solid #e5e5e5;
+  background:#000;
+  color:#fff;
+  font-size:20px;
+  cursor:pointer;
+}
+
+.menu{
+  position:absolute;
+  right:14px;
+  top:58px;
+  background:#fff;
+  border:1px solid #e5e5e5;
+  border-radius:14px;
+  box-shadow:0 12px 30px rgba(0,0,0,0.12);
+  overflow:hidden;
+  display:none;
+  min-width:180px;
+}
+
+.menu button{
+  width:100%;
+  padding:12px 14px;
+  border:none;
+  background:#fff;
+  text-align:left;
+  cursor:pointer;
+  font-weight:700;
+}
+.menu button:hover{ background:#f4f4f4; }
+.menu .danger{ color:#dc3545; }
+
+.card{
+  margin-top:12px;
+  background:#f4f4f4;
+  border:1px solid #ededed;
+  border-radius:16px;
+  padding:14px;
+}
+
+/* ADDED */
+.profileHead{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.avatarBig{
+  width:56px;height:56px;
+  border-radius:18px;
+  background:#000;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  font-size:20px;
+  flex:0 0 56px;
+}
+.pmeta b{display:block;font-size:16px;}
+.pmeta span{display:block;color:#666;font-weight:700;font-size:12px;margin-top:2px;}
+.pills{
+  margin-top:10px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.pill{
+  padding:7px 10px;
+  border-radius:999px;
+  background:#fff;
+  border:1px solid #e5e5e5;
+  font-weight:800;
+  font-size:12px;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:10px;
+  font-weight:700;
+}
+.muted{ color:#666; font-weight:600; }
+.mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+.hr{
+  height:1px;
+  background:#e5e5e5;
+  margin:12px 0;
+}
+
+.qrBox{
+  margin-top:12px;
+  background:#fff;
+  border:1px solid #e5e5e5;
+  border-radius:16px;
+  padding:12px;
+  text-align:center;
+}
+.qr{
+  width:220px;
+  max-width:100%;
+  border-radius:14px;
+  border:1px solid #ededed;
+}
+.small{ font-size:12px; color:#666; margin-top:8px; line-height:1.4; }
+
+.btnRow{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+}
+.btnRow button{
+  flex:1;
+  width:auto;
+}
+.back{
+  margin-top:12px;
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:14px;
+  background:#000;
+  color:#fff;
+  font-weight:900;
+  cursor:pointer;
+}
+
+/* ADDED buttons style */
+.btn{
+  padding:12px;
+  border:none;
+  border-radius:14px;
+  background:#000;
+  color:#fff;
+  font-weight:900;
+  cursor:pointer;
+}
+.btnGray{
+  background:#fff;
+  color:#111;
+  border:1px solid #e5e5e5;
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="title">Profile</div>
+    <button class="dots" onclick="toggleMenu()">⋮</button>
+  </div>
+
+  <div class="menu" id="menu">
+    <button onclick="goPage('settings.html')">⚙ Settings</button>
+    <button onclick="goPage('help.html')">❓ Help</button>
+    <button class="danger" onclick="logout()">🚪 Logout</button>
+  </div>
+
+  <!-- PROFILE CARD (existing + more details) -->
+  <div class="card">
+    <div class="profileHead">
+      <div class="avatarBig" id="avatarBig">U</div>
+      <div class="pmeta">
+        <b id="uName">User</b>
+        <span id="uTag">ST PAY • Demo Wallet</span>
+      </div>
+    </div>
+
+    <div class="pills">
+      <div class="pill">✅ Verified (Demo)</div>
+      <div class="pill">🔒 Secure OTP</div>
+      <div class="pill">👥 5 Users</div>
+    </div>
+
+    <div class="hr"></div>
+
+    <!-- existing rows kept -->
+    <div class="row"><span class="muted">User</span><span id="u">-</span></div>
+    <div class="row"><span class="muted">Balance</span><span>₹ <span id="b">0</span></span></div>
+
+    <!-- ADDED rows -->
+    <div class="row"><span class="muted">UPI ID</span><span class="mono" id="upi">-</span></div>
+    <div class="row"><span class="muted">Wallet ID</span><span class="mono" id="walletId">-</span></div>
+    <div class="row"><span class="muted">Login Time</span><span id="loginTime">-</span></div>
+    <div class="row"><span class="muted">Backend</span><span id="backendStatus">checking...</span></div>
+
+    <div class="btnRow">
+      <button class="btnGray btn" onclick="copyUPI()">Copy UPI</button>
+      <button class="btn" onclick="shareUPI()">Share</button>
+    </div>
+  </div>
+
+  <!-- QR CODE -->
+  <div class="qrBox">
+    <div style="font-weight:900;">Your UPI QR</div>
+    <div class="small">Scan to pay you (demo). QR contains: <span class="mono" id="qrText">-</span></div>
+    <div style="margin-top:10px;">
+      <img id="qrImg" class="qr" alt="UPI QR">
+    </div>
+    <div class="small">If image not loading: backend should be running (python app.py).</div>
+  </div>
+
+  <button class="back" onclick="goPage('dashboard.html')">⬅ Back</button>
+
+</div>
+
+<script>
+if(!sessionStorage.getItem("user")) window.location="index.html";
+
+function goPage(p){ window.location=p; }
+
+function toggleMenu(){
+  let m=document.getElementById("menu");
+  m.style.display = (m.style.display==="block") ? "none" : "block";
+}
+
+/* touch anywhere -> menu close */
+document.addEventListener("click", (e)=>{
+  let m=document.getElementById("menu");
+  if(!m) return;
+  if(e.target.classList.contains("dots")) return;
+  if(m.contains(e.target)) return;
+  m.style.display="none";
+});
+
+/* ========= ADDED HELPERS ========= */
+function slugifyName(name){
+  return (name || "user")
+    .toLowerCase()
+    .replace(/\s+/g,"")
+    .replace(/[^a-z0-9]/g,"");
+}
+
+function buildUPI(name){
+  // demo format: <name>@stpay
+  return slugifyName(name) + "@stpay";
+}
+
+function setText(id, val){
+  document.getElementById(id).innerText = val;
+}
+
+function setStatusBackend(ok){
+  const el = document.getElementById("backendStatus");
+  el.innerText = ok ? "connected ✅" : "offline ⚠";
+  el.style.fontWeight = "900";
+  el.style.color = ok ? "#1a7f37" : "#c62828";
+}
+
+/* ========= USER INIT ========= */
+const user = sessionStorage.getItem("user") || "User";
+document.getElementById("u").innerText = user;
+document.getElementById("uName").innerText = user;
+document.getElementById("avatarBig").innerText = (user[0] || "U").toUpperCase();
+
+const upi = buildUPI(user);
+setText("upi", upi);
+setText("walletId", "WAL-" + slugifyName(user) + "-001");
+
+// store login time first time only
+if(!sessionStorage.getItem("login_time")){
+  sessionStorage.setItem("login_time", new Date().toLocaleString());
+}
+setText("loginTime", sessionStorage.getItem("login_time"));
+
+/* ========= QR GENERATE =========
+   we use free QR api (no backend change needed)
+   QR payload: "upi://pay?pa=<upi>&pn=<name>"
+*/
+const qrPayload = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(user)}`;
+document.getElementById("qrText").innerText = upi;
+document.getElementById("qrImg").src =
+  "https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=" + encodeURIComponent(qrPayload);
+
+/* ========= COPY / SHARE ========= */
+async function copyUPI(){
+  try{
+    await navigator.clipboard.writeText(upi);
+    alert("UPI copied: " + upi);
+  }catch(e){
+    // fallback
+    const t=document.createElement("textarea");
+    t.value=upi;
+    document.body.appendChild(t);
+    t.select();
+    document.execCommand("copy");
+    document.body.removeChild(t);
+    alert("UPI copied: " + upi);
+  }
+}
+
+async function shareUPI(){
+  const text = `My ST PAY UPI: ${upi}`;
+  try{
+    if(navigator.share){
+      await navigator.share({ title:"ST PAY UPI", text });
+    }else{
+      await copyUPI();
+    }
+  }catch(e){}
+}
+
+/* ========= BALANCE FETCH (FIXED ENDPOINT) ========= */
+(async ()=>{
+  try{
+    fetch(API + "/api/balance/" + encodeURIComponent(user))
+    const r=await fetch(API+"/api/balance/"+encodeURIComponent(user));
+    const d=await r.json().catch(()=>({}));
+    if(r.ok && d.ok){
+      document.getElementById("b").innerText = d.balance ?? 0;
+      setStatusBackend(true);
+    }else{
+      document.getElementById("b").innerText = 0;
+      setStatusBackend(false);
+    }
+  }catch{
+    document.getElementById("b").innerText = 0;
+    setStatusBackend(false);
+  }
+})();
+</script>
+
+</body>
+</html>

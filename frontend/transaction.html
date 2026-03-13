@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>💰 Secure Transaction</title>
+
+<!-- keep your existing include (DON'T remove) -->
+<script src="script.js"></script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+margin:0;font-family:'Segoe UI',sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:center;
+background:#ffffff;color:#111;overflow:hidden;padding:16px;box-sizing:border-box;
+}
+.box{
+background:#f4f4f4;padding:28px;width:520px;max-width:95vw;border-radius:20px;
+box-shadow:0 10px 25px rgba(0,0,0,0.12);text-align:center;box-sizing:border-box;
+}
+input,select,button,textarea{
+width:100%;padding:10px;margin-top:12px;border-radius:10px;box-sizing:border-box;
+}
+input,select,textarea{border:1px solid #cfcfcf;background:#fff;color:#111;outline:none;}
+textarea{min-height:70px; resize:none;}
+button{border:none;background:#000;color:#fff;cursor:pointer;font-weight:bold;transition:0.2s;}
+button:hover{opacity:0.92;transform:scale(1.01);}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+.loader{
+margin:18px auto;border:6px solid #ddd;border-top:6px solid #000;border-radius:50%;
+width:60px;height:60px;animation:spin 1s linear infinite;display:none;
+}
+@keyframes spin{100%{transform:rotate(360deg);}}
+.stage{
+margin-top:10px;padding:10px;border-radius:10px;background:#ffffff;border:1px solid #e3e3e3;
+color:#111;opacity:0.4;display:none;
+}
+.active{background:#000;color:#fff;opacity:1;}
+.success{color:#1a7f37;font-weight:bold;margin-top:15px;}
+.fail{color:#c62828;font-weight:bold;margin-top:15px;}
+.receipt{
+margin-top:18px;background:#fff;border:1px solid #e3e3e3;padding:14px;border-radius:12px;
+display:none;text-align:left;color:#111;
+}
+
+/* OTP UI */
+.otpBox{
+display:none;margin-top:12px;padding:12px;border-radius:12px;background:#fff;border:1px solid #e3e3e3;text-align:left;
+}
+.otpRow{display:flex;gap:10px;align-items:center;margin-top:10px;}
+.otpRow input{margin-top:0;flex:1;font-weight:800;letter-spacing:3px;text-align:center;}
+.badge{
+display:inline-block;padding:6px 10px;border-radius:999px;background:#000;color:#fff;font-size:12px;font-weight:800;
+}
+
+/* OTP notification */
+.notification{
+position:fixed;top:18px;right:18px;background:#000;color:#fff;padding:12px 14px;border-radius:12px;
+box-shadow:0 12px 30px rgba(0,0,0,0.2);display:none;cursor:pointer;z-index:100;
+}
+.small{font-size:12px;color:#666;margin-top:8px;}
+@media(max-width:480px){.row2{grid-template-columns:1fr;}}
+</style>
+</head>
+
+<body>
+
+<div class="notification" id="otpNotify">📩 OTP Received! Tap to Auto-Fill</div>
+
+<div class="box">
+<h2>💰 Secure Transaction</h2>
+
+<div id="formSection">
+  <!-- ✅ receiver suggestions (prevents "Receiver not found") -->
+  <input id="receiver" list="userList" placeholder="Receiver name (select from list)">
+  <datalist id="userList"></datalist>
+
+  <div class="row2">
+    <input id="receiverId" placeholder="Receiver UPI / Phone (optional)">
+    <input id="amount" type="number" placeholder="Amount">
+  </div>
+
+  <select id="payMethod">
+    <option>UPI</option>
+    <option>Card</option>
+    <option>NetBanking</option>
+    <option>Wallet</option>
+    <option>Bank Transfer</option>
+    <option>QR Pay</option>
+  </select>
+
+  <select id="category">
+    <option>General</option>
+    <option>Food</option>
+    <option>Recharge</option>
+    <option>Shopping</option>
+    <option>Bills</option>
+    <option>Rent</option>
+  </select>
+
+  <textarea id="note" placeholder="Note (optional)"></textarea>
+
+  <!-- keep schedule UI, but receipt la date/time show panna maatom -->
+  <input id="schedule" type="datetime-local" placeholder="Schedule (optional)">
+
+  <button onclick="sendSecure()">Pay Securely</button>
+  <button onclick="back()">Back</button>
+
+  <div class="small" id="apiHint" style="display:none;"></div>
+</div>
+
+<div class="loader" id="loader"></div>
+
+<div id="stage1" class="stage">Validating</div>
+<div id="stage2" class="stage">Checking Balance</div>
+<div id="stage3" class="stage">Securing</div>
+<div id="stage4" class="stage">Confirming</div>
+
+<!-- OTP section -->
+<div class="otpBox" id="otpBox">
+  <div><span class="badge">OTP</span> Enter OTP to confirm</div>
+  <div class="otpRow">
+    <input id="otpInput" maxlength="6" inputmode="numeric" placeholder="------">
+    <button onclick="verifyOTP()">Verify</button>
+  </div>
+  <div class="small"> OTP alert</div>
+</div>
+
+<h3 id="status"></h3>
+<div id="receiptBox" class="receipt"></div>
+</div>
+
+<script>
+(() => {
+  // ✅ Session check
+  if(!sessionStorage.getItem("user")){
+    window.location="index.html";
+    return;
+  }
+
+  /* ============================
+     ✅ FIX: API BASE + ENDPOINTS
+     ============================ */
+  let API = window.STPAY_API; // if script.js sets it, we use it
+
+  // If not set, auto-detect:
+  if(!API){
+    // If opened from Live Server (5500) but backend is Flask (5000)
+    if(location.hostname === "127.0.0.1" || location.hostname === "localhost"){
+      API = (location.port === "5000") ? location.origin : "http://127.0.0.1:5000";
+    }else{
+      // production/reverse-proxy usually exposes backend under /api
+      API = location.origin + "/api";
+    }
+  }
+
+  // Normalize no trailing slash
+  API = (API || "").replace(/\/+$/, "");
+
+  // If API ends with /api then endpoints are /send, /users
+  // Else endpoints are /api/send, /api/users
+  const USERS_EP = API.endsWith("/api") ? "/users" : "/api/users";
+  const SEND_EP  = API.endsWith("/api") ? "/send"  : "/api/send";
+
+  const apiHint = document.getElementById("apiHint");
+  apiHint.style.display = "block";
+  apiHint.innerText = "API: " + API + " (auto)";
+
+  let otpCode = "";
+  let pendingPayload = null;
+
+  // ✅ prefill receiver from dashboard quickPay
+  const q = sessionStorage.getItem("quick_receiver");
+  if(q){
+    document.getElementById("receiver").value = (q || "").trim();
+    sessionStorage.removeItem("quick_receiver");
+  }
+
+  const otpNotify = document.getElementById("otpNotify");
+  otpNotify.onclick = () => {
+    document.getElementById("otpInput").value = otpCode;
+    otpNotify.style.display="none";
+  };
+
+  function resetStages(){
+    ["stage1","stage2","stage3","stage4"].forEach(id=>{
+      const el=document.getElementById(id);
+      el.style.display="none";
+      el.classList.remove("active");
+    });
+  }
+  function showStatus(msg,type){
+    const s=document.getElementById("status");
+    s.className="";
+    s.innerHTML=msg;
+    if(type==="ok") s.classList.add("success");
+    if(type==="bad") s.classList.add("fail");
+  }
+  function showForm(){ document.getElementById("formSection").style.display="block"; }
+  function hideForm(){ document.getElementById("formSection").style.display="none"; }
+  function showOTP(){ document.getElementById("otpBox").style.display="block"; }
+  function hideOTP(){ document.getElementById("otpBox").style.display="none"; }
+
+  // ✅ history save
+  function pushHistory(item){
+    const user = sessionStorage.getItem("user") || "User";
+
+    let h=[];
+    try{ h = JSON.parse(localStorage.getItem("history") || "[]"); }catch(e){ h=[]; }
+    if(!Array.isArray(h)) h=[];
+    h.push(item);
+    localStorage.setItem("history", JSON.stringify(h));
+
+    let hu=[];
+    try{ hu = JSON.parse(localStorage.getItem("history_"+user) || "[]"); }catch(e){ hu=[]; }
+    if(!Array.isArray(hu)) hu=[];
+    hu.push(item);
+    localStorage.setItem("history_"+user, JSON.stringify(hu));
+  }
+
+  // ✅ load users list for suggestions
+  async function loadUsers(){
+    try{
+      const res = await fetch(API + USERS_EP);
+      const data = await res.json().catch(()=> ({}));
+      if(res.ok && data.ok && Array.isArray(data.users)){
+        const dl = document.getElementById("userList");
+        dl.innerHTML = "";
+        data.users.forEach(u=>{
+          const opt = document.createElement("option");
+          opt.value = u.name;
+          dl.appendChild(opt);
+        });
+      }
+    }catch(e){
+      // ignore
+    }
+  }
+  loadUsers();
+
+  // ✅ IMPORTANT: attach global functions so onclick always works
+  window.sendSecure = function(){
+    document.getElementById("receiptBox").style.display="none";
+    document.getElementById("receiptBox").innerHTML="";
+    document.getElementById("loader").style.display="none";
+    showStatus("", "");
+    resetStages();
+    hideOTP();
+    otpNotify.style.display="none";
+
+    let receiver = document.getElementById("receiver").value.trim();
+    let receiverId = document.getElementById("receiverId").value.trim();
+    let amount = document.getElementById("amount").value;
+    let pay = document.getElementById("payMethod").value;
+    let category = document.getElementById("category").value;
+    let note = document.getElementById("note").value.trim();
+    let schedule = document.getElementById("schedule").value;
+
+    let sender = (sessionStorage.getItem("user") || "").trim();
+
+    if(!sender){
+      alert("Login again. sessionStorage user missing.");
+      window.location="index.html";
+      return;
+    }
+
+    if(!receiver || !amount || Number(amount)<=0){
+      alert("Enter valid details");
+      return;
+    }
+
+    pendingPayload = {
+      sender,
+      receiver,
+      amount: Number(amount), // ✅ ensure number
+      extra:{receiverId,pay,category,note,schedule}
+    };
+
+    hideForm();
+    document.getElementById("loader").style.display="block";
+
+    const stages=["stage1","stage2","stage3","stage4"];
+    let i=0;
+    function next(){
+      if(i<stages.length){
+        const s=document.getElementById(stages[i]);
+        s.style.display="block";
+        s.classList.add("active");
+        i++;
+        setTimeout(next,550);
+      }else{
+        document.getElementById("loader").style.display="none";
+
+        otpCode = String(Math.floor(100000 + Math.random()*900000));
+        console.log("Demo OTP:", otpCode);
+        alert("Demo OTP: " + otpCode);
+
+        showOTP();
+        showStatus("Enter OTP to confirm payment", "");
+        otpNotify.style.display="block";
+        setTimeout(()=> otpNotify.style.display="none", 7000);
+      }
+    }
+    next();
+  };
+
+  window.verifyOTP = async function(){
+    const entered = (document.getElementById("otpInput").value || "").trim();
+
+    if(!otpCode){
+      showStatus("❌ Send OTP first", "bad");
+      return;
+    }
+    if(entered !== otpCode){
+      showStatus("❌ Invalid OTP", "bad");
+      return;
+    }
+    if(!pendingPayload){
+      showStatus("❌ Something went wrong. Try again.", "bad");
+      showForm();
+      resetStages();
+      return;
+    }
+
+    hideOTP();
+    showStatus("✔ OTP Verified. Processing...", "ok");
+    document.getElementById("loader").style.display="block";
+
+    try{
+      const res = await fetch(API + SEND_EP,{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({
+          sender: pendingPayload.sender,
+          receiver: pendingPayload.receiver,
+          amount: pendingPayload.amount
+        })
+      });
+
+      const data = await res.json().catch(()=> ({}));
+      document.getElementById("loader").style.display="none";
+
+      if(!res.ok || data.error){
+        showStatus("❌ Failed: " + (data.error || "Server error"), "bad");
+        showForm();
+        resetStages();
+        return;
+      }
+
+      const txnId = data.id || ("TXN"+Date.now());
+      pushHistory({
+        type:"pay",
+        id: txnId,
+        sender: pendingPayload.sender,
+        receiver: pendingPayload.receiver,
+        amount: Number(pendingPayload.amount),
+        method: pendingPayload.extra.pay,
+        category: pendingPayload.extra.category,
+        note: pendingPayload.extra.note || "",
+        receiverId: pendingPayload.extra.receiverId || "",
+        date: new Date().toLocaleString()
+      });
+
+      showStatus("✔ Transaction Success", "ok");
+
+      const box=document.getElementById("receiptBox");
+      box.style.display="block";
+      box.innerHTML =
+        "<b>Receipt</b><br><br>" +
+        "ID: "+txnId+
+        "<br>Sender: "+pendingPayload.sender+
+        "<br>Receiver: "+pendingPayload.receiver+
+        (pendingPayload.extra.receiverId? "<br>Receiver ID: "+pendingPayload.extra.receiverId : "")+
+        "<br>Amount: ₹"+pendingPayload.amount+
+        "<br>Method: "+pendingPayload.extra.pay+
+        "<br>Category: "+pendingPayload.extra.category+
+        (pendingPayload.extra.note? "<br>Note: "+pendingPayload.extra.note : "")+
+        "<br><br><button style='width:100%;padding:10px;border:none;border-radius:10px;background:#000;color:#fff;font-weight:bold;cursor:pointer;' onclick='back()'>Back to Dashboard</button>";
+
+      document.getElementById("amount").value="";
+      document.getElementById("receiver").value="";
+      document.getElementById("receiverId").value="";
+      document.getElementById("note").value="";
+      document.getElementById("schedule").value="";
+      document.getElementById("otpInput").value="";
+      otpCode="";
+      pendingPayload=null;
+
+    }catch(err){
+      document.getElementById("loader").style.display="none";
+      showStatus("❌ Backend not reachable (run python app.py)", "bad");
+      showForm();
+      resetStages();
+    }
+  };
+
+  window.back = function(){
+    window.location="dashboard.html";
+  };
+})();
+</script>
+
+</body>
+</html>

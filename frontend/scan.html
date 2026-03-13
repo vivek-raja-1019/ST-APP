@@ -1,0 +1,97 @@
+<script>
+  // session check
+  if(!sessionStorage.getItem("user")){
+    window.location="index.html";
+  }
+
+  const codeReader = new ZXing.BrowserMultiFormatReader();
+  let currentDeviceId = null;
+  let lastScannedText = "";
+  let isScanning = false;
+
+  async function startScan(){
+    if(isScanning) return;   // ✅ prevent double start
+    isScanning = true;
+
+    lastScannedText = "";
+    setStatus("Starting camera...");
+
+    try{
+      const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
+      if(!devices || devices.length === 0){
+        setStatus("❌ No camera found.");
+        isScanning = false;
+        return;
+      }
+
+      // Prefer back camera on phones (usually last device)
+      currentDeviceId = devices[devices.length - 1].deviceId;
+
+      document.getElementById("resultBox").style.display = "none";
+      document.getElementById("resultText").innerText = "";
+
+      await codeReader.decodeFromVideoDevice(
+        currentDeviceId,
+        "preview",
+        (result, err) => {
+          if(result){
+            lastScannedText = (result.getText() || "").trim(); // ✅ trim
+            showResult(lastScannedText);
+            setStatus("✅ QR scanned! Tap Pay or Copy.");
+            stopScan(); // Auto stop after first scan
+          }
+        }
+      );
+
+      setStatus("📷 Camera ON. Point to QR...");
+
+    }catch(e){
+      setStatus("❌ Camera permission denied / not available. Use Live Server or HTTPS. ("+ (e.name || "Error") +")");
+      isScanning = false;
+    }
+  }
+
+  function stopScan(){
+    try{
+      codeReader.reset();
+    }catch(e){}
+    isScanning = false; // ✅ release lock
+    setStatus("Camera stopped.");
+  }
+
+  function showResult(text){
+    const box = document.getElementById("resultBox");
+    const out = document.getElementById("resultText");
+    out.innerText = text;
+    box.style.display = "block";
+  }
+
+  function copyResult(){
+    if(!lastScannedText){ alert("No scan data"); return; }
+    navigator.clipboard?.writeText(lastScannedText);
+    alert("Copied ✔");
+  }
+
+  function payNow(){
+    if(!lastScannedText){ alert("No scan data"); return; }
+
+    // store receiver and open transaction page
+    sessionStorage.setItem("quick_receiver", lastScannedText); // ✅ already trimmed
+    window.location = "transaction.html";
+  }
+
+  function setStatus(msg){
+    document.getElementById("status").innerHTML = msg;
+  }
+
+  function back(){
+    stopScan();
+    window.location="dashboard.html";
+  }
+
+  // auto start when page opens (nice for mobile)
+  window.addEventListener("load", () => startScan());
+
+  // ✅ important: stop camera when leaving page
+  window.addEventListener("beforeunload", () => stopScan());
+</script>
