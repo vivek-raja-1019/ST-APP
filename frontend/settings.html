@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Settings</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body{
+margin:0;
+font-family:Segoe UI;
+background:#ffffff;
+color:#111;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.box{
+background:#f4f4f4;
+padding:25px;
+border-radius:12px;
+width:350px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+text-align:center;
+}
+
+h2{
+margin-bottom:15px;
+}
+
+input{
+width:100%;
+padding:8px;
+margin-top:8px;
+border:1px solid #ccc;
+border-radius:6px;
+}
+
+button{
+margin-top:10px;
+padding:10px;
+width:100%;
+border:none;
+background:#007bff;
+color:white;
+border-radius:6px;
+font-weight:bold;
+cursor:pointer;
+}
+
+button:hover{
+background:#0056b3;
+}
+
+.danger{
+background:#dc3545;
+}
+
+.danger:hover{
+background:#a71d2a;
+}
+
+.section{
+margin-top:15px;
+padding-top:10px;
+border-top:1px solid #ddd;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="box">
+
+<h2>⚙ Settings</h2>
+
+<div class="section">
+Current Balance: ₹ <span id="bal">0</span>
+</div>
+
+<div class="section">
+<input id="newName" placeholder="Change Username">
+<button onclick="changeName()">Update Name</button>
+</div>
+
+<div class="section">
+<input id="newPass" type="password" placeholder="Change Password">
+<button onclick="changePass()">Update Password</button>
+</div>
+
+<div class="section">
+<button onclick="resetBalance()">Reset Balance</button>
+<button onclick="clearHistory()">Clear History</button>
+</div>
+
+<div class="section">
+<button class="danger" onclick="logout()">Logout</button>
+<button onclick="goBack()">Back</button>
+</div>
+
+</div>
+
+<script>
+
+if(!sessionStorage.getItem("user")){
+window.location="index.html";
+}
+
+document.getElementById("bal").innerText =
+localStorage.getItem("balance") || 0
+
+
+function resetBalance(){
+localStorage.setItem("balance",10000)
+alert("Balance Reset")
+location.reload()
+}
+
+function clearHistory(){
+localStorage.removeItem("history")
+alert("History Cleared")
+}
+
+function logout(){
+sessionStorage.clear()
+window.location="index.html"
+}
+
+function goBack(){
+window.location="dashboard.html"
+}
+
+function changeName(){
+let n=document.getElementById("newName").value
+if(n=="") return
+sessionStorage.setItem("user",n)
+alert("Username Updated")
+}
+
+function changePass(){
+let p=document.getElementById("newPass").value
+if(p=="") return
+localStorage.setItem("password",p)
+alert("Password Updated (Demo)")
+}
+
+</script>
+
+</body>
+</html>

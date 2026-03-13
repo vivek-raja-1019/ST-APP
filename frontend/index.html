@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ST PAY - Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+/* ===== BACKGROUND (ADDED) ===== */
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#111;
+  padding:16px;
+  box-sizing:border-box;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.92)),
+    url("https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=1600&q=60");
+  background-size:cover;
+  background-position:center;
+  background-attachment:fixed;
+}
+
+/* floating glow circles */
+.glow{
+  position:fixed;
+  inset:auto;
+  width:220px;height:220px;
+  border-radius:50%;
+  background:rgba(0,0,0,0.08);
+  filter:blur(2px);
+  z-index:0;
+  animation:float 14s linear infinite;
+}
+.glow.g1{left:8%; top:18%; background:rgba(0,198,255,0.15); animation-duration:18s;}
+.glow.g2{right:10%; top:55%; background:rgba(0,0,0,0.10); animation-duration:22s;}
+.glow.g3{left:35%; bottom:10%; background:rgba(52,199,89,0.12); animation-duration:20s;}
+
+@keyframes float{
+  0%{transform:translateY(0px) translateX(0px) scale(1);}
+  50%{transform:translateY(-18px) translateX(10px) scale(1.03);}
+  100%{transform:translateY(0px) translateX(0px) scale(1);}
+}
+
+/* ===== BOX ===== */
+.box{
+  width:380px;
+  max-width:95vw;
+  background:rgba(244,244,244,0.92);
+  border-radius:18px;
+  padding:22px;
+  box-shadow:0 14px 40px rgba(0,0,0,.16);
+  position:relative;
+  z-index:1;
+  border:1px solid rgba(0,0,0,0.08);
+  backdrop-filter: blur(10px);
+}
+
+.headRow{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin-bottom:8px;
+}
+.logoWrap{
+  width:44px;height:44px;
+  border-radius:14px;
+  background:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 10px 25px rgba(0,0,0,0.18);
+}
+.logoWrap svg{width:26px;height:26px;display:block;}
+.brandTitle{
+  display:flex;
+  flex-direction:column;
+  line-height:1.1;
+}
+.brandTitle b{font-size:16px;}
+.brandTitle span{font-size:12px;color:#555;font-weight:700;}
+
+/* inputs */
+input,select,button{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  box-sizing:border-box;
+  margin-top:10px;
+}
+input,select{
+  border:1px solid #cfcfcf;
+  background:#fff;
+  outline:none;
+}
+input:focus, select:focus{
+  border-color:#000;
+  box-shadow:0 0 0 3px rgba(0,0,0,0.08);
+}
+
+/* buttons */
+button{
+  border:none;
+  background:#000;
+  color:#fff;
+  font-weight:800;
+  cursor:pointer;
+  transition:0.2s;
+}
+button:hover{opacity:0.92;transform:translateY(-1px);}
+
+.small{font-size:12px;color:#666;margin-top:10px;}
+.notification{
+  position:fixed;
+  top:18px;
+  right:18px;
+  background:#000;
+  color:#fff;
+  padding:12px 14px;
+  border-radius:12px;
+  display:none;
+  cursor:pointer;
+  z-index:3;
+  box-shadow:0 12px 30px rgba(0,0,0,0.20);
+}
+.success{color:#1a7f37;font-weight:800;}
+.fail{color:#c62828;font-weight:800;}
+
+.chip{
+  display:inline-block;
+  margin-top:10px;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#fff;
+  border:1px solid #e5e5e5;
+  color:#333;
+  font-size:12px;
+  font-weight:800;
+}
+
+/* ===== Secure hint card ===== */
+.secCard{
+  margin-top:12px;
+  padding:12px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.85);
+  border:1px solid rgba(0,0,0,0.08);
+}
+.secCard b{display:block;font-size:12px;margin-bottom:6px;}
+.secLine{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  font-size:12px;
+  color:#333;
+}
+.secLine span{font-weight:900;}
+.tag{
+  display:inline-block;
+  margin-top:10px;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#000;
+  color:#fff;
+  font-size:11px;
+  font-weight:900;
+}
+
+/* =========================================================
+   ✅ 10 seconds ST Splash Screen
+   ========================================================= */
+.splash{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(0,198,255,0.20), transparent 45%),
+    radial-gradient(circle at 80% 70%, rgba(52,199,89,0.18), transparent 50%),
+    linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.96));
+  z-index:9999;
+  transition:opacity .45s ease, transform .45s ease;
+}
+.splash.hide{
+  opacity:0;
+  pointer-events:none;
+  transform:scale(1.02);
+}
+.splashCard{
+  width:min(420px, 92vw);
+  padding:26px 22px;
+  border-radius:22px;
+  background:rgba(255,255,255,0.65);
+  border:1px solid rgba(0,0,0,0.08);
+  box-shadow:0 18px 60px rgba(0,0,0,0.14);
+  backdrop-filter: blur(12px);
+  text-align:center;
+}
+.stSpin{
+  width:110px;
+  height:110px;
+  margin:0 auto 14px auto;
+  border-radius:28px;
+  background:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 14px 40px rgba(0,0,0,0.22);
+  animation:spin3d 1.1s linear infinite;
+}
+.stSpin span{
+  color:#fff;
+  font-weight:900;
+  font-size:38px;
+  letter-spacing:1px;
+}
+@keyframes spin3d{
+  0%{transform:rotate(0deg) rotateY(0deg);}
+  100%{transform:rotate(360deg) rotateY(360deg);}
+}
+.splashTitle{font-size:18px;font-weight:900;margin:0;}
+.splashSub{margin:8px 0 12px 0;font-size:13px;color:#444;font-weight:800;}
+.progressLine{
+  height:8px;
+  border-radius:999px;
+  background:rgba(0,0,0,0.08);
+  overflow:hidden;
+}
+.progressLine > i{
+  display:block;
+  height:100%;
+  width:0%;
+  background:#000;
+  border-radius:999px;
+  animation:load10s 10s linear forwards;
+}
+@keyframes load10s{to{width:100%;}}
+.count{margin-top:10px;font-size:12px;color:#333;font-weight:900;}
+</style>
+</head>
+<body>
+
+<!-- Splash -->
+<div class="splash" id="splash">
+  <div class="splashCard">
+    <div class="stSpin"><span>ST</span></div>
+    <p class="splashTitle">ST PAY</p>
+    <p class="splashSub">Starting secure login…</p>
+    <div class="progressLine"><i></i></div>
+    <div class="count" id="countTxt">10s</div>
+  </div>
+</div>
+
+<!-- glow elements -->
+<div class="glow g1"></div>
+<div class="glow g2"></div>
+<div class="glow g3"></div>
+
+<div class="notification" id="otpNotify" onclick="autoFillOTP()">📩 OTP Received! Tap to Auto-Fill</div>
+
+<!-- Login box -->
+<div class="box" id="loginBox" style="display:none;">
+
+  <div class="headRow">
+    <div class="logoWrap" aria-label="Blockchain Lock Logo">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8.5 9.5h-1A3.5 3.5 0 0 0 4 13v1a3.5 3.5 0 0 0 3.5 3.5h1"
+              stroke="#00C6FF" stroke-width="2" stroke-linecap="round"/>
+        <path d="M15.5 9.5h1A3.5 3.5 0 0 1 20 13v1a3.5 3.5 0 0 1-3.5 3.5h-1"
+              stroke="#00C6FF" stroke-width="2" stroke-linecap="round"/>
+        <path d="M9 12h6" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <path d="M15.5 14.5V13a3.5 3.5 0 0 0-7 0v1.5"
+              stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <path d="M8.5 14.5h7v5h-7v-5Z" stroke="#fff" stroke-width="2" />
+      </svg>
+    </div>
+    <div class="brandTitle">
+      <b>🔐 ST PAY OTP Login</b>
+      <span>Security check: identity + OTP</span>
+    </div>
+  </div>
+
+  <!-- user -->
+  <select id="userSelect">
+    <option value="">Select User</option>
+    <option>Vivek</option>
+    <option>Aravind</option>
+    <option>gojo</option>
+    <option>rosyy</option>
+    <option>advika</option>
+  </select>
+
+  <!-- more secure fields -->
+  <input type="date" id="dob" placeholder="Date of Birth">
+  <select id="gender">
+    <option value="">Select Gender</option>
+    <option value="male">Male</option>
+    <option value="female">Female</option>
+    <option value="other">Other</option>
+  </select>
+
+  <input type="tel" id="phone" placeholder="Phone Number" inputmode="numeric" maxlength="10">
+  <input type="email" id="email" placeholder="Email">
+
+  <button onclick="sendOTP()">Send OTP</button>
+
+  <input id="otp" placeholder="Enter OTP" inputmode="numeric" maxlength="6">
+
+  <button onclick="verifyLogin()">Verify & Login</button>
+
+  <div id="status" class="small"></div>
+
+  <!-- security info -->
+  <div class="secCard" id="secCard" style="display:none;">
+    <b>Security verification</b>
+    <div class="secLine"><div>Email</div><span id="maskedEmail">—</span></div>
+    <div class="secLine"><div>Phone</div><span id="maskedPhone">—</span></div>
+    <div class="secLine"><div>OTP validity</div><span id="ttlTxt">60s</span></div>
+    <div class="tag">Protected session</div>
+  </div>
+
+  <div class="chip">✅ Works with backend users.json</div>
+</div>
+
+<script src="script.js"></script>
+<script>
+/* Splash logic */
+(function splashBoot(){
+  const splash = document.getElementById("splash");
+  const loginBox = document.getElementById("loginBox");
+  const countTxt = document.getElementById("countTxt");
+
+  let t = 10;
+  countTxt.innerText = t + "s";
+
+  const timer = setInterval(()=>{
+    t--;
+    countTxt.innerText = (t<=0? "0s" : t+"s");
+    if(t<=0){
+      clearInterval(timer);
+      splash.classList.add("hide");
+      setTimeout(()=>{
+        splash.style.display="none";
+        loginBox.style.display="block";
+      }, 450);
+    }
+  }, 1000);
+})();
+
+/* Secure OTP controls */
+let otpCode="";
+let otpExpiresAt=0;
+let otpTimer=null;
+
+function setStatus(msg,type){
+  const s=document.getElementById("status");
+  s.className="small";
+  if(type==="ok") s.classList.add("success");
+  if(type==="bad") s.classList.add("fail");
+  s.innerText=msg;
+}
+
+function maskEmail(email){
+  const at = email.indexOf("@");
+  if(at<=1) return "***" + email.slice(at);
+  return email[0] + "***" + email.slice(at);
+}
+function maskPhone(p){
+  const clean = (p||"").replace(/\D/g,"");
+  if(clean.length<4) return "******";
+  return "+91 ******" + clean.slice(-4);
+}
+
+function startTTL(){
+  const ttlTxt = document.getElementById("ttlTxt");
+  if(otpTimer) clearInterval(otpTimer);
+
+  otpTimer = setInterval(()=>{
+    const left = Math.max(0, Math.ceil((otpExpiresAt - Date.now())/1000));
+    ttlTxt.innerText = left + "s";
+    if(left<=0){
+      clearInterval(otpTimer);
+      otpCode="";
+      setStatus("OTP expired. Send OTP again ❌","bad");
+      document.getElementById("otpNotify").style.display="none";
+    }
+  }, 300);
+}
+
+function sendOTP(){
+  const email=document.getElementById("email").value.trim();
+  const user=document.getElementById("userSelect").value.trim();
+  const dob=document.getElementById("dob").value.trim();
+  const gender=document.getElementById("gender").value.trim();
+  const phone=document.getElementById("phone").value.trim();
+
+  if(!user){ setStatus("Select user first ❌","bad"); return; }
+  if(!dob){ setStatus("Enter date of birth ❌","bad"); return; }
+  if(!gender){ setStatus("Select gender ❌","bad"); return; }
+
+  const phoneClean = phone.replace(/\D/g,"");
+  if(phoneClean.length < 10){ setStatus("Enter valid phone number ❌","bad"); return; }
+
+  if(!email){ setStatus("Enter email ❌","bad"); return; }
+
+  otpCode=String(Math.floor(100000 + Math.random()*900000));
+  otpExpiresAt = Date.now() + (60*1000); // 60 sec TTL
+
+  console.log("OTP:", otpCode);
+  alert("OTP: " + otpCode);
+
+  // show security card (masked)
+  document.getElementById("secCard").style.display="block";
+  document.getElementById("maskedEmail").innerText = maskEmail(email);
+  document.getElementById("maskedPhone").innerText = maskPhone(phoneClean);
+  startTTL();
+
+  setStatus("OTP sent ✔","ok");
+
+  setTimeout(()=>{
+    document.getElementById("otpNotify").style.display="block";
+    setTimeout(()=> document.getElementById("otpNotify").style.display="none", 7000);
+  },2000);
+}
+
+function autoFillOTP(){
+  document.getElementById("otp").value = otpCode;
+  document.getElementById("otpNotify").style.display="none";
+  setStatus("OTP auto-filled ✔","ok");
+}
+
+function verifyLogin(){
+  const entered=document.getElementById("otp").value.trim();
+  const user=document.getElementById("userSelect").value.trim();
+  const dob=document.getElementById("dob").value.trim();
+  const gender=document.getElementById("gender").value.trim();
+
+  if(!otpCode){ setStatus("Send OTP first ❌","bad"); return; }
+  if(Date.now() > otpExpiresAt){ otpCode=""; setStatus("OTP expired ❌","bad"); return; }
+
+  if(!dob || !gender){
+    setStatus("Enter DOB & Gender ❌","bad"); return;
+  }
+
+  if(entered !== otpCode){
+    setStatus("Invalid OTP ❌","bad"); return;
+  }
+
+  // store secure session data
+  sessionStorage.setItem("user", user);
+  sessionStorage.setItem("dob", dob);
+  sessionStorage.setItem("gender", gender);
+
+  setStatus("Login success ✔ Redirecting...","ok");
+  setTimeout(()=> window.location="dashboard.html", 700);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>➕ Add Money - ST PAY</title>
+  <script src="script.js"></script>
+
+  <style>
+    body{
+      margin:0;
+      font-family:'Segoe UI',sans-serif;
+      min-height:100vh;
+      background:#ffffff;
+      color:#111;
+      display:flex;
+      justify-content:center;
+      padding:14px;
+      box-sizing:border-box;
+    }
+    .app{ width:420px; max-width:100%; }
+
+    .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:8px 0 12px 0;
+      position:sticky;
+      top:0;
+      background:#fff;
+      z-index:5;
+    }
+    .title{ font-weight:900; letter-spacing:0.4px; }
+
+    .btn{
+      border:none;
+      background:#000;
+      color:#fff;
+      font-weight:800;
+      border-radius:12px;
+      padding:10px 12px;
+      cursor:pointer;
+    }
+    .btn:active{transform:scale(0.99);}
+    .btnGray{
+      background:#f2f2f2;
+      color:#111;
+      border:1px solid #e5e5e5;
+    }
+
+    .card{
+      background:#f4f4f4;
+      border:1px solid #e7e7e7;
+      border-radius:18px;
+      padding:14px;
+      box-shadow:0 10px 24px rgba(0,0,0,0.08);
+      margin-top:10px;
+    }
+
+    .label{ font-size:12px; color:#666; margin-top:10px; }
+    .field{
+      width:100%;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid #d8d8d8;
+      background:#fff;
+      outline:none;
+      margin-top:8px;
+      box-sizing:border-box;
+      font-size:14px;
+    }
+
+    .chips{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-top:12px;
+    }
+    .chip{
+      background:#fff;
+      border:1px solid #e5e5e5;
+      border-radius:14px;
+      padding:10px 8px;
+      text-align:center;
+      font-weight:900;
+      cursor:pointer;
+      user-select:none;
+    }
+    .chip.active{
+      background:#000;
+      color:#fff;
+      border-color:#000;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+    }
+    .row .btn{ flex:1; }
+
+    .hint{
+      margin-top:10px;
+      font-size:12px;
+      color:#666;
+      line-height:1.4;
+    }
+
+    /* Loader + stages */
+    .loader{
+      margin:18px auto;
+      border:6px solid #ddd;
+      border-top:6px solid #000;
+      border-radius:50%;
+      width:56px;height:56px;
+      animation:spin 1s linear infinite;
+      display:none;
+    }
+    @keyframes spin{100%{transform:rotate(360deg);}}
+
+    .stage{
+      margin-top:10px;
+      padding:10px;
+      border-radius:12px;
+      background:#fff;
+      border:1px solid #e7e7e7;
+      opacity:0.4;
+      display:none;
+      font-size:13px;
+    }
+    .stage.active{
+      background:#000;
+      color:#fff;
+      opacity:1;
+    }
+
+    .success{
+      margin-top:12px;
+      color:#1a7f37;
+      font-weight:900;
+      display:none;
+    }
+    .fail{
+      margin-top:12px;
+      color:#c62828;
+      font-weight:900;
+      display:none;
+    }
+
+    /* OTP */
+    .otpBox{
+      display:none;
+      margin-top:12px;
+      padding:12px;
+      border-radius:14px;
+      background:#fff;
+      border:1px solid #e7e7e7;
+      text-align:left;
+    }
+    .otpRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top:10px;
+    }
+    .otpRow input{
+      margin-top:0;
+      flex:1;
+      font-weight:900;
+      letter-spacing:3px;
+      text-align:center;
+    }
+    .badge{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#000;
+      color:#fff;
+      font-size:12px;
+      font-weight:900;
+    }
+
+    .notification{
+      position:fixed;
+      top:18px;
+      right:18px;
+      background:#000;
+      color:#fff;
+      padding:12px 14px;
+      border-radius:12px;
+      box-shadow:0 12px 30px rgba(0,0,0,0.2);
+      display:none;
+      cursor:pointer;
+      z-index:100;
+    }
+
+    @media(max-width:360px){
+      .chips{grid-template-columns:repeat(3,1fr);}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="notification" id="otpNotify" onclick="autoFillOTP()">
+    📩 OTP Received! Tap to Auto-Fill
+  </div>
+
+  <div class="app">
+
+    <div class="top">
+      <div class="title">➕ Add Money</div>
+      <button class="btn" onclick="back()">Back</button>
+    </div>
+
+    <div class="card" id="formCard">
+      <div style="font-weight:900;">Choose Amount</div>
+
+      <div class="chips">
+        <div class="chip" onclick="pick(100)">₹100</div>
+        <div class="chip" onclick="pick(200)">₹200</div>
+        <div class="chip" onclick="pick(500)">₹500</div>
+        <div class="chip" onclick="pick(1000)">₹1000</div>
+      </div>
+
+      <div class="label">Custom amount</div>
+      <input class="field" id="amount" type="number" placeholder="Enter amount (e.g., 750)" oninput="clearChips()"/>
+
+      <div class="label">Payment method</div>
+      <select class="field" id="method">
+        <option>UPI</option>
+        <option>Card</option>
+        <option>NetBanking</option>
+        <option>Wallet</option>
+      </select>
+
+      <div class="label">Note (optional)</div>
+      <input class="field" id="note" placeholder="e.g., Wallet topup" />
+
+      <div class="row">
+        <button class="btn" onclick="startAdd()">Add Money</button>
+        <button class="btn btnGray" onclick="resetForm()">Reset</button>
+      </div>
+
+      <div class="hint">
+        ✅ Demo flow: Add click → stages → OTP → success → balance update.
+      </div>
+
+      <div class="loader" id="loader"></div>
+
+      <div id="s1" class="stage">Validating</div>
+      <div id="s2" class="stage">Processing Payment</div>
+      <div id="s3" class="stage">Bank Confirmation</div>
+      <div id="s4" class="stage">OTP Verification</div>
+
+      <div class="otpBox" id="otpBox">
+        <div><span class="badge">OTP</span> Enter OTP to confirm</div>
+        <div class="otpRow">
+          <input class="field" id="otpInput" maxlength="6" placeholder="------" />
+          <button class="btn" onclick="verifyOTP()">Verify</button>
+        </div>
+        <div class="hint">Demo OTP console la varum. Notification tap panna auto-fill.</div>
+      </div>
+
+      <div class="success" id="okMsg">✔ Money added successfully!</div>
+      <div class="fail" id="badMsg">❌ Failed. Try again.</div>
+    </div>
+
+  </div>
+
+<script>
+  if(!sessionStorage.getItem("user")){
+    window.location="index.html";
+  }
+
+  // init balance
+  if(!localStorage.getItem("balance")){
+    localStorage.setItem("balance", "10000");
+  }
+
+  let otpCode = "";
+  let pending = null;
+
+  function pick(v){
+    document.getElementById("amount").value = v;
+    document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+    // set active based on text match
+    document.querySelectorAll(".chip").forEach(c=>{
+      if(c.innerText.replace("₹","") == String(v)) c.classList.add("active");
+    });
+  }
+
+  function clearChips(){
+    document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+  }
+
+  function resetForm(){
+    clearChips();
+    document.getElementById("amount").value = "";
+    document.getElementById("method").value = "UPI";
+    document.getElementById("note").value = "";
+    hideAll();
+  }
+
+  function hideAll(){
+    document.getElementById("loader").style.display="none";
+    ["s1","s2","s3","s4"].forEach(id=>{
+      const el=document.getElementById(id);
+      el.style.display="none";
+      el.classList.remove("active");
+    });
+    document.getElementById("otpBox").style.display="none";
+    document.getElementById("okMsg").style.display="none";
+    document.getElementById("badMsg").style.display="none";
+  }
+
+  function showNotify(){
+    const n=document.getElementById("otpNotify");
+    n.style.display="block";
+    setTimeout(()=>{ n.style.display="none"; }, 7000);
+  }
+
+  function autoFillOTP(){
+    document.getElementById("otpInput").value = otpCode;
+    document.getElementById("otpNotify").style.display="none";
+  }
+
+  function startAdd(){
+    hideAll();
+
+    const amt = Number(document.getElementById("amount").value || 0);
+    const method = document.getElementById("method").value;
+    const note = document.getElementById("note").value.trim();
+    const user = sessionStorage.getItem("user") || "User";
+
+    if(!amt || amt <= 0){
+      alert("Enter valid amount");
+      return;
+    }
+
+    pending = { amt, method, note, user };
+
+    document.getElementById("loader").style.display="block";
+
+    const stages = ["s1","s2","s3","s4"];
+    let i=0;
+
+    function next(){
+      if(i<stages.length){
+        const el=document.getElementById(stages[i]);
+        el.style.display="block";
+        el.classList.add("active");
+        i++;
+        setTimeout(next,850);
+      }else{
+        // stop loader and show OTP
+        document.getElementById("loader").style.display="none";
+        otpCode = String(Math.floor(100000 + Math.random()*900000));
+        console.log("Demo OTP:", otpCode);
+        document.getElementById("otpBox").style.display="block";
+        showNotify();
+      }
+    }
+    next();
+  }
+
+  function verifyOTP(){
+    const entered = document.getElementById("otpInput").value.trim();
+    if(entered !== otpCode || otpCode===""){
+      document.getElementById("badMsg").style.display="block";
+      document.getElementById("badMsg").innerText="❌ Invalid OTP";
+      return;
+    }
+
+    // success -> update balance
+    const bal = Number(localStorage.getItem("balance") || 0);
+    const newBal = bal + Number(pending.amt);
+    localStorage.setItem("balance", String(newBal));
+
+    // save history
+    const history = JSON.parse(localStorage.getItem("history") || "[]");
+    history.push({
+      type:"addmoney",
+      amount: pending.amt,
+      method: pending.method,
+      note: pending.note,
+      date: new Date().toLocaleString()
+    });
+    localStorage.setItem("history", JSON.stringify(history));
+
+    document.getElementById("otpBox").style.display="none";
+    document.getElementById("okMsg").style.display="block";
+    document.getElementById("okMsg").innerText = `✔ Added ₹${pending.amt} via ${pending.method}. New balance: ₹${newBal}`;
+
+    // clear otp
+    document.getElementById("otpInput").value="";
+    otpCode="";
+    pending=null;
+
+    // auto back after 1.2s (optional)
+    setTimeout(()=>{ window.location="dashboard.html"; }, 1200);
+  }
+
+  function back(){
+    window.location="dashboard.html";
+  }
+</script>
+
+</body>
+</html>

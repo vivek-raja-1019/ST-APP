@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>File Transfer</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+margin:0;
+font-family:Segoe UI, sans-serif;
+background:#ffffff;
+color:#111;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+padding:18px;
+box-sizing:border-box;
+}
+
+.box{
+background:#f4f4f4;
+padding:22px;
+border-radius:12px;
+width:360px;
+max-width:95vw;
+box-shadow:0 0 10px rgba(0,0,0,0.12);
+text-align:center;
+box-sizing:border-box;
+}
+
+h2{margin:0 0 12px 0;}
+
+input, select{
+width:100%;
+padding:10px;
+margin-top:10px;
+border:1px solid #ccc;
+border-radius:8px;
+box-sizing:border-box;
+background:#fff;
+}
+
+button{
+margin-top:10px;
+padding:11px;
+width:100%;
+border:none;
+background:#000;         /* BLACK */
+color:#fff;
+border-radius:8px;
+font-weight:bold;
+cursor:pointer;
+transition:0.2s;
+}
+
+button:hover{
+opacity:0.9;
+transform:scale(1.01);
+}
+
+.btn-secondary{
+background:#222;
+}
+
+.info{
+margin-top:12px;
+text-align:left;
+background:#fff;
+border:1px solid #ddd;
+border-radius:10px;
+padding:10px;
+font-size:14px;
+display:none;
+}
+
+.preview{
+margin-top:10px;
+display:none;
+}
+
+.preview img, .preview video{
+max-width:100%;
+border-radius:10px;
+border:1px solid #ddd;
+}
+
+.preview audio{
+width:100%;
+}
+
+.small{
+font-size:12px;
+color:#555;
+margin-top:6px;
+}
+
+@media(max-width:420px){
+.box{padding:18px;}
+}
+</style>
+
+</head>
+<body>
+
+<div class="box">
+
+<h2>File Transfer</h2>
+
+<input type="text" id="receiver" placeholder="Receiver ID">
+
+<select id="fileType">
+  <option value="image">Image</option>
+  <option value="video">Video</option>
+  <option value="audio">Audio</option>
+  <option value="document">Document</option>
+  <option value="other">Other</option>
+</select>
+
+<input type="file" id="fileInput" onchange="showFileInfo()">
+
+<div class="info" id="fileInfo"></div>
+
+<div class="preview" id="preview"></div>
+
+<button onclick="sendFile()">Send File</button>
+
+<button class="btn-secondary" onclick="goBack()">Back</button>
+
+<div class="small">Tip: Choose file type above for better info & preview.</div>
+
+</div>
+
+<script src="script.js"></script>
+
+<script>
+
+if(!sessionStorage.getItem("user")){
+window.location="index.html";
+}
+
+function bytesToSize(bytes){
+if(bytes===0) return "0 Bytes";
+let k=1024;
+let sizes=["Bytes","KB","MB","GB","TB"];
+let i=Math.floor(Math.log(bytes)/Math.log(k));
+return parseFloat((bytes/Math.pow(k,i)).toFixed(2))+" "+sizes[i];
+}
+
+function showFileInfo(){
+let file = document.getElementById("fileInput").files[0];
+let type = document.getElementById("fileType").value;
+
+let info = document.getElementById("fileInfo");
+let preview = document.getElementById("preview");
+
+preview.style.display="none";
+preview.innerHTML="";
+
+if(!file){
+info.style.display="none";
+return;
+}
+
+info.style.display="block";
+info.innerHTML = `
+<b>Selected File</b><br>
+Name: ${file.name}<br>
+Size: ${bytesToSize(file.size)}<br>
+Browser Type: ${file.type || "Unknown"}<br>
+Selected Category: ${type}
+`;
+
+let url = URL.createObjectURL(file);
+
+if(type==="image"){
+preview.style.display="block";
+preview.innerHTML = `<img src="${url}" alt="preview">`;
+}else if(type==="video"){
+preview.style.display="block";
+preview.innerHTML = `<video src="${url}" controls></video>`;
+}else if(type==="audio"){
+preview.style.display="block";
+preview.innerHTML = `<audio src="${url}" controls></audio>`;
+}else{
+preview.style.display="block";
+preview.innerHTML = `<div class="small">Preview not available for this file type.</div>`;
+}
+}
+
+function sendFile(){
+
+let receiver = document.getElementById("receiver").value.trim();
+let file = document.getElementById("fileInput").files[0];
+let type = document.getElementById("fileType").value;
+
+if(receiver=="" || !file){
+alert("Enter receiver and choose file");
+return;
+}
+
+/* keep your existing feature: save history */
+let history = JSON.parse(localStorage.getItem("history") || "[]");
+
+history.push({
+type:"file",
+receiver:receiver,
+file:file.name,
+fileType:type,
+size:file.size,
+mime:file.type || "",
+date:new Date().toLocaleString()
+});
+
+localStorage.setItem("history",JSON.stringify(history));
+
+alert("File Sent ✔");
+
+document.getElementById("receiver").value="";
+document.getElementById("fileInput").value="";
+document.getElementById("fileInfo").style.display="none";
+document.getElementById("preview").style.display="none";
+}
+
+function goBack(){
+window.location="dashboard.html";
+}
+
+</script>
+
+</body>
+</html>
