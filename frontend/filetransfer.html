@@ -135,98 +135,133 @@ margin-top:6px;
 <script src="script.js"></script>
 
 <script>
-
 if(!sessionStorage.getItem("user")){
-window.location="index.html";
+  window.location="index.html";
 }
 
+let _previewUrl = null;
+
 function bytesToSize(bytes){
-if(bytes===0) return "0 Bytes";
-let k=1024;
-let sizes=["Bytes","KB","MB","GB","TB"];
-let i=Math.floor(Math.log(bytes)/Math.log(k));
-return parseFloat((bytes/Math.pow(k,i)).toFixed(2))+" "+sizes[i];
+  if(bytes===0) return "0 Bytes";
+  let k=1024;
+  let sizes=["Bytes","KB","MB","GB","TB"];
+  let i=Math.floor(Math.log(bytes)/Math.log(k));
+  return parseFloat((bytes/Math.pow(k,i)).toFixed(2))+" "+sizes[i];
+}
+
+/* ✅ ADDED: robust history save (common + per-user + base64) */
+function pushHistory(item){
+  const user = sessionStorage.getItem("user") || "User";
+
+  // common key
+  let h = [];
+  try{ h = JSON.parse(localStorage.getItem("history") || "[]"); }catch(e){ h=[]; }
+  if(!Array.isArray(h)) h = [];
+  h.push(item);
+  localStorage.setItem("history", JSON.stringify(h));
+
+  // per-user key (plain)
+  let hu = [];
+  try{ hu = JSON.parse(localStorage.getItem("history_"+user) || "[]"); }catch(e){ hu=[]; }
+  if(!Array.isArray(hu)) hu = [];
+  hu.push(item);
+  localStorage.setItem("history_"+user, JSON.stringify(hu));
+
+  // per-user key (base64 compatibility - old pages)
+  try{
+    localStorage.setItem("history_"+user, btoa(JSON.stringify(hu)));
+  }catch(e){
+    // if btoa fails, ignore
+  }
 }
 
 function showFileInfo(){
-let file = document.getElementById("fileInput").files[0];
-let type = document.getElementById("fileType").value;
+  let file = document.getElementById("fileInput").files[0];
+  let type = document.getElementById("fileType").value;
 
-let info = document.getElementById("fileInfo");
-let preview = document.getElementById("preview");
+  let info = document.getElementById("fileInfo");
+  let preview = document.getElementById("preview");
 
-preview.style.display="none";
-preview.innerHTML="";
+  // cleanup old preview url
+  if(_previewUrl){
+    try{ URL.revokeObjectURL(_previewUrl); }catch(e){}
+    _previewUrl = null;
+  }
 
-if(!file){
-info.style.display="none";
-return;
-}
+  preview.style.display="none";
+  preview.innerHTML="";
 
-info.style.display="block";
-info.innerHTML = `
-<b>Selected File</b><br>
-Name: ${file.name}<br>
-Size: ${bytesToSize(file.size)}<br>
-Browser Type: ${file.type || "Unknown"}<br>
-Selected Category: ${type}
-`;
+  if(!file){
+    info.style.display="none";
+    return;
+  }
 
-let url = URL.createObjectURL(file);
+  info.style.display="block";
+  info.innerHTML = `
+    <b>Selected File</b><br>
+    Name: ${file.name}<br>
+    Size: ${bytesToSize(file.size)}<br>
+    Browser Type: ${file.type || "Unknown"}<br>
+    Selected Category: ${type}
+  `;
 
-if(type==="image"){
-preview.style.display="block";
-preview.innerHTML = `<img src="${url}" alt="preview">`;
-}else if(type==="video"){
-preview.style.display="block";
-preview.innerHTML = `<video src="${url}" controls></video>`;
-}else if(type==="audio"){
-preview.style.display="block";
-preview.innerHTML = `<audio src="${url}" controls></audio>`;
-}else{
-preview.style.display="block";
-preview.innerHTML = `<div class="small">Preview not available for this file type.</div>`;
-}
+  _previewUrl = URL.createObjectURL(file);
+
+  if(type==="image"){
+    preview.style.display="block";
+    preview.innerHTML = `<img src="${_previewUrl}" alt="preview">`;
+  }else if(type==="video"){
+    preview.style.display="block";
+    preview.innerHTML = `<video src="${_previewUrl}" controls></video>`;
+  }else if(type==="audio"){
+    preview.style.display="block";
+    preview.innerHTML = `<audio src="${_previewUrl}" controls></audio>`;
+  }else{
+    preview.style.display="block";
+    preview.innerHTML = `<div class="small">Preview not available for this file type.</div>`;
+  }
 }
 
 function sendFile(){
+  let receiver = document.getElementById("receiver").value.trim();
+  let file = document.getElementById("fileInput").files[0];
+  let type = document.getElementById("fileType").value;
 
-let receiver = document.getElementById("receiver").value.trim();
-let file = document.getElementById("fileInput").files[0];
-let type = document.getElementById("fileType").value;
+  if(receiver=="" || !file){
+    alert("Enter receiver and choose file");
+    return;
+  }
 
-if(receiver=="" || !file){
-alert("Enter receiver and choose file");
-return;
-}
+  const record = {
+    type:"file",
+    receiver:receiver,
+    file:file.name,
+    fileType:type,
+    size:file.size,
+    mime:file.type || "",
+    date:new Date().toLocaleString()
+  };
 
-/* keep your existing feature: save history */
-let history = JSON.parse(localStorage.getItem("history") || "[]");
+  /* ✅ keep your existing feature + stronger */
+  pushHistory(record);
 
-history.push({
-type:"file",
-receiver:receiver,
-file:file.name,
-fileType:type,
-size:file.size,
-mime:file.type || "",
-date:new Date().toLocaleString()
-});
+  alert("File Sent ✔");
 
-localStorage.setItem("history",JSON.stringify(history));
+  document.getElementById("receiver").value="";
+  document.getElementById("fileInput").value="";
+  document.getElementById("fileInfo").style.display="none";
+  document.getElementById("preview").style.display="none";
 
-alert("File Sent ✔");
-
-document.getElementById("receiver").value="";
-document.getElementById("fileInput").value="";
-document.getElementById("fileInfo").style.display="none";
-document.getElementById("preview").style.display="none";
+  // cleanup preview url
+  if(_previewUrl){
+    try{ URL.revokeObjectURL(_previewUrl); }catch(e){}
+    _previewUrl = null;
+  }
 }
 
 function goBack(){
-window.location="dashboard.html";
+  window.location="dashboard.html";
 }
-
 </script>
 
 </body>
