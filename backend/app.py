@@ -9,6 +9,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.dirname(BASE_DIR)
 
 FRONTEND_DIR = os.path.join(PROJECT_DIR, "frontend")
+if not os.path.exists(FRONTEND_DIR):
+    FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 
 USERS_FILE = os.path.join(BASE_DIR, "users.json")
 HISTORY_FILE = os.path.join(BASE_DIR, "history.json")
@@ -129,17 +131,15 @@ def parse_time_for_sort(value):
 
 def sort_history_desc(items):
     items.sort(
-        key=lambda x: parse_time_for_sort(x.get("time") or x.get("date") or x.get("timestamp") or ""),
+        key=lambda x: parse_time_for_sort(
+            x.get("time") or x.get("date") or x.get("timestamp") or ""
+        ),
         reverse=True
     )
     return items
 
 
 def normalize_history_item(tx, current_user=None):
-    """
-    Old history format + new history format render panna common format.
-    """
-
     tx_id = tx.get("id") or make_txn_id()
     raw_type = (tx.get("type") or "").lower().strip()
 
@@ -150,7 +150,6 @@ def normalize_history_item(tx, current_user=None):
     status = tx.get("status") or "success"
     user_value = tx.get("user") or tx.get("username") or ""
 
-    # type normalize
     if raw_type in ["pay", "paid", "send", "sent", "transfer_sent", "debit"]:
         tx_type = "transfer_sent"
     elif raw_type in ["transfer_received", "received", "credit"]:
@@ -194,7 +193,6 @@ def normalize_history_item(tx, current_user=None):
         "block_no": tx.get("block_no") if tx.get("block_no") is not None else tx.get("block")
     }
 
-    # current user perspective ku convert
     if current_user:
         cu = (current_user or "").lower().strip()
         s = (sender or "").lower().strip()
@@ -254,7 +252,10 @@ def index():
 
 @app.get("/api/health")
 def health():
-    return jsonify({"ok": True})
+    return jsonify({
+        "ok": True,
+        "frontend_dir": FRONTEND_DIR
+    })
 
 
 # ---------------- LOGIN ----------------
@@ -267,7 +268,6 @@ def login():
     password = (data.get("password") or "").strip()
 
     users = read_json(USERS_FILE, [])
-
     u = find_user(users, name)
 
     if not u or u.get("password") != password:
@@ -287,7 +287,6 @@ def users():
     users = read_json(USERS_FILE, [])
 
     safe = []
-
     for u in users:
         safe.append({
             "name": u["name"],
@@ -302,7 +301,6 @@ def users():
 @app.get("/api/balance/<username>")
 def balance(username):
     users = read_json(USERS_FILE, [])
-
     u = find_user(users, username)
 
     if not u:
@@ -413,7 +411,6 @@ def history_by_user(username):
     })
 
 
-# extra support for frontend fallback
 @app.get("/history/<username>")
 def history_by_user_plain(username):
     user_history = get_user_history(username)
@@ -424,7 +421,6 @@ def history_by_user_plain(username):
     })
 
 
-# extra support for query param route
 @app.get("/api/statement")
 @app.get("/api/history-by-user")
 def history_query_user():
@@ -459,7 +455,6 @@ def addmoney():
     amount = safe_float(data.get("amount") or 0)
 
     users = read_json(USERS_FILE, [])
-
     u = find_user(users, username)
 
     if not username:
@@ -472,7 +467,6 @@ def addmoney():
         return jsonify({"error": "User not found"}), 404
 
     u["balance"] = safe_float(u["balance"]) + amount
-
     write_json(USERS_FILE, users)
 
     txn_id = make_txn_id()
@@ -507,6 +501,23 @@ def addmoney():
     })
 
 
+# ---------------- DEBUG ----------------
+
+@app.get("/api/debug/routes")
+def debug_routes():
+    routes = []
+    for rule in app.url_map.iter_rules():
+        routes.append({
+            "route": str(rule),
+            "methods": sorted(list(rule.methods))
+        })
+
+    return jsonify({
+        "ok": True,
+        "routes": routes
+    })
+
+
 # ---------------- FRONTEND FILE ROUTE ----------------
 
 @app.get("/<path:path>")
@@ -519,7 +530,7 @@ def serve_file(path):
 
     file_path = os.path.join(FRONTEND_DIR, path)
 
-    if os.path.exists(file_path):
+    if os.path.exists(file_path) and os.path.isfile(file_path):
         return send_from_directory(FRONTEND_DIR, path)
 
     return send_from_directory(FRONTEND_DIR, "index.html")
