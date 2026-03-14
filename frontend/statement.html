@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ST PAY - Statement</title>
+  <style>
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --brand:#111827;
+      --green:#16a34a;
+      --green-soft:#dcfce7;
+      --red:#dc2626;
+      --red-soft:#fee2e2;
+      --blue:#2563eb;
+      --blue-soft:#dbeafe;
+      --shadow:0 10px 26px rgba(15,23,42,0.08);
+    }
+
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .app{
+      max-width:430px;
+      margin:0 auto;
+      min-height:100vh;
+      padding:14px 14px 30px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .title{
+      font-size:28px;
+      font-weight:900;
+      letter-spacing:-0.5px;
+    }
+
+    .sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:4px;
+    }
+
+    .btn{
+      border:none;
+      background:#fff;
+      color:#111;
+      padding:10px 13px;
+      border-radius:14px;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+    }
+
+    .hero{
+      background:linear-gradient(135deg,#0f172a,#1e293b 55%,#334155);
+      color:#fff;
+      border-radius:28px;
+      padding:18px;
+      box-shadow:0 14px 30px rgba(15,23,42,0.22);
+      margin-bottom:14px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      width:160px;
+      height:160px;
+      border-radius:50%;
+      right:-35px;
+      top:-35px;
+      background:rgba(255,255,255,0.07);
+    }
+
+    .heroLabel{
+      font-size:12px;
+      opacity:0.82;
+      position:relative;
+      z-index:1;
+    }
+
+    .heroUser{
+      font-size:24px;
+      font-weight:900;
+      margin-top:4px;
+      position:relative;
+      z-index:1;
+    }
+
+    .heroDate{
+      margin-top:8px;
+      font-size:12px;
+      opacity:0.8;
+      position:relative;
+      z-index:1;
+    }
+
+    .heroGrid{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:10px;
+      margin-top:16px;
+      position:relative;
+      z-index:1;
+    }
+
+    .heroStat{
+      background:rgba(255,255,255,0.09);
+      border-radius:18px;
+      padding:12px 10px;
+    }
+
+    .heroStatLabel{
+      font-size:11px;
+      opacity:0.75;
+      margin-bottom:4px;
+    }
+
+    .heroStatValue{
+      font-size:16px;
+      font-weight:900;
+    }
+
+    .panel{
+      background:var(--card);
+      border-radius:24px;
+      padding:14px;
+      box-shadow:var(--shadow);
+      margin-bottom:14px;
+    }
+
+    .panelTitle{
+      font-size:14px;
+      font-weight:900;
+      margin-bottom:10px;
+    }
+
+    .input, .select{
+      width:100%;
+      padding:13px 14px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      font-size:15px;
+      outline:none;
+      background:#fff;
+    }
+
+    .input:focus, .select:focus{
+      border-color:#b7c6ff;
+      box-shadow:0 0 0 3px rgba(37,99,235,0.08);
+    }
+
+    .row{
+      display:flex;
+      gap:9px;
+    }
+
+    .row > *{
+      flex:1;
+    }
+
+    .chipRow{
+      display:flex;
+      gap:8px;
+      overflow:auto;
+      margin-bottom:12px;
+      padding-bottom:2px;
+    }
+
+    .chip{
+      white-space:nowrap;
+      border:none;
+      border-radius:999px;
+      padding:10px 14px;
+      background:#eef2ff;
+      color:#1d4ed8;
+      font-size:13px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .chip.active{
+      background:#111827;
+      color:#fff;
+    }
+
+    .summary{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-bottom:14px;
+    }
+
+    .card{
+      background:#fff;
+      border-radius:20px;
+      padding:14px;
+      border:1px solid #edf2f7;
+      box-shadow:0 6px 18px rgba(15,23,42,0.04);
+    }
+
+    .label{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:700;
+      margin-bottom:6px;
+    }
+
+    .value{
+      font-size:22px;
+      font-weight:900;
+    }
+
+    .small{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:6px;
+    }
+
+    .sectionHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin:14px 0 10px;
+    }
+
+    .sectionTitle{
+      font-size:16px;
+      font-weight:900;
+    }
+
+    .count{
+      background:#e5e7eb;
+      color:#111827;
+      font-size:12px;
+      font-weight:800;
+      padding:6px 10px;
+      border-radius:999px;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .tx{
+      background:#fff;
+      border-radius:24px;
+      padding:14px;
+      box-shadow:var(--shadow);
+    }
+
+    .txTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .txLeft{
+      display:flex;
+      gap:12px;
+      flex:1;
+      min-width:0;
+    }
+
+    .icon{
+      width:52px;
+      height:52px;
+      border-radius:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:20px;
+      font-weight:900;
+      flex-shrink:0;
+    }
+
+    .icon.sent{
+      background:var(--red-soft);
+      color:var(--red);
+    }
+
+    .icon.received{
+      background:var(--green-soft);
+      color:var(--green);
+    }
+
+    .icon.deposit{
+      background:var(--blue-soft);
+      color:var(--blue);
+    }
+
+    .txName{
+      font-size:16px;
+      font-weight:900;
+      margin-bottom:4px;
+      line-height:1.25;
+    }
+
+    .txMeta{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    .badge{
+      display:inline-block;
+      margin-top:7px;
+      padding:5px 10px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:900;
+    }
+
+    .badge.sent{
+      background:var(--red-soft);
+      color:var(--red);
+    }
+
+    .badge.received{
+      background:var(--green-soft);
+      color:var(--green);
+    }
+
+    .badge.deposit{
+      background:var(--blue-soft);
+      color:var(--blue);
+    }
+
+    .txRight{
+      text-align:right;
+      min-width:95px;
+      flex-shrink:0;
+    }
+
+    .amount{
+      font-size:19px;
+      font-weight:900;
+      margin-bottom:6px;
+    }
+
+    .amount.sent{ color:var(--red); }
+    .amount.received{ color:var(--green); }
+    .amount.deposit{ color:var(--blue); }
+
+    .status{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      text-transform:capitalize;
+    }
+
+    .details{
+      margin-top:13px;
+      padding-top:12px;
+      border-top:1px solid #edf0f5;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .detail{
+      background:#f8fafc;
+      border-radius:16px;
+      padding:10px;
+    }
+
+    .detailLabel{
+      font-size:10px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.6px;
+      font-weight:900;
+      margin-bottom:4px;
+    }
+
+    .detailValue{
+      font-size:13px;
+      font-weight:800;
+      word-break:break-word;
+      color:#0f172a;
+    }
+
+    .message, .empty, .loading{
+      background:#fff;
+      border-radius:24px;
+      padding:20px 16px;
+      text-align:center;
+      box-shadow:var(--shadow);
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .message.error{
+      background:#fff1f2;
+      color:#be123c;
+      border:1px solid #fecdd3;
+      text-align:left;
+    }
+
+    @media (max-width:450px){
+      .heroGrid, .summary, .details{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media print{
+      body{ background:#fff; }
+      .topbar, .panel, .chipRow{ display:none !important; }
+      .app{ max-width:100%; padding:0; }
+      .tx, .card, .hero{ box-shadow:none !important; border:1px solid #ddd; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div>
+        <div class="title">Statement</div>
+        <div class="sub">ST PAY transaction records</div>
+      </div>
+      <button class="btn" id="refreshBtn">Refresh</button>
+    </div>
+
+    <div class="hero">
+      <div class="heroLabel">Account holder</div>
+      <div class="heroUser" id="heroUser">Loading...</div>
+      <div class="heroDate" id="todayDate">-</div>
+
+      <div class="heroGrid">
+        <div class="heroStat">
+          <div class="heroStatLabel">Transactions</div>
+          <div class="heroStatValue" id="heroTxnCount">0</div>
+        </div>
+        <div class="heroStat">
+          <div class="heroStatLabel">Money In</div>
+          <div class="heroStatValue" id="heroMoneyIn">₹0</div>
+        </div>
+        <div class="heroStat">
+          <div class="heroStatLabel">Money Out</div>
+          <div class="heroStatValue" id="heroMoneyOut">₹0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panelTitle">Search and sort</div>
+      <div class="row" style="margin-bottom:10px;">
+        <input id="searchInput" class="input" type="text" placeholder="Search by person, ID, reference, amount, date">
+      </div>
+      <div class="row">
+        <select id="sortSelect" class="select">
+          <option value="latest">Latest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="high">Amount high to low</option>
+          <option value="low">Amount low to high</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="chipRow">
+      <button class="chip active" data-filter="all">All</button>
+      <button class="chip" data-filter="sent">Sent</button>
+      <button class="chip" data-filter="received">Received</button>
+      <button class="chip" data-filter="deposit">Added</button>
+    </div>
+
+    <div class="summary">
+      <div class="card">
+        <div class="label">Net flow</div>
+        <div class="value" id="netFlow">₹0</div>
+        <div class="small">Incoming minus outgoing</div>
+      </div>
+
+      <div class="card">
+        <div class="label">Statement range</div>
+        <div class="value" style="font-size:16px;" id="statementRange">-</div>
+        <div class="small">From first to latest transaction</div>
+      </div>
+
+      <div class="card">
+        <div class="label">Total received</div>
+        <div class="value" id="receivedTotal">₹0</div>
+        <div class="small">Money received to this account</div>
+      </div>
+
+      <div class="card">
+        <div class="label">Total sent</div>
+        <div class="value" id="sentTotal">₹0</div>
+        <div class="small">Money sent from this account</div>
+      </div>
+    </div>
+
+    <div id="messageBox"></div>
+
+    <div class="sectionHead">
+      <div class="sectionTitle">All statement entries</div>
+      <div class="count" id="countBadge">0</div>
+    </div>
+
+    <div class="list" id="statementList">
+      <div class="loading">Loading statement...</div>
+    </div>
+  </div>
+
+  <script>
+    let allStatements = [];
+    let filteredStatements = [];
+    let currentFilter = "all";
+
+    function escapeHtml(value){
+      if(value === null || value === undefined) return "";
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function formatAmount(value){
+      const num = Number(value || 0);
+      return num.toLocaleString("en-IN", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function normalizeType(rawType){
+      const t = String(rawType || "").toLowerCase().trim();
+
+      if (
+        t.includes("sent") ||
+        t.includes("debit") ||
+        t === "pay" ||
+        t === "send" ||
+        t === "paid" ||
+        t === "transfer_sent"
+      ) return "sent";
+
+      if (
+        t.includes("received") ||
+        t.includes("credit") ||
+        t === "receive" ||
+        t === "payment_received" ||
+        t === "transfer_received"
+      ) return "received";
+
+      if (
+        t.includes("deposit") ||
+        t.includes("topup") ||
+        t.includes("add") ||
+        t === "money_added"
+      ) return "deposit";
+
+      return "received";
+    }
+
+    function getType(tx){
+      return normalizeType(tx.type);
+    }
+
+    function getIcon(type){
+      if(type === "sent") return "↗";
+      if(type === "received") return "↙";
+      if(type === "deposit") return "₹";
+      return "•";
+    }
+
+    function getBadge(type){
+      if(type === "sent") return "Sent";
+      if(type === "received") return "Received";
+      if(type === "deposit") return "Added";
+      return "Done";
+    }
+
+    function getTitle(tx, type){
+      if(tx.title) return tx.title;
+      if(type === "sent") return `Sent to ${tx.to || tx.receiver || "User"}`;
+      if(type === "received") return `Received from ${tx.from || tx.sender || "User"}`;
+      if(type === "deposit") return "Money added";
+      return "Transaction";
+    }
+
+    function normalizeStatus(status){
+      const s = String(status || "success").toLowerCase().trim();
+      return s || "success";
+    }
+
+    function parseDateValue(value){
+      if(!value) return null;
+
+      if (typeof value === "number") {
+        const d = new Date(value);
+        return isNaN(d.getTime()) ? null : d;
+      }
+
+      const raw = String(value).trim();
+      if(!raw) return null;
+
+      let d = new Date(raw);
+      if (!isNaN(d.getTime())) return d;
+
+      const m1 = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})(?:\s+(.*))?$/);
+      if (m1) {
+        let day = m1[1].padStart(2, "0");
+        let month = m1[2].padStart(2, "0");
+        let year = m1[3];
+        if (year.length === 2) year = "20" + year;
+        const time = m1[4] ? " " + m1[4] : "";
+        d = new Date(`${year}-${month}-${day}${time}`);
+        if (!isNaN(d.getTime())) return d;
+      }
+
+      return null;
+    }
+
+    function safeDate(tx){
+      const d = parseDateValue(tx.time || tx.date || tx.timestamp || "");
+      return d ? d.getTime() : 0;
+    }
+
+    function formatDisplayDate(value){
+      const d = parseDateValue(value);
+      if(!d) return value || "-";
+
+      const datePart = d.toLocaleDateString("en-IN", {
+        day:"2-digit",
+        month:"short",
+        year:"numeric"
+      });
+
+      const timePart = d.toLocaleTimeString("en-IN", {
+        hour:"2-digit",
+        minute:"2-digit"
+      });
+
+      return `${datePart}, ${timePart}`;
+    }
+
+    function buildSearchText(tx){
+      const rawDate = tx.time || "";
+      const d = parseDateValue(rawDate);
+
+      let dateSearch = rawDate ? String(rawDate) : "";
+
+      if (d) {
+        const dd = String(d.getDate()).padStart(2, "0");
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const yyyy = String(d.getFullYear());
+        const shortMonth = d.toLocaleDateString("en-IN", { month: "short" }).toLowerCase();
+        const longMonth = d.toLocaleDateString("en-IN", { month: "long" }).toLowerCase();
+
+        dateSearch += " " + [
+          `${dd}/${mm}/${yyyy}`,
+          `${yyyy}-${mm}-${dd}`,
+          `${dd}-${mm}-${yyyy}`,
+          `${dd} ${shortMonth} ${yyyy}`,
+          `${dd} ${longMonth} ${yyyy}`
+        ].join(" ");
+      }
+
+      return [
+        tx.id,
+        tx.title,
+        tx.from,
+        tx.to,
+        tx.reference,
+        tx.status,
+        tx.amount,
+        tx.hash,
+        tx.block_no,
+        tx.time,
+        dateSearch
+      ].join(" ").toLowerCase();
+    }
+
+    function generateReference(tx){
+      if(tx.reference) return tx.reference;
+      if(tx.id) return "REF-" + String(tx.id).slice(-8).toUpperCase();
+      return "REF-NA";
+    }
+
+    function generateHash(tx){
+      if(tx.hash) return tx.hash;
+      if(tx.id) return "0x" + String(tx.id).toLowerCase().replace(/\s+/g, "");
+      return "0xstpayhash";
+    }
+
+    function generateBlock(tx, index){
+      if(tx.block_no !== undefined && tx.block_no !== null && tx.block_no !== "") return tx.block_no;
+      return index + 1;
+    }
+
+    function setFilter(filter, btn){
+      currentFilter = filter;
+      document.querySelectorAll(".chip").forEach(el => el.classList.remove("active"));
+      btn.classList.add("active");
+      applyFilters();
+    }
+
+    function normalizeStatementItems(rawList, currentUser){
+      if(!Array.isArray(rawList)) return [];
+
+      return rawList.map((tx, index) => {
+        const originalType = tx.type || tx.kind || tx.transaction_type || "";
+        const t = normalizeType(originalType);
+        const fromName = tx.from || tx.sender || tx.sent_from || "";
+        const toName = tx.to || tx.receiver || tx.sent_to || "";
+        const current = String(currentUser || "").toLowerCase().trim();
+
+        let finalType = t;
+
+        if (current) {
+          const fromLower = String(fromName || "").toLowerCase().trim();
+          const toLower = String(toName || "").toLowerCase().trim();
+
+          if (fromLower === current && toLower && t !== "deposit") {
+            finalType = "sent";
+          } else if (toLower === current && fromLower && t !== "deposit") {
+            finalType = "received";
+          }
+        }
+
+        let title = tx.title || tx.name || "";
+        if (!title) {
+          if (finalType === "sent") {
+            title = `Sent to ${toName || "User"}`;
+          } else if (finalType === "received") {
+            title = `Received from ${fromName || "User"}`;
+          } else {
+            title = "Money added";
+          }
+        }
+
+        return {
+          id: tx.id || tx.tx_id || tx.transaction_id || ("TXN" + (index + 1)),
+          user: tx.user || currentUser || "",
+          title,
+          from: fromName,
+          to: toName,
+          amount: Number(tx.amount || 0),
+          type: finalType,
+          status: normalizeStatus(tx.status),
+          time: tx.time || tx.date || tx.timestamp || "",
+          balance_after: tx.balance_after ?? tx.balance ?? tx.balanceAfter ?? "",
+          reference: tx.reference || tx.ref || "",
+          block_no: tx.block_no ?? tx.block ?? null,
+          hash: tx.hash || tx.tx_hash || ""
+        };
+      });
+    }
+
+    function renderSummary(statements){
+      let moneyIn = 0;
+      let moneyOut = 0;
+
+      statements.forEach(tx => {
+        const amount = Number(tx.amount || 0);
+        const type = getType(tx);
+
+        if(type === "sent") moneyOut += amount;
+        else moneyIn += amount;
+      });
+
+      const net = moneyIn - moneyOut;
+
+      document.getElementById("heroTxnCount").textContent = statements.length;
+      document.getElementById("heroMoneyIn").textContent = "₹" + formatAmount(moneyIn);
+      document.getElementById("heroMoneyOut").textContent = "₹" + formatAmount(moneyOut);
+      document.getElementById("receivedTotal").textContent = "₹" + formatAmount(moneyIn);
+      document.getElementById("sentTotal").textContent = "₹" + formatAmount(moneyOut);
+      document.getElementById("netFlow").textContent = (net < 0 ? "-₹" : "₹") + formatAmount(Math.abs(net));
+      document.getElementById("countBadge").textContent = statements.length;
+
+      if(statements.length){
+        const sorted = [...statements].sort((a,b) => safeDate(a) - safeDate(b));
+        const start = formatDisplayDate(sorted[0].time || "-");
+        const end = formatDisplayDate(sorted[sorted.length - 1].time || "-");
+        document.getElementById("statementRange").textContent = start + " to " + end;
+      } else {
+        document.getElementById("statementRange").textContent = "-";
+      }
+    }
+
+    function renderStatement(statements){
+      const list = document.getElementById("statementList");
+
+      if(!statements.length){
+        list.innerHTML = `<div class="empty">No statement records found.</div>`;
+        return;
+      }
+
+      list.innerHTML = statements.map((tx, index) => {
+        const type = getType(tx);
+        const sign = type === "sent" ? "-" : "+";
+        const title = getTitle(tx, type);
+        const badge = getBadge(type);
+        const reference = generateReference(tx);
+        const hash = generateHash(tx);
+        const block = generateBlock(tx, index);
+        const balanceAfter = tx.balance_after !== undefined && tx.balance_after !== null && tx.balance_after !== ""
+          ? "₹" + formatAmount(tx.balance_after)
+          : "-";
+
+        return `
+          <div class="tx">
+            <div class="txTop">
+              <div class="txLeft">
+                <div class="icon ${type}">${getIcon(type)}</div>
+                <div style="min-width:0;">
+                  <div class="txName">${escapeHtml(title)}</div>
+                  <div class="txMeta">${escapeHtml(formatDisplayDate(tx.time || "No date available"))}</div>
+                  <div class="badge ${type}">${badge}</div>
+                </div>
+              </div>
+
+              <div class="txRight">
+                <div class="amount ${type}">${sign} ₹${formatAmount(tx.amount)}</div>
+                <div class="status">${escapeHtml(tx.status || "success")}</div>
+              </div>
+            </div>
+
+            <div class="details">
+              <div class="detail">
+                <div class="detailLabel">Transaction ID</div>
+                <div class="detailValue">${escapeHtml(tx.id || "-")}</div>
+              </div>
+
+              <div class="detail">
+                <div class="detailLabel">Reference</div>
+                <div class="detailValue">${escapeHtml(reference)}</div>
+              </div>
+
+              <div class="detail">
+                <div class="detailLabel">Sent From</div>
+                <div class="detailValue">${escapeHtml(tx.from || "-")}</div>
+              </div>
+
+              <div class="detail">
+                <div class="detailLabel">Sent To</div>
+                <div class="detailValue">${escapeHtml(tx.to || "-")}</div>
+              </div>
+
+              <div class="detail">
+                <div class="detailLabel">Date & Time</div>
+                <div class="detailValue">${escapeHtml(formatDisplayDate(tx.time || "-"))}</div>
+              </div>
+
+              <div class="detail">
+                <div class="detailLabel">Balance After</div>
+                <div class="detailValue">${escapeHtml(balanceAfter)}</div>
+              </div>
+
+              <div class="detail">
+                <div class="detailLabel">Block No</div>
+                <div class="detailValue">${escapeHtml(block)}</div>
+              </div>
+
+              <div class="detail">
+                <div class="detailLabel">Hash</div>
+                <div class="detailValue">${escapeHtml(hash)}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function applyFilters(){
+      const searchEl = document.getElementById("searchInput");
+      const sortEl = document.getElementById("sortSelect");
+
+      if(!searchEl || !sortEl) return;
+
+      const query = searchEl.value.trim().toLowerCase();
+      const sort = sortEl.value;
+
+      filteredStatements = allStatements.filter(tx => {
+        const type = getType(tx);
+        const filterOk = currentFilter === "all" || currentFilter === type;
+        const haystack = buildSearchText(tx);
+        const queryOk = !query || haystack.includes(query);
+        return filterOk && queryOk;
+      });
+
+      if(sort === "latest"){
+        filteredStatements.sort((a,b) => safeDate(b) - safeDate(a));
+      }else if(sort === "oldest"){
+        filteredStatements.sort((a,b) => safeDate(a) - safeDate(b));
+      }else if(sort === "high"){
+        filteredStatements.sort((a,b) => Number(b.amount || 0) - Number(a.amount || 0));
+      }else if(sort === "low"){
+        filteredStatements.sort((a,b) => Number(a.amount || 0) - Number(b.amount || 0));
+      }
+
+      renderSummary(filteredStatements);
+      renderStatement(filteredStatements);
+    }
+
+    function getCurrentUser(){
+      const possibleKeys = [
+        sessionStorage.getItem("user"),
+        sessionStorage.getItem("username"),
+        sessionStorage.getItem("stpay_user"),
+        localStorage.getItem("user"),
+        localStorage.getItem("username"),
+        localStorage.getItem("stpay_user")
+      ];
+
+      for(const item of possibleKeys){
+        if(item && String(item).trim()){
+          return String(item).trim();
+        }
+      }
+
+      return "";
+    }
+
+    function getApiUrls(currentUser){
+      const user = encodeURIComponent(currentUser);
+      const urls = [];
+
+      const bases = [];
+      if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
+        bases.push("http://127.0.0.1:5000");
+        bases.push("http://localhost:5000");
+      } else {
+        bases.push(location.origin);
+      }
+
+      for(const base of bases){
+        urls.push(`${base}/api/history/${user}`);
+        urls.push(`${base}/history/${user}`);
+        urls.push(`${base}/api/statement/${user}`);
+        urls.push(`${base}/statement/${user}`);
+        urls.push(`${base}/api/history?user=${user}`);
+        urls.push(`${base}/history?user=${user}`);
+        urls.push(`${base}/api/statement?user=${user}`);
+        urls.push(`${base}/statement?user=${user}`);
+      }
+
+      return [...new Set(urls)];
+    }
+
+    async function fetchJsonWithTimeout(url, timeout = 8000){
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeout);
+
+      try{
+        const res = await fetch(url, {
+          method: "GET",
+          headers: { "Accept": "application/json" },
+          signal: controller.signal
+        });
+
+        const text = await res.text();
+        let data = {};
+
+        try{
+          data = text ? JSON.parse(text) : {};
+        }catch{
+          data = { ok:false, message:"Invalid JSON response", raw:text };
+        }
+
+        return { res, data };
+      }finally{
+        clearTimeout(timer);
+      }
+    }
+
+    function pickStatementArray(data){
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data.statement)) return data.statement;
+      if (Array.isArray(data.statements)) return data.statements;
+      if (Array.isArray(data.history)) return data.history;
+      if (Array.isArray(data.data)) return data.data;
+      if (Array.isArray(data.transactions)) return data.transactions;
+      if (Array.isArray(data.result)) return data.result;
+      return [];
+    }
+
+    async function loadStatement(){
+      const msg = document.getElementById("messageBox");
+      const list = document.getElementById("statementList");
+      const currentUser = getCurrentUser();
+
+      if(!currentUser){
+        document.getElementById("heroUser").textContent = "User not logged in";
+        renderSummary([]);
+        list.innerHTML = `<div class="empty">No statement records found.</div>`;
+        msg.innerHTML = `<div class="message error">Login pannitu open pannu da. sessionStorage la <b>user</b> illa <b>username</b> key save aaganum.</div>`;
+        return;
+      }
+
+      document.getElementById("heroUser").textContent = currentUser;
+      localStorage.setItem("stpay_user", currentUser);
+
+      msg.innerHTML = "";
+      list.innerHTML = `<div class="loading">Loading statement...</div>`;
+
+      const urls = getApiUrls(currentUser);
+      let success = false;
+      let lastError = "Unable to load statement.";
+
+      for(const url of urls){
+        try{
+          const { res, data } = await fetchJsonWithTimeout(url, 8000);
+
+          if(!res.ok){
+            lastError = data.message || data.error || `HTTP ${res.status}`;
+            continue;
+          }
+
+          const statementArray = pickStatementArray(data);
+          allStatements = normalizeStatementItems(statementArray, currentUser);
+          filteredStatements = [...allStatements];
+          applyFilters();
+
+          if(!allStatements.length){
+            msg.innerHTML = `<div class="message">No statement entries found for ${escapeHtml(currentUser)}.</div>`;
+          }
+
+          success = true;
+          break;
+        }catch(err){
+          if(err.name === "AbortError"){
+            lastError = "Backend timeout. API slow ah iruku.";
+          }else{
+            lastError = err.message || "Unable to connect backend.";
+          }
+        }
+      }
+
+      if(!success){
+        allStatements = [];
+        filteredStatements = [];
+        renderSummary([]);
+        list.innerHTML = `<div class="empty">No statement records found.</div>`;
+        msg.innerHTML = `<div class="message error">${escapeHtml(lastError)}</div>`;
+      }
+    }
+
+    function setToday(){
+      const now = new Date();
+      document.getElementById("todayDate").textContent =
+        now.toLocaleDateString("en-IN", {
+          day:"2-digit",
+          month:"long",
+          year:"numeric"
+        }) + " • " +
+        now.toLocaleTimeString("en-IN", {
+          hour:"2-digit",
+          minute:"2-digit"
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function(){
+      setToday();
+
+      document.getElementById("searchInput").addEventListener("input", applyFilters);
+      document.getElementById("sortSelect").addEventListener("change", applyFilters);
+      document.getElementById("refreshBtn").addEventListener("click", loadStatement);
+
+      document.querySelectorAll(".chip").forEach(btn => {
+        btn.addEventListener("click", function(){
+          setFilter(this.dataset.filter, this);
+        });
+      });
+
+      loadStatement();
+    });
+  </script>
+</body>
+</html>
