@@ -51,7 +51,20 @@ function sanitizeAmount(value) {
   return num.toFixed(2);
 }
 
+function getUserBalanceKey(user) {
+  return "stpay_balance_" + String(user || "").toLowerCase();
+}
+
+function getUserHistoryKey(user) {
+  return "stpay_history_" + String(user || "").toLowerCase();
+}
+
+function getUserRechargeHistoryKey(user) {
+  return "stpay_recharge_history_" + String(user || "").toLowerCase();
+}
+
 function saveBalanceAmount(value) {
+  var user = getLoggedUser();
   var finalAmount = sanitizeAmount(value);
 
   sessionStorage.setItem("balance_amount", finalAmount);
@@ -59,15 +72,28 @@ function saveBalanceAmount(value) {
   sessionStorage.setItem("wallet_balance", finalAmount);
   sessionStorage.setItem("balance", finalAmount);
 
+  localStorage.setItem("stpay_balance", finalAmount);
+  localStorage.setItem("stpay_wallet_balance", finalAmount);
+  localStorage.setItem("stpay_balance_last_updated", String(Date.now()));
+
+  if (user) {
+    localStorage.setItem(getUserBalanceKey(user), finalAmount);
+  }
+
   return finalAmount;
 }
 
 function getSavedBalanceAmount() {
+  var user = getLoggedUser();
+
   return sanitizeAmount(
     sessionStorage.getItem("balance_amount") ||
     sessionStorage.getItem("current_balance") ||
     sessionStorage.getItem("wallet_balance") ||
     sessionStorage.getItem("balance") ||
+    (user ? localStorage.getItem(getUserBalanceKey(user)) : "") ||
+    localStorage.getItem("stpay_balance") ||
+    localStorage.getItem("stpay_wallet_balance") ||
     "0"
   );
 }
@@ -124,6 +150,65 @@ function strContains(text, search) {
   return text.indexOf(search) !== -1;
 }
 
+function readArrayStorage(key) {
+  try {
+    var raw = localStorage.getItem(key) || "[]";
+    var parsed = JSON.parse(raw);
+    return Object.prototype.toString.call(parsed) === "[object Array]" ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function writeArrayStorage(key, arr, limit) {
+  var list = Object.prototype.toString.call(arr) === "[object Array]" ? arr : [];
+  localStorage.setItem(key, JSON.stringify(list.slice(0, limit || 100)));
+}
+
+function pushUserHistory(item) {
+  try {
+    var user = getLoggedUser();
+    if (!user || !item) return;
+
+    var commonHistory = readArrayStorage("stpay_history");
+    commonHistory.unshift(item);
+    writeArrayStorage("stpay_history", commonHistory, 150);
+
+    var userHistoryKey = getUserHistoryKey(user);
+    var userHistory = readArrayStorage(userHistoryKey);
+    userHistory.unshift(item);
+    writeArrayStorage(userHistoryKey, userHistory, 150);
+
+    if (item.type === "recharge") {
+      var commonRecharge = readArrayStorage("stpay_recharge_history");
+      commonRecharge.unshift(item);
+      writeArrayStorage("stpay_recharge_history", commonRecharge, 100);
+
+      var userRechargeKey = getUserRechargeHistoryKey(user);
+      var userRecharge = readArrayStorage(userRechargeKey);
+      userRecharge.unshift(item);
+      writeArrayStorage(userRechargeKey, userRecharge, 100);
+    }
+
+    localStorage.setItem("stpay_last_history_update", String(Date.now()));
+  } catch (e) {
+    console.log("pushUserHistory error:", e);
+  }
+}
+
+function dispatchBalanceUpdateEvent(value) {
+  try {
+    window.dispatchEvent(new CustomEvent("stpay-balance-updated", {
+      detail: {
+        user: getLoggedUser(),
+        balance: sanitizeAmount(value)
+      }
+    }));
+  } catch (e) {
+    console.log("dispatchBalanceUpdateEvent error:", e);
+  }
+}
+
 
 /* ------------------------------
    LOGIN CHECK
@@ -164,29 +249,39 @@ function loadBalance() {
   return new Promise(function (resolve) {
     try {
       var user = getLoggedUser();
+      var saved = getSavedBalanceAmount();
+
+      updateBalanceElements(saved);
 
       if (!user) {
-        var saved = getSavedBalanceAmount();
-        updateBalanceElements(saved);
         resolve(saved);
         return;
       }
 
       fetch(API + "/api/balance/" + encodeURIComponent(user))
         .then(function (res) {
-          return safeJson(res);
+          return Promise.all([Promise.resolve(res), safeJson(res)]);
         })
-        .then(function (data) {
+        .then(function (arr) {
+          var res = arr[0];
+          var data = arr[1];
+
           console.log("Balance API response:", data);
 
-          var amount = 0;
+          var amount = null;
 
-          if (data && data.balance !== undefined && data.balance !== null) {
+          if (
+            res.ok &&
+            data &&
+            data.balance !== undefined &&
+            data.balance !== null &&
+            !isNaN(Number(data.balance))
+          ) {
             amount = Number(data.balance);
           }
 
-          if (isNaN(amount)) {
-            amount = Number(getSavedBalanceAmount());
+          if (amount === null) {
+            amount = Number(saved);
           }
 
           if (isNaN(amount)) {
@@ -196,12 +291,7 @@ function loadBalance() {
           var finalAmount = amount.toFixed(2);
 
           updateBalanceElements(finalAmount);
-
-          sessionStorage.setItem("balance_amount", finalAmount);
-          sessionStorage.setItem("current_balance", finalAmount);
-          sessionStorage.setItem("wallet_balance", finalAmount);
-          sessionStorage.setItem("balance", finalAmount);
-
+          dispatchBalanceUpdateEvent(finalAmount);
           resolve(finalAmount);
         })
         .catch(function (e) {
@@ -457,7 +547,20 @@ function addMoney(amount) {
             if (data.balance !== undefined && data.balance !== null) {
               balanceValue = data.balance;
             }
+
             updateBalanceElements(balanceValue);
+            dispatchBalanceUpdateEvent(balanceValue);
+
+            pushUserHistory({
+              type: "credit",
+              title: "Money Added",
+              user: user,
+              amount: Number(finalAmount),
+              time: new Date().toLocaleString("en-IN"),
+              status: "success",
+              icon: "💰"
+            });
+
             alert("Money added successfully");
             resolve(data);
           } else {
@@ -529,7 +632,22 @@ function sendMoney(toUser, amount) {
             if (data.balance !== undefined && data.balance !== null) {
               balanceValue = data.balance;
             }
-            updateBalanceElements(balanceValue);
+
+            var finalBal = updateBalanceElements(balanceValue);
+            dispatchBalanceUpdateEvent(finalBal);
+
+            pushUserHistory({
+              type: "debit",
+              title: "Money Sent",
+              user: fromUser,
+              to: receiver,
+              amount: Number(finalAmount),
+              time: new Date().toLocaleString("en-IN"),
+              status: "success",
+              balanceAfter: finalBal,
+              icon: "📤"
+            });
+
             alert("Payment successful");
             resolve(data);
           } else {
@@ -567,9 +685,12 @@ function loadHistory() {
 
       fetch(API + "/api/history/" + encodeURIComponent(user))
         .then(function (res) {
-          return safeJson(res);
+          return Promise.all([Promise.resolve(res), safeJson(res)]);
         })
-        .then(function (data) {
+        .then(function (arr) {
+          var res = arr[0];
+          var data = arr[1];
+
           console.log("History response:", data);
 
           var list =
@@ -578,20 +699,45 @@ function loadHistory() {
             data.items ||
             [];
 
-          if (Object.prototype.toString.call(list) === "[object Array]") {
+          if (res.ok && Object.prototype.toString.call(list) === "[object Array]") {
+            try {
+              writeArrayStorage("stpay_history", list, 150);
+              writeArrayStorage(getUserHistoryKey(user), list, 150);
+            } catch (e) {
+              console.log("History cache write error:", e);
+            }
             resolve(list);
-          } else {
-            resolve([]);
+            return;
           }
+
+          var fallback =
+            readArrayStorage(getUserHistoryKey(user)).length
+              ? readArrayStorage(getUserHistoryKey(user))
+              : readArrayStorage("stpay_history");
+
+          resolve(fallback);
         })
         .catch(function (e) {
           console.log("History load error:", e);
-          resolve([]);
+
+          var fallback =
+            readArrayStorage(getUserHistoryKey(user)).length
+              ? readArrayStorage(getUserHistoryKey(user))
+              : readArrayStorage("stpay_history");
+
+          resolve(fallback);
         });
 
     } catch (e) {
       console.log("History load error:", e);
-      resolve([]);
+
+      var user2 = getLoggedUser();
+      var fallback2 =
+        readArrayStorage(getUserHistoryKey(user2)).length
+          ? readArrayStorage(getUserHistoryKey(user2))
+          : readArrayStorage("stpay_history");
+
+      resolve(fallback2);
     }
   });
 }
@@ -646,6 +792,7 @@ function uploadFile(formData) {
 
 function logout() {
   sessionStorage.removeItem("quick_receiver");
+  sessionStorage.removeItem("balance_visible");
   sessionStorage.clear();
   window.location = "index.html";
 }
@@ -662,12 +809,46 @@ window.addEventListener("click", function (e) {
   }
 });
 
+window.addEventListener("focus", function () {
+  if (getLoggedUser()) {
+    loadBalance();
+  }
+});
+
+window.addEventListener("pageshow", function () {
+  if (getLoggedUser()) {
+    loadBalance();
+  }
+});
+
+window.addEventListener("storage", function (e) {
+  var user = getLoggedUser();
+
+  if (
+    e &&
+    (
+      e.key === "stpay_balance" ||
+      e.key === "stpay_wallet_balance" ||
+      e.key === "stpay_history" ||
+      e.key === getUserBalanceKey(user) ||
+      e.key === getUserHistoryKey(user)
+    )
+  ) {
+    updateBalanceElements(getSavedBalanceAmount());
+  }
+});
+
+window.addEventListener("stpay-balance-updated", function () {
+  updateBalanceElements(getSavedBalanceAmount());
+});
+
 window.addEventListener("DOMContentLoaded", function () {
   initUserDisplay();
 
   var start = Promise.resolve();
 
   if (getLoggedUser()) {
+    updateBalanceElements(getSavedBalanceAmount());
     start = loadBalance();
   }
 

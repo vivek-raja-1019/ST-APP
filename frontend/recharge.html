@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
   <title>ST PAY - Recharge</title>
 
   <style>
@@ -24,6 +27,8 @@
       --greenSoft:#dcfce7;
       --red:#dc2626;
       --redSoft:#fee2e2;
+      --orange:#f59e0b;
+      --orangeSoft:#fef3c7;
       --shadow:0 14px 35px rgba(15,23,42,0.08);
       --radius:22px;
     }
@@ -88,6 +93,7 @@
       align-items:center;
       gap:10px;
       margin-bottom:10px;
+      flex-wrap:wrap;
     }
 
     .heroBadge{
@@ -173,8 +179,8 @@
     }
 
     .simLogo{
-      width:42px;
-      height:42px;
+      width:44px;
+      height:44px;
       border-radius:14px;
       display:flex;
       align-items:center;
@@ -182,7 +188,7 @@
       color:#fff;
       font-weight:900;
       font-size:14px;
-      flex:0 0 42px;
+      flex:0 0 44px;
     }
 
     .simName{
@@ -194,6 +200,51 @@
       font-size:12px;
       color:var(--muted);
       margin-top:2px;
+    }
+
+    .selectedProviderBox{
+      display:none;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:14px;
+      padding:12px;
+      border:1px solid #dbeafe;
+      background:#eff6ff;
+      border-radius:18px;
+    }
+
+    .providerInfo{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .providerLogoBig{
+      width:46px;
+      height:46px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      font-weight:900;
+      font-size:16px;
+    }
+
+    .changeBtn{
+      border:none;
+      border-radius:12px;
+      padding:9px 12px;
+      background:#111827;
+      color:#fff;
+      font-weight:800;
+      cursor:pointer;
+      font-size:12px;
+    }
+
+    .hidden{
+      display:none !important;
     }
 
     .plansTabs{
@@ -266,6 +317,23 @@
       font-size:13px;
       color:#475569;
       line-height:1.5;
+      margin-bottom:6px;
+    }
+
+    .planExtra{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:6px;
+    }
+
+    .miniTag{
+      background:#f3f4f6;
+      color:#374151;
+      font-size:11px;
+      font-weight:800;
+      padding:6px 9px;
+      border-radius:999px;
     }
 
     .summaryBox{
@@ -273,14 +341,14 @@
       border:1px solid #dbeafe;
       border-radius:18px;
       padding:14px;
-      margin-top:10px;
+      margin-top:12px;
     }
 
     .summaryRow{
       display:flex;
       justify-content:space-between;
       gap:10px;
-      padding:7px 0;
+      padding:8px 0;
       border-bottom:1px dashed #dbeafe;
       font-size:13px;
     }
@@ -291,6 +359,7 @@
 
     .summaryRow b:last-child{
       text-align:right;
+      word-break:break-word;
     }
 
     .otpBox{
@@ -313,6 +382,28 @@
       border-radius:16px;
       padding:14px;
       margin:10px 0 12px 0;
+    }
+
+    .balanceBox{
+      background:linear-gradient(135deg,#ecfdf5,#f0fdf4);
+      border:1px solid #bbf7d0;
+      border-radius:18px;
+      padding:14px;
+      margin-bottom:14px;
+    }
+
+    .balanceTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:6px;
+    }
+
+    .balanceAmount{
+      font-size:24px;
+      font-weight:900;
+      color:#14532d;
     }
 
     .error{
@@ -417,12 +508,24 @@
       color:var(--muted);
     }
 
+    .loadingText{
+      display:none;
+      font-size:12px;
+      color:#475569;
+      text-align:center;
+      margin-top:8px;
+      font-weight:700;
+    }
+
     @media (max-width:360px){
       .networkGrid{
         grid-template-columns:1fr;
       }
       .btnRow{
         flex-direction:column;
+      }
+      .topbar{
+        align-items:flex-start;
       }
     }
   </style>
@@ -446,109 +549,138 @@
       <div class="heroBadge" id="userDisplay">User</div>
     </div>
     <h2>Recharge in seconds</h2>
-    <p>Select network, enter mobile number, choose best plan, verify OTP and complete recharge securely.</p>
+    <p>Select network, enter mobile number, choose operator plan, verify OTP and recharge securely.</p>
+  </div>
+
+  <div class="balanceBox">
+    <div class="balanceTop">
+      <div style="font-weight:800;">Available Balance</div>
+      <div class="heroBadge" style="background:#16a34a;">Wallet</div>
+    </div>
+    <div class="balanceAmount">₹ <span id="availableBalance">0.00</span></div>
+    <div class="muted" style="font-size:12px; margin-top:4px;">Recharge panna amount inga irundhu deduct agum</div>
   </div>
 
   <div class="card" id="rechargeFormCard">
-    <div class="cardTitle">SIM Provider</div>
+    <div id="providerSection">
+      <div class="cardTitle">Choose SIM Provider</div>
 
-    <div class="networkGrid">
-      <div class="simCard" onclick="selectProvider('Jio', this)">
-        <div class="simRow">
-          <div class="simLogo" style="background:#2563eb;">J</div>
-          <div>
-            <div class="simName">Jio</div>
-            <div class="simDesc">5G prepaid plans</div>
+      <div class="networkGrid">
+        <div class="simCard" onclick="selectProvider('Jio', this)">
+          <div class="simRow">
+            <div class="simLogo" style="background:#2563eb;">J</div>
+            <div>
+              <div class="simName">Jio</div>
+              <div class="simDesc">5G prepaid plans</div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="simCard" onclick="selectProvider('Airtel', this)">
-        <div class="simRow">
-          <div class="simLogo" style="background:#ef4444;">A</div>
-          <div>
-            <div class="simName">Airtel</div>
-            <div class="simDesc">Popular unlimited packs</div>
+        <div class="simCard" onclick="selectProvider('Airtel', this)">
+          <div class="simRow">
+            <div class="simLogo" style="background:#ef4444;">A</div>
+            <div>
+              <div class="simName">Airtel</div>
+              <div class="simDesc">Popular unlimited packs</div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="simCard" onclick="selectProvider('VI', this)">
-        <div class="simRow">
-          <div class="simLogo" style="background:#7c3aed;">VI</div>
-          <div>
-            <div class="simName">VI</div>
-            <div class="simDesc">Data + talktime offers</div>
+        <div class="simCard" onclick="selectProvider('VI', this)">
+          <div class="simRow">
+            <div class="simLogo" style="background:#7c3aed;">VI</div>
+            <div>
+              <div class="simName">VI</div>
+              <div class="simDesc">Data + talktime offers</div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="simCard" onclick="selectProvider('BSNL', this)">
-        <div class="simRow">
-          <div class="simLogo" style="background:#16a34a;">B</div>
-          <div>
-            <div class="simName">BSNL / Others</div>
-            <div class="simDesc">Flexible recharge packs</div>
+        <div class="simCard" onclick="selectProvider('BSNL', this)">
+          <div class="simRow">
+            <div class="simLogo" style="background:#16a34a;">B</div>
+            <div>
+              <div class="simName">BSNL / Others</div>
+              <div class="simDesc">Flexible recharge packs</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <label class="label">Mobile Number</label>
-    <input id="mobileNumber" class="input" type="tel" maxlength="10" placeholder="Enter 10 digit mobile number" />
-
-    <label class="label">Recharge Type</label>
-    <select id="rechargeType" class="select" onchange="changeTab(this.value)">
-      <option value="popular">Popular Plans</option>
-      <option value="data">Data Packs</option>
-      <option value="talktime">Talktime</option>
-      <option value="long">Long Validity</option>
-    </select>
-
-    <div class="cardTitle" style="margin-top:8px;">Plans & Packages</div>
-
-    <div class="plansTabs">
-      <button class="tabBtn active" id="tab-popular" onclick="changeTab('popular')">Popular</button>
-      <button class="tabBtn" id="tab-data" onclick="changeTab('data')">Data</button>
-      <button class="tabBtn" id="tab-talktime" onclick="changeTab('talktime')">Talktime</button>
-      <button class="tabBtn" id="tab-long" onclick="changeTab('long')">Long</button>
-    </div>
-
-    <div class="plansGrid" id="plansGrid"></div>
-
-    <div class="summaryBox">
-      <div class="summaryRow">
-        <span class="muted">Provider</span>
-        <b id="summaryProvider">Not selected</b>
+    <div id="plansSection" class="hidden">
+      <div class="selectedProviderBox" id="selectedProviderBox">
+        <div class="providerInfo">
+          <div class="providerLogoBig" id="selectedProviderLogo">J</div>
+          <div>
+            <div style="font-weight:900;" id="selectedProviderName">Jio</div>
+            <div class="muted" style="font-size:12px;">Provider-specific plans loaded</div>
+          </div>
+        </div>
+        <button class="changeBtn" onclick="changeProvider()">Change</button>
       </div>
-      <div class="summaryRow">
-        <span class="muted">Number</span>
-        <b id="summaryNumber">-</b>
-      </div>
-      <div class="summaryRow">
-        <span class="muted">Selected Plan</span>
-        <b id="summaryPlan">-</b>
-      </div>
-      <div class="summaryRow">
-        <span class="muted">Amount</span>
-        <b id="summaryAmount">₹ 0</b>
-      </div>
-    </div>
 
-    <div class="otpBox" id="otpBox">
-      <div class="cardTitle" style="margin-bottom:8px;">OTP Verification</div>
-      <div class="muted" style="font-size:13px;">
-        Demo OTP generated. Real project la backend/SMS API connect pannalaam.
+      <label class="label">Mobile Number</label>
+      <input id="mobileNumber" class="input" type="tel" maxlength="10" placeholder="Enter 10 digit mobile number" />
+
+      <label class="label">Recharge Type</label>
+      <select id="rechargeType" class="select" onchange="changeTab(this.value)">
+        <option value="popular">Popular Plans</option>
+        <option value="data">Data Packs</option>
+        <option value="talktime">Talktime</option>
+        <option value="long">Long Validity</option>
+      </select>
+
+      <div class="cardTitle" style="margin-top:8px;">Plans & Packages</div>
+
+      <div class="plansTabs">
+        <button class="tabBtn active" id="tab-popular" type="button" onclick="changeTab('popular')">Popular</button>
+        <button class="tabBtn" id="tab-data" type="button" onclick="changeTab('data')">Data</button>
+        <button class="tabBtn" id="tab-talktime" type="button" onclick="changeTab('talktime')">Talktime</button>
+        <button class="tabBtn" id="tab-long" type="button" onclick="changeTab('long')">Long</button>
       </div>
-      <div class="otpCodePreview" id="otpPreview">000000</div>
-      <input id="otpInput" class="input" type="text" maxlength="6" placeholder="Enter OTP" />
-    </div>
 
-    <div class="error" id="errorBox">Please complete all details.</div>
+      <div class="plansGrid" id="plansGrid"></div>
 
-    <div class="btnRow">
-      <button class="btn btnSecondary" onclick="generateOtp()">Generate OTP</button>
-      <button class="btn btnPrimary" onclick="confirmRecharge()">Recharge Now</button>
+      <div class="summaryBox">
+        <div class="summaryRow">
+          <span class="muted">Provider</span>
+          <b id="summaryProvider">Not selected</b>
+        </div>
+        <div class="summaryRow">
+          <span class="muted">Number</span>
+          <b id="summaryNumber">-</b>
+        </div>
+        <div class="summaryRow">
+          <span class="muted">Selected Plan</span>
+          <b id="summaryPlan">-</b>
+        </div>
+        <div class="summaryRow">
+          <span class="muted">Amount</span>
+          <b id="summaryAmount">₹ 0</b>
+        </div>
+        <div class="summaryRow">
+          <span class="muted">Balance After Recharge</span>
+          <b id="summaryBalanceAfter">₹ 0.00</b>
+        </div>
+      </div>
+
+      <div class="otpBox" id="otpBox">
+        <div class="cardTitle" style="margin-bottom:8px;">OTP Verification</div>
+        <div class="muted" style="font-size:13px;">
+          Demo OTP generated. Real project la SMS API connect pannalaam.
+        </div>
+        <div class="otpCodePreview" id="otpPreview">000000</div>
+        <input id="otpInput" class="input" type="text" maxlength="6" placeholder="Enter OTP" />
+      </div>
+
+      <div class="error" id="errorBox">Please complete all details.</div>
+      <div class="loadingText" id="loadingText">Processing recharge...</div>
+
+      <div class="btnRow">
+        <button class="btn btnSecondary" type="button" onclick="generateOtp()">Generate OTP</button>
+        <button class="btn btnPrimary" type="button" onclick="confirmRecharge()">Recharge Now</button>
+      </div>
     </div>
   </div>
 
@@ -581,6 +713,11 @@
       </div>
 
       <div class="receiptRow">
+        <span class="muted">Balance After</span>
+        <b id="receiptBalanceAfter">-</b>
+      </div>
+
+      <div class="receiptRow">
         <span class="muted">Txn ID</span>
         <b id="receiptTxn">-</b>
       </div>
@@ -609,27 +746,105 @@
     window.location = "index.html";
   }
 
-  const plansData = {
-    popular: [
-      { price: 199, badge: "Popular", details: "28 days • 2GB total • Unlimited Calls • 100 SMS/day" },
-      { price: 299, badge: "Best Seller", details: "28 days • 1.5GB/day • Unlimited Calls • 100 SMS/day" },
-      { price: 399, badge: "Trending", details: "56 days • 2GB/day • Unlimited Calls • 100 SMS/day" }
-    ],
-    data: [
-      { price: 19, badge: "Booster", details: "1 day • 1GB data booster" },
-      { price: 58, badge: "Data Pack", details: "7 days • 3GB extra data" },
-      { price: 118, badge: "Heavy Data", details: "12 days • 12GB extra data" }
-    ],
-    talktime: [
-      { price: 10, badge: "Topup", details: "Talktime recharge • Validity as per operator" },
-      { price: 50, badge: "Value", details: "Talktime recharge • Great for emergency use" },
-      { price: 100, badge: "Saver", details: "Talktime recharge • Better balance support" }
-    ],
-    long: [
-      { price: 666, badge: "84 Days", details: "84 days • 1.5GB/day • Unlimited Calls • 100 SMS/day" },
-      { price: 719, badge: "84 Days", details: "84 days • 2GB/day • Unlimited Calls • 100 SMS/day" },
-      { price: 2999, badge: "365 Days", details: "365 days • 2GB/day • Unlimited Calls • 100 SMS/day" }
-    ]
+  let API = "";
+  if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
+    API = "http://127.0.0.1:5000";
+  } else {
+    API = location.origin;
+  }
+
+  const providerPlans = {
+    Jio: {
+      popular: [
+        { price: 239, badge: "Popular", details: "28 days • 1.5GB/day • Unlimited Calls • 100 SMS/day", tags:["True 5G","OTT Ready"] },
+        { price: 299, badge: "Best Seller", details: "28 days • 2GB/day • Unlimited Calls • 100 SMS/day", tags:["High Speed","Popular"] },
+        { price: 666, badge: "84 Days", details: "84 days • 1.5GB/day • Unlimited Calls • 100 SMS/day", tags:["Long Validity","Top Pick"] }
+      ],
+      data: [
+        { price: 19, badge: "Booster", details: "1 day • 1GB booster data", tags:["Booster"] },
+        { price: 29, badge: "Mini", details: "2 days • 2GB extra data", tags:["Short Pack"] },
+        { price: 61, badge: "Cricket", details: "6GB booster data", tags:["Extra Data"] }
+      ],
+      talktime: [
+        { price: 10, badge: "Topup", details: "Talktime recharge as per operator rules", tags:["Small Topup"] },
+        { price: 100, badge: "Saver", details: "Talktime recharge for regular usage", tags:["Useful"] },
+        { price: 500, badge: "Value", details: "Heavy talktime topup plan", tags:["High Value"] }
+      ],
+      long: [
+        { price: 749, badge: "72 Days", details: "72 days • 2GB/day • Unlimited Calls • 100 SMS/day", tags:["Long Pack"] },
+        { price: 2999, badge: "365 Days", details: "365 days • 2.5GB/day • Unlimited Calls • 100 SMS/day", tags:["1 Year","Premium"] },
+        { price: 3599, badge: "Annual+", details: "365 days • daily data + OTT benefits", tags:["OTT","Annual"] }
+      ]
+    },
+
+    Airtel: {
+      popular: [
+        { price: 219, badge: "Popular", details: "28 days • 3GB total • Unlimited Calls • 300 SMS", tags:["Starter"] },
+        { price: 299, badge: "Best Seller", details: "28 days • 1GB/day • Unlimited Calls • 100 SMS/day", tags:["Popular"] },
+        { price: 359, badge: "Trending", details: "28 days • 2GB/day • Unlimited Calls • 100 SMS/day", tags:["Fast Data"] }
+      ],
+      data: [
+        { price: 58, badge: "Booster", details: "3GB extra data pack", tags:["Extra"] },
+        { price: 98, badge: "Data", details: "5GB extra data pack", tags:["Value"] },
+        { price: 181, badge: "Heavy", details: "15GB extra data pack", tags:["Heavy Use"] }
+      ],
+      talktime: [
+        { price: 20, badge: "Topup", details: "Talktime topup with limited service validity", tags:["Mini"] },
+        { price: 100, badge: "Utility", details: "Talktime recharge", tags:["Regular"] },
+        { price: 500, badge: "Big Topup", details: "High value talktime recharge", tags:["Big Value"] }
+      ],
+      long: [
+        { price: 455, badge: "84 Days", details: "84 days • 6GB total • Unlimited Calls • 900 SMS", tags:["Budget Long"] },
+        { price: 719, badge: "84 Days", details: "84 days • 1.5GB/day • Unlimited Calls • 100 SMS/day", tags:["Popular Long"] },
+        { price: 1799, badge: "365 Days", details: "365 days • 24GB total • Unlimited Calls • 3600 SMS", tags:["Annual"] }
+      ]
+    },
+
+    VI: {
+      popular: [
+        { price: 199, badge: "Popular", details: "28 days • 2GB total • Unlimited Calls • 300 SMS", tags:["Budget"] },
+        { price: 299, badge: "Best Seller", details: "28 days • 1GB/day • Unlimited Calls • 100 SMS/day", tags:["Popular"] },
+        { price: 319, badge: "Weekend", details: "30 days • 2GB/day • Unlimited Calls • 100 SMS/day", tags:["Binge"] }
+      ],
+      data: [
+        { price: 17, badge: "Mini", details: "1GB extra data", tags:["Booster"] },
+        { price: 48, badge: "Pack", details: "6GB extra data", tags:["Data"] },
+        { price: 118, badge: "Max", details: "12GB extra data", tags:["Big Booster"] }
+      ],
+      talktime: [
+        { price: 10, badge: "Topup", details: "Small talktime recharge", tags:["Mini"] },
+        { price: 50, badge: "Topup", details: "Regular talktime recharge", tags:["Regular"] },
+        { price: 100, badge: "Saver", details: "More talktime support", tags:["Saver"] }
+      ],
+      long: [
+        { price: 459, badge: "84 Days", details: "84 days • 6GB total • Unlimited Calls • 1000 SMS", tags:["Budget Long"] },
+        { price: 839, badge: "84 Days", details: "84 days • 2GB/day • Unlimited Calls • 100 SMS/day", tags:["Heavy Use"] },
+        { price: 1999, badge: "365 Days", details: "365 days • 1.5GB/day • Unlimited Calls • 100 SMS/day", tags:["Yearly"] }
+      ]
+    },
+
+    BSNL: {
+      popular: [
+        { price: 107, badge: "Popular", details: "35 days • talktime + data benefits", tags:["Budget"] },
+        { price: 197, badge: "Combo", details: "70 days • data + voice benefits", tags:["Combo"] },
+        { price: 397, badge: "Full Pack", details: "150 days • unlimited voice + data benefits", tags:["Value"] }
+      ],
+      data: [
+        { price: 16, badge: "Mini", details: "2GB data voucher", tags:["Mini"] },
+        { price: 56, badge: "Data", details: "10GB data voucher", tags:["Extra"] },
+        { price: 151, badge: "Big Data", details: "40GB data voucher", tags:["Heavy"] }
+      ],
+      talktime: [
+        { price: 50, badge: "Topup", details: "Talktime recharge", tags:["Basic"] },
+        { price: 110, badge: "Topup+", details: "Enhanced talktime recharge", tags:["Better"] },
+        { price: 500, badge: "Premium", details: "High value talktime recharge", tags:["Premium"] }
+      ],
+      long: [
+        { price: 797, badge: "300 Days", details: "Long validity voice plan", tags:["Long"] },
+        { price: 1999, badge: "365 Days", details: "Annual validity plan", tags:["Annual"] },
+        { price: 2399, badge: "365+ Days", details: "Annual plus benefits plan", tags:["Annual+"] }
+      ]
+    }
   };
 
   let selectedProvider = "";
@@ -637,12 +852,91 @@
   let currentTab = "popular";
   let generatedOtp = "";
 
+  function getLoggedUser() {
+    return (sessionStorage.getItem("user") || "").trim();
+  }
+
+  function getUserBalanceKey(user) {
+    return "stpay_balance_" + user.toLowerCase();
+  }
+
+  function getUserHistoryKey(user) {
+    return "stpay_history_" + user.toLowerCase();
+  }
+
+  function getUserRechargeHistoryKey(user) {
+    return "stpay_recharge_history_" + user.toLowerCase();
+  }
+
+  function sanitizeBalanceValue(value) {
+    if (value === undefined || value === null) return "0.00";
+
+    let txt = String(value).trim();
+
+    if (!txt || txt === "undefined" || txt === "null" || txt === "NaN") {
+      return "0.00";
+    }
+
+    txt = txt.replace(/[₹,\s]/g, "");
+
+    const num = Number(txt);
+    if (isNaN(num)) return "0.00";
+
+    return num.toFixed(2);
+  }
+
+  function setEverywhereBalance(user, value) {
+    const clean = sanitizeBalanceValue(value);
+
+    sessionStorage.setItem("current_balance", clean);
+    sessionStorage.setItem("balance", clean);
+    sessionStorage.setItem("wallet_balance", clean);
+
+    localStorage.setItem("stpay_balance", clean);
+    localStorage.setItem("stpay_wallet_balance", clean);
+
+    if (user) {
+      localStorage.setItem(getUserBalanceKey(user), clean);
+    }
+
+    localStorage.setItem("stpay_balance_last_updated", String(Date.now()));
+
+    try {
+      window.dispatchEvent(new CustomEvent("stpay-balance-updated", {
+        detail: { user, balance: clean }
+      }));
+    } catch (e) {
+      console.log("Balance event dispatch failed:", e);
+    }
+
+    updateBalanceUI();
+    return clean;
+  }
+
+  function getCurrentBalance() {
+    const user = getLoggedUser();
+
+    return sanitizeBalanceValue(
+      sessionStorage.getItem("current_balance") ||
+      sessionStorage.getItem("balance") ||
+      sessionStorage.getItem("wallet_balance") ||
+      (user ? localStorage.getItem(getUserBalanceKey(user)) : "") ||
+      localStorage.getItem("stpay_balance") ||
+      localStorage.getItem("stpay_wallet_balance") ||
+      "0"
+    );
+  }
+
   function goBack() {
-    window.location = "dashboard.html";
+    if (!document.getElementById("plansSection").classList.contains("hidden")) {
+      changeProvider();
+      return;
+    }
+    window.location = "dashboard.html?refresh=1";
   }
 
   function goHome() {
-    window.location = "dashboard.html";
+    window.location = "dashboard.html?refresh=1";
   }
 
   function formatNow() {
@@ -661,20 +955,106 @@
     return "RCH" + Date.now() + Math.floor(Math.random() * 900 + 100);
   }
 
+  function getProviderLogo(provider) {
+    const map = {
+      Jio: { text:"J", color:"#2563eb" },
+      Airtel: { text:"A", color:"#ef4444" },
+      VI: { text:"VI", color:"#7c3aed" },
+      BSNL: { text:"B", color:"#16a34a" }
+    };
+    return map[provider] || { text:"S", color:"#111827" };
+  }
+
+  async function refreshBalanceFromAPI() {
+    try {
+      const user = getLoggedUser();
+      if (!user) return getCurrentBalance();
+
+      const res = await fetch(`${API}/api/balance/${encodeURIComponent(user)}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" }
+      });
+
+      let data = {};
+      try {
+        data = await res.json();
+      } catch (e) {
+        data = {};
+      }
+
+      if (res.ok && (data.ok === true || data.balance !== undefined)) {
+        return setEverywhereBalance(user, data.balance);
+      }
+    } catch (e) {
+      console.log("Balance fetch failed:", e);
+    }
+
+    return getCurrentBalance();
+  }
+
+  function updateBalanceUI() {
+    const el = document.getElementById("availableBalance");
+    if (el) {
+      el.textContent = getCurrentBalance();
+    }
+    updateSummary();
+  }
+
   function updateUserDisplay() {
-    const user = (sessionStorage.getItem("user") || "User").trim();
+    const user = getLoggedUser() || "User";
     document.getElementById("userDisplay").textContent = user;
   }
 
   function selectProvider(provider, el) {
     selectedProvider = provider;
+    selectedPlan = null;
+    generatedOtp = "";
+    document.getElementById("otpInput").value = "";
+    document.getElementById("otpBox").style.display = "none";
 
     document.querySelectorAll(".simCard").forEach(card => {
       card.classList.remove("active");
     });
 
-    el.classList.add("active");
+    if (el) el.classList.add("active");
+
+    const logo = getProviderLogo(provider);
+
+    document.getElementById("providerSection").classList.add("hidden");
+    document.getElementById("plansSection").classList.remove("hidden");
+    document.getElementById("selectedProviderBox").style.display = "flex";
+    document.getElementById("selectedProviderName").textContent = provider;
+    document.getElementById("selectedProviderLogo").textContent = logo.text;
+    document.getElementById("selectedProviderLogo").style.background = logo.color;
     document.getElementById("summaryProvider").textContent = provider;
+
+    renderPlans("popular");
+    updateSummary();
+    hideError();
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function changeProvider() {
+    selectedProvider = "";
+    selectedPlan = null;
+    generatedOtp = "";
+
+    document.getElementById("providerSection").classList.remove("hidden");
+    document.getElementById("plansSection").classList.add("hidden");
+    document.getElementById("selectedProviderBox").style.display = "none";
+    document.getElementById("summaryProvider").textContent = "Not selected";
+    document.getElementById("summaryPlan").textContent = "-";
+    document.getElementById("summaryAmount").textContent = "₹ 0";
+    document.getElementById("summaryBalanceAfter").textContent = "₹ " + getCurrentBalance();
+    document.getElementById("otpBox").style.display = "none";
+    document.getElementById("plansGrid").innerHTML = "";
+
+    document.querySelectorAll(".simCard").forEach(card => {
+      card.classList.remove("active");
+    });
+
+    hideError();
   }
 
   function renderPlans(tab) {
@@ -686,44 +1066,67 @@
     document.getElementById("tab-" + tab).classList.add("active");
     document.getElementById("rechargeType").value = tab;
 
-    plansData[tab].forEach((plan, index) => {
+    const plans = (providerPlans[selectedProvider] && providerPlans[selectedProvider][tab]) || [];
+
+    plans.forEach((plan) => {
       const card = document.createElement("div");
       card.className = "planCard";
+
       card.innerHTML = `
         <div class="planTop">
           <div class="planPrice">₹ ${plan.price}</div>
           <div class="planBadge">${plan.badge}</div>
         </div>
         <div class="planInfo">${plan.details}</div>
+        <div class="planExtra">
+          ${(plan.tags || []).map(tag => `<span class="miniTag">${tag}</span>`).join("")}
+        </div>
       `;
+
       card.onclick = function() {
         document.querySelectorAll(".planCard").forEach(c => c.classList.remove("active"));
         card.classList.add("active");
         selectedPlan = plan;
         updateSummary();
+        hideError();
       };
+
       grid.appendChild(card);
     });
   }
 
   function changeTab(tab) {
+    if (!selectedProvider) return;
+    selectedPlan = null;
+    generatedOtp = "";
+    document.getElementById("otpInput").value = "";
+    document.getElementById("otpBox").style.display = "none";
     renderPlans(tab);
+    updateSummary();
   }
 
   function updateSummary() {
     const number = (document.getElementById("mobileNumber").value || "").trim();
+    const currentBalance = parseFloat(getCurrentBalance() || "0");
+    const amount = selectedPlan ? Number(selectedPlan.price) : 0;
+    const afterBalance = Math.max(currentBalance - amount, 0);
 
     document.getElementById("summaryNumber").textContent = number || "-";
     document.getElementById("summaryPlan").textContent = selectedPlan ? selectedPlan.details : "-";
     document.getElementById("summaryAmount").textContent = selectedPlan ? ("₹ " + selectedPlan.price) : "₹ 0";
+    document.getElementById("summaryBalanceAfter").textContent = "₹ " + afterBalance.toFixed(2);
   }
 
   function validateBeforeOtp() {
     const number = (document.getElementById("mobileNumber").value || "").trim();
+    const currentBalance = parseFloat(getCurrentBalance() || "0");
+    const amount = selectedPlan ? Number(selectedPlan.price) : 0;
 
     if (!selectedProvider) return "Select SIM provider";
     if (!/^\d{10}$/.test(number)) return "Enter valid 10 digit mobile number";
     if (!selectedPlan) return "Select a recharge plan";
+    if (amount <= 0) return "Invalid plan amount";
+    if (amount > currentBalance) return "Insufficient balance";
     return "";
   }
 
@@ -737,6 +1140,10 @@
     const box = document.getElementById("errorBox");
     box.style.display = "none";
     box.textContent = "";
+  }
+
+  function showLoading(show) {
+    document.getElementById("loadingText").style.display = show ? "block" : "none";
   }
 
   function generateOtp() {
@@ -753,17 +1160,103 @@
     document.getElementById("otpBox").style.display = "block";
   }
 
-  function saveRechargeHistory(receipt) {
-    let items = [];
+  function readArrayStorage(key) {
     try {
-      items = JSON.parse(localStorage.getItem("stpay_recharge_history") || "[]");
-      if (!Array.isArray(items)) items = [];
+      const raw = localStorage.getItem(key) || "[]";
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
     } catch (e) {
-      items = [];
+      return [];
+    }
+  }
+
+  function writeArrayStorage(key, arr, limit) {
+    localStorage.setItem(key, JSON.stringify((arr || []).slice(0, limit || 100)));
+  }
+
+  function saveRechargeHistory(receipt) {
+    const user = receipt.user || getLoggedUser();
+
+    const commonRecharge = readArrayStorage("stpay_recharge_history");
+    commonRecharge.unshift(receipt);
+    writeArrayStorage("stpay_recharge_history", commonRecharge, 100);
+
+    if (user) {
+      const userRecharge = readArrayStorage(getUserRechargeHistoryKey(user));
+      userRecharge.unshift(receipt);
+      writeArrayStorage(getUserRechargeHistoryKey(user), userRecharge, 100);
+    }
+  }
+
+  function saveUnifiedHistory(receipt) {
+    const historyItem = {
+      type: "recharge",
+      title: "Mobile Recharge",
+      user: receipt.user,
+      number: receipt.number,
+      provider: receipt.provider,
+      amount: Number(receipt.amount),
+      plan: receipt.plan,
+      txnId: receipt.txnId,
+      time: receipt.time,
+      status: receipt.status,
+      balanceAfter: receipt.balanceAfter,
+      icon: "📱"
+    };
+
+    const commonHistory = readArrayStorage("stpay_history");
+    commonHistory.unshift(historyItem);
+    writeArrayStorage("stpay_history", commonHistory, 150);
+
+    if (receipt.user) {
+      const userHistory = readArrayStorage(getUserHistoryKey(receipt.user));
+      userHistory.unshift(historyItem);
+      writeArrayStorage(getUserHistoryKey(receipt.user), userHistory, 150);
     }
 
-    items.unshift(receipt);
-    localStorage.setItem("stpay_recharge_history", JSON.stringify(items.slice(0, 50)));
+    localStorage.setItem("stpay_last_history_update", String(Date.now()));
+  }
+
+  async function postRechargeToBackend(payload) {
+    const endpoints = [
+      "/api/recharge",
+      "/api/mobile-recharge",
+      "/api/recharges",
+      "/api/pay-recharge"
+    ];
+
+    for (const endpoint of endpoints) {
+      try {
+        const res = await fetch(API + endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        let data = {};
+        try {
+          data = await res.json();
+        } catch (e) {
+          data = {};
+        }
+
+        if (
+          res.ok &&
+          (
+            data.ok === true ||
+            data.success === true ||
+            data.message ||
+            data.balance !== undefined
+          )
+        ) {
+          return { ok: true, data, endpoint };
+        }
+      } catch (e) {
+        console.log("Recharge endpoint failed:", endpoint, e);
+      }
+    }
+
+    return { ok:false };
   }
 
   async function confirmRecharge() {
@@ -776,6 +1269,7 @@
     }
 
     const enteredOtp = (document.getElementById("otpInput").value || "").trim();
+
     if (!generatedOtp) {
       showError("First generate OTP");
       return;
@@ -787,24 +1281,65 @@
     }
 
     const number = (document.getElementById("mobileNumber").value || "").trim();
-    const user = (sessionStorage.getItem("user") || "User").trim();
+    const user = getLoggedUser() || "User";
     const txnId = makeTxnId();
     const time = formatNow();
+    const amount = Number(selectedPlan.price);
+    const balanceBefore = parseFloat(getCurrentBalance() || "0");
+
+    if (amount > balanceBefore) {
+      showError("Insufficient balance");
+      return;
+    }
+
+    showLoading(true);
+
+    const payload = {
+      user: user,
+      sender: user,
+      number: number,
+      mobile: number,
+      provider: selectedProvider,
+      operator: selectedProvider,
+      amount: amount,
+      plan: selectedPlan.details,
+      txnId: txnId,
+      time: time,
+      type: "recharge",
+      source: "recharge_page"
+    };
+
+    const result = await postRechargeToBackend(payload);
+
+    let finalBalance = "0.00";
+
+    if (result.ok && result.data && result.data.balance !== undefined) {
+      finalBalance = sanitizeBalanceValue(result.data.balance);
+    } else {
+      finalBalance = sanitizeBalanceValue((balanceBefore - amount).toFixed(2));
+    }
+
+    setEverywhereBalance(user, finalBalance);
 
     const receipt = {
       type: "recharge",
       user: user,
       number: number,
       provider: selectedProvider,
-      amount: selectedPlan.price,
+      amount: amount,
       plan: selectedPlan.details,
       txnId: txnId,
       time: time,
-      status: "success"
+      status: "success",
+      balanceAfter: finalBalance
     };
 
     saveRechargeHistory(receipt);
+    saveUnifiedHistory(receipt);
     sessionStorage.setItem("last_recharge_receipt", JSON.stringify(receipt));
+    localStorage.setItem("stpay_last_recharge_receipt", JSON.stringify(receipt));
+
+    showLoading(false);
 
     document.getElementById("rechargeFormCard").style.display = "none";
     document.getElementById("successCard").style.display = "block";
@@ -815,16 +1350,34 @@
     document.getElementById("receiptMobile").textContent = number;
     document.getElementById("receiptProvider").textContent = selectedProvider;
     document.getElementById("receiptPlan").textContent = selectedPlan.details;
-    document.getElementById("receiptAmount").textContent = "₹ " + selectedPlan.price;
+    document.getElementById("receiptAmount").textContent = "₹ " + amount.toFixed(2);
+    document.getElementById("receiptBalanceAfter").textContent = "₹ " + finalBalance;
     document.getElementById("receiptTxn").textContent = txnId;
     document.getElementById("receiptTime").textContent = time;
   }
 
-  document.getElementById("mobileNumber").addEventListener("input", updateSummary);
+  document.getElementById("mobileNumber").addEventListener("input", function(e) {
+    e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
+    updateSummary();
+  });
 
-  window.addEventListener("DOMContentLoaded", function() {
+  window.addEventListener("DOMContentLoaded", async function() {
     updateUserDisplay();
-    renderPlans("popular");
+
+    const user = getLoggedUser();
+
+    setEverywhereBalance(
+      user,
+      sessionStorage.getItem("current_balance") ||
+      sessionStorage.getItem("balance") ||
+      sessionStorage.getItem("wallet_balance") ||
+      (user ? localStorage.getItem(getUserBalanceKey(user)) : "") ||
+      localStorage.getItem("stpay_balance") ||
+      localStorage.getItem("stpay_wallet_balance") ||
+      "0"
+    );
+
+    await refreshBalanceFromAPI();
     updateSummary();
   });
 </script>

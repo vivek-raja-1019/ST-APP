@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ST PAY - Tickets</title>
+
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    :root{
+      --bg:#f6f8fc;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --black:#111827;
+      --shadow:0 14px 35px rgba(15,23,42,0.08);
+      --green:#16a34a;
+      --greenSoft:#dcfce7;
+      --blue:#2563eb;
+    }
+    body{
+      margin:0;
+      font-family:'Segoe UI',sans-serif;
+      background:linear-gradient(180deg,#f8fbff 0%,#f3f7ff 100%);
+      color:var(--text);
+      display:flex;
+      justify-content:center;
+      padding:14px;
+    }
+    .app{width:420px;max-width:100%;}
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:14px;
+    }
+    .backBtn,.homeBtn{
+      border:none;
+      background:#fff;
+      border-radius:14px;
+      padding:10px 12px;
+      box-shadow:var(--shadow);
+      font-weight:800;
+      cursor:pointer;
+    }
+    .title{
+      font-size:20px;
+      font-weight:900;
+    }
+    .hero{
+      background:linear-gradient(135deg,#111827,#2563eb);
+      color:#fff;
+      border-radius:26px;
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+    .heroTitle{font-size:24px;font-weight:900;margin-bottom:6px;}
+    .heroSub{font-size:13px;opacity:0.92;line-height:1.5;}
+    .grid{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+    }
+    .ticketType{
+      background:#fff;
+      border:1px solid #edf2f7;
+      border-radius:18px;
+      padding:14px 10px;
+      text-align:center;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+    }
+    .ticketType.active{
+      border:2px solid #111827;
+      background:#f8fbff;
+    }
+    .ticketIcon{
+      width:46px;height:46px;border-radius:14px;
+      background:#111827;color:#fff;
+      display:flex;align-items:center;justify-content:center;
+      margin:0 auto 8px auto;font-size:22px;
+    }
+    .ticketLabel{font-size:12px;font-weight:800;}
+    .card{
+      margin-top:14px;
+      background:#fff;
+      border-radius:24px;
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+    .cardTitle{
+      font-size:16px;
+      font-weight:900;
+      margin-bottom:12px;
+    }
+    .input,.select,.btn{
+      width:100%;
+      padding:13px 14px;
+      border-radius:14px;
+      border:1px solid #e5e7eb;
+      outline:none;
+      font-size:14px;
+      margin-bottom:12px;
+      background:#fff;
+    }
+    .split{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    .btn{
+      border:none;
+      background:#111827;
+      color:#fff;
+      font-weight:800;
+      cursor:pointer;
+      margin-bottom:0;
+    }
+    .error{
+      color:#dc2626;
+      font-size:12px;
+      margin-top:-4px;
+      margin-bottom:10px;
+      display:none;
+    }
+    .success{
+      display:none;
+      margin-top:14px;
+      background:#f0fdf4;
+      border:1px solid #bbf7d0;
+      border-radius:22px;
+      padding:16px;
+    }
+    .successTick{
+      width:72px;height:72px;border-radius:50%;
+      background:var(--greenSoft);
+      color:var(--green);
+      display:flex;align-items:center;justify-content:center;
+      font-size:36px;font-weight:900;margin:0 auto 12px auto;
+    }
+    .successTitle{
+      text-align:center;
+      font-weight:900;
+      font-size:22px;
+      color:var(--green);
+      margin-bottom:8px;
+    }
+    .successSub{
+      text-align:center;
+      font-size:13px;
+      color:#4b5563;
+      margin-bottom:12px;
+    }
+    .receiptRow{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:9px 0;
+      border-bottom:1px dashed #dbe4ee;
+      font-size:13px;
+    }
+    .receiptRow:last-child{border-bottom:none;}
+    .muted{color:#64748b;}
+    .value{font-weight:800;text-align:right;word-break:break-word;}
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <div class="topbar">
+    <button class="backBtn" onclick="history.back()">← Back</button>
+    <div class="title">Tickets</div>
+    <button class="homeBtn" onclick="goHome()">Home</button>
+  </div>
+
+  <div class="hero">
+    <div class="heroTitle">Travel Ticket Booking</div>
+    <div class="heroSub">
+      Train, bus, airplane, metro, cab and more. From city, to city, date, passengers, class and amount fill pannitu book pannalaam.
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="ticketType active" onclick="selectTicketType(this,'Train')">
+      <div class="ticketIcon">🚆</div>
+      <div class="ticketLabel">Train</div>
+    </div>
+    <div class="ticketType" onclick="selectTicketType(this,'Bus')">
+      <div class="ticketIcon">🚌</div>
+      <div class="ticketLabel">Bus</div>
+    </div>
+    <div class="ticketType" onclick="selectTicketType(this,'Airplane')">
+      <div class="ticketIcon">✈️</div>
+      <div class="ticketLabel">Airplane</div>
+    </div>
+    <div class="ticketType" onclick="selectTicketType(this,'Metro')">
+      <div class="ticketIcon">🚇</div>
+      <div class="ticketLabel">Metro</div>
+    </div>
+    <div class="ticketType" onclick="selectTicketType(this,'Cab')">
+      <div class="ticketIcon">🚕</div>
+      <div class="ticketLabel">Cab</div>
+    </div>
+    <div class="ticketType" onclick="selectTicketType(this,'More')">
+      <div class="ticketIcon">➕</div>
+      <div class="ticketLabel">More</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="cardTitle">Ticket Details</div>
+
+    <input id="ticketType" class="input" type="text" value="Train" readonly>
+    <div class="split">
+      <input id="fromCity" class="input" type="text" placeholder="From city">
+      <input id="toCity" class="input" type="text" placeholder="To city">
+    </div>
+
+    <div class="split">
+      <input id="travelDate" class="input" type="date">
+      <input id="passengers" class="input" type="number" min="1" value="1" placeholder="Passengers">
+    </div>
+
+    <div class="split">
+      <select id="travelClass" class="select">
+        <option value="">Select class</option>
+        <option>Economy</option>
+        <option>Business</option>
+        <option>First Class</option>
+        <option>Sleeper</option>
+        <option>AC Chair Car</option>
+        <option>General</option>
+      </select>
+
+      <input id="ticketAmount" class="input" type="number" min="1" step="0.01" placeholder="Total amount">
+    </div>
+
+    <select id="ticketMethod" class="select">
+      <option value="">Payment method</option>
+      <option>Wallet</option>
+      <option>UPI</option>
+      <option>Debit Card</option>
+      <option>Credit Card</option>
+      <option>Net Banking</option>
+    </select>
+
+    <input id="ticketPass" class="input" type="password" placeholder="Enter password / PIN">
+    <div class="error" id="ticketError">Please fill all details correctly.</div>
+    <button class="btn" onclick="bookTicket()">Book Ticket</button>
+  </div>
+
+  <div class="success" id="ticketSuccess">
+    <div class="successTick">✓</div>
+    <div class="successTitle">Ticket Booked Successfully</div>
+    <div class="successSub" id="ticketSuccessText">Your ticket booking is confirmed.</div>
+
+    <div class="receiptRow"><div class="muted">Travel Type</div><div class="value" id="tType">-</div></div>
+    <div class="receiptRow"><div class="muted">Route</div><div class="value" id="tRoute">-</div></div>
+    <div class="receiptRow"><div class="muted">Travel Date</div><div class="value" id="tDate">-</div></div>
+    <div class="receiptRow"><div class="muted">Passengers</div><div class="value" id="tPassengers">-</div></div>
+    <div class="receiptRow"><div class="muted">Class</div><div class="value" id="tClass">-</div></div>
+    <div class="receiptRow"><div class="muted">Amount</div><div class="value" id="tAmount">-</div></div>
+    <div class="receiptRow"><div class="muted">Payment</div><div class="value" id="tMethod">-</div></div>
+    <div class="receiptRow"><div class="muted">Booking ID</div><div class="value" id="tTxn">-</div></div>
+    <div class="receiptRow"><div class="muted">Time</div><div class="value" id="tTime">-</div></div>
+  </div>
+</div>
+
+<script>
+if (!sessionStorage.getItem("user")) {
+  window.location = "index.html";
+}
+
+function goHome(){
+  window.location = "dashboard.html";
+}
+
+function selectTicketType(el,type){
+  document.querySelectorAll(".ticketType").forEach(item=>item.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById("ticketType").value = type;
+}
+
+function getPassword(){
+  return (sessionStorage.getItem("pass") || "123").trim();
+}
+
+function makeTxnId(){
+  return "TKT" + Date.now() + Math.floor(Math.random()*900+100);
+}
+
+function formatNow(){
+  return new Date().toLocaleString("en-IN",{
+    day:"2-digit",
+    month:"short",
+    year:"numeric",
+    hour:"2-digit",
+    minute:"2-digit",
+    second:"2-digit"
+  });
+}
+
+function bookTicket(){
+  const type = (document.getElementById("ticketType").value || "").trim();
+  const from = (document.getElementById("fromCity").value || "").trim();
+  const to = (document.getElementById("toCity").value || "").trim();
+  const date = (document.getElementById("travelDate").value || "").trim();
+  const passengers = parseInt(document.getElementById("passengers").value || "0");
+  const travelClass = (document.getElementById("travelClass").value || "").trim();
+  const amount = parseFloat(document.getElementById("ticketAmount").value || "0");
+  const method = (document.getElementById("ticketMethod").value || "").trim();
+  const pass = (document.getElementById("ticketPass").value || "").trim();
+  const error = document.getElementById("ticketError");
+
+  error.style.display = "none";
+
+  if (!type || !from || !to || !date || !passengers || passengers <= 0 || !travelClass || !amount || amount <= 0 || !method || !pass) {
+    error.textContent = "Please fill all details correctly.";
+    error.style.display = "block";
+    return;
+  }
+
+  if (from.toLowerCase() === to.toLowerCase()) {
+    error.textContent = "From and To city same ah irukka koodadhu.";
+    error.style.display = "block";
+    return;
+  }
+
+  if (pass !== getPassword()) {
+    error.textContent = "Wrong password / PIN.";
+    error.style.display = "block";
+    return;
+  }
+
+  const txn = makeTxnId();
+  const time = formatNow();
+
+  document.getElementById("ticketSuccess").style.display = "block";
+  document.getElementById("ticketSuccessText").textContent = `${type} ticket booked from ${from} to ${to}`;
+  document.getElementById("tType").textContent = type;
+  document.getElementById("tRoute").textContent = from + " → " + to;
+  document.getElementById("tDate").textContent = date;
+  document.getElementById("tPassengers").textContent = passengers;
+  document.getElementById("tClass").textContent = travelClass;
+  document.getElementById("tAmount").textContent = "₹ " + amount.toFixed(2);
+  document.getElementById("tMethod").textContent = method;
+  document.getElementById("tTxn").textContent = txn;
+  document.getElementById("tTime").textContent = time;
+
+  window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+}
+</script>
+
+</body>
+</html>

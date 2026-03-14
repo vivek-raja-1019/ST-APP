@@ -181,16 +181,22 @@
   }
 
   .miniIcon{
-    width:34px;
-    height:34px;
+    width:42px;
+    height:42px;
     border-radius:12px;
     background:#000;
     color:#fff;
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:16px;
-    flex:0 0 34px;
+    flex:0 0 42px;
+    overflow:hidden;
+  }
+
+  .miniIcon img{
+    width:24px;
+    height:24px;
+    display:block;
   }
 
   .actionText b{font-size:14px;}
@@ -592,31 +598,35 @@
   <div class="sectionTitle">Manage</div>
   <div class="actionsList" id="actionList">
 
-    <div class="actionRow feature" data-label="transaction send money" onclick="goPage('transaction.html')">
-      <div class="actionLeft">
-        <div class="miniIcon">💸</div>
-        <div class="actionText">
-          <b>Send Money</b><br><span>Pay to any user</span>
-        </div>
-      </div>
-      <div class="arrow">›</div>
-    </div>
-
-    <div class="actionRow feature" data-label="mobile recharge sim plans prepaid postpaid" onclick="goPage('recharge.html')">
-      <div class="actionLeft">
-        <div class="miniIcon">📱</div>
-        <div class="actionText">
-          <b>Recharge</b><br><span>Jio, Airtel, VI and more</span>
-        </div>
-      </div>
-      <div class="arrow">›</div>
-    </div>
-
     <div class="actionRow feature" data-label="history transactions" onclick="goPage('history.html')">
       <div class="actionLeft">
         <div class="miniIcon">🧾</div>
         <div class="actionText">
           <b>History</b><br><span>All payments and files</span>
+        </div>
+      </div>
+      <div class="arrow">›</div>
+    </div>
+
+    <div class="actionRow feature" data-label="bills electricity water gas broadband dth credit card insurance payment" onclick="goPage('bills.html')">
+      <div class="actionLeft">
+        <div class="miniIcon">
+          <img alt="bills" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='64' height='64' rx='16' fill='%23ffffff'/><rect x='16' y='10' width='32' height='44' rx='6' fill='%23000'/><path d='M23 22h18v3H23zm0 8h18v3H23zm0 8h12v3H23z' fill='%23fff'/></svg>">
+        </div>
+        <div class="actionText">
+          <b>Bills</b><br><span>Current, water, gas, broadband and more</span>
+        </div>
+      </div>
+      <div class="arrow">›</div>
+    </div>
+
+    <div class="actionRow feature" data-label="ticket train bus airplane flight booking travel" onclick="goPage('ticket.html')">
+      <div class="actionLeft">
+        <div class="miniIcon">
+          <img alt="ticket" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='64' height='64' rx='16' fill='%23ffffff'/><path d='M16 24c0-3 2-5 5-5h22c3 0 5 2 5 5v4a4 4 0 000 8v4c0 3-2 5-5 5H21c-3 0-5-2-5-5v-4a4 4 0 000-8z' fill='%23000'/><path d='M28 20v24' stroke='%23fff' stroke-width='3' stroke-dasharray='4 4'/><path d='M35 30l8-4-3 6 3 6-8-4h-8v-4z' fill='%23fff'/></svg>">
+        </div>
+        <div class="actionText">
+          <b>Tickets</b><br><span>Train, bus, flight and travel booking</span>
         </div>
       </div>
       <div class="arrow">›</div>
@@ -958,8 +968,6 @@ async function verifyBalancePassword() {
 
   if (box) box.style.display = "block";
 }
-
-/* ---------------- QUICK PAY MODAL ---------------- */
 
 function getAvatarColor(name) {
   const map = {

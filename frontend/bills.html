@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ST PAY - Bills</title>
+
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    :root{
+      --bg:#f6f8fc;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --black:#111827;
+      --shadow:0 14px 35px rgba(15,23,42,0.08);
+      --green:#16a34a;
+      --greenSoft:#dcfce7;
+      --blue:#2563eb;
+      --soft:#eff6ff;
+      --radius:22px;
+    }
+    body{
+      margin:0;
+      font-family:'Segoe UI',sans-serif;
+      background:linear-gradient(180deg,#f8fbff 0%,#f3f7ff 100%);
+      color:var(--text);
+      display:flex;
+      justify-content:center;
+      padding:14px;
+    }
+    .app{width:420px;max-width:100%;}
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:14px;
+    }
+    .backBtn,.homeBtn{
+      border:none;
+      background:#fff;
+      border-radius:14px;
+      padding:10px 12px;
+      box-shadow:var(--shadow);
+      font-weight:800;
+      cursor:pointer;
+    }
+    .title{
+      font-size:20px;
+      font-weight:900;
+    }
+    .hero{
+      background:linear-gradient(135deg,#111827,#2563eb);
+      color:#fff;
+      border-radius:26px;
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+    .heroTitle{font-size:24px;font-weight:900;margin-bottom:6px;}
+    .heroSub{font-size:13px;opacity:0.9;line-height:1.5;}
+    .grid{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+    }
+    .billType{
+      background:#fff;
+      border:1px solid #edf2f7;
+      border-radius:18px;
+      padding:14px 10px;
+      text-align:center;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+      transition:.15s ease;
+    }
+    .billType.active{
+      border:2px solid #111827;
+      background:#f8fbff;
+    }
+    .billIcon{
+      width:46px;
+      height:46px;
+      border-radius:14px;
+      background:#111827;
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin:0 auto 8px auto;
+      font-size:22px;
+    }
+    .billLabel{font-size:12px;font-weight:800;}
+    .card{
+      margin-top:14px;
+      background:#fff;
+      border-radius:24px;
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+    .cardTitle{
+      font-size:16px;
+      font-weight:900;
+      margin-bottom:12px;
+    }
+    .input,.select,.btn{
+      width:100%;
+      padding:13px 14px;
+      border-radius:14px;
+      border:1px solid #e5e7eb;
+      outline:none;
+      font-size:14px;
+      margin-bottom:12px;
+      background:#fff;
+    }
+    .btn{
+      border:none;
+      background:#111827;
+      color:#fff;
+      font-weight:800;
+      cursor:pointer;
+      margin-bottom:0;
+    }
+    .error{
+      color:#dc2626;
+      font-size:12px;
+      margin-top:-4px;
+      margin-bottom:10px;
+      display:none;
+    }
+    .success{
+      display:none;
+      margin-top:14px;
+      background:#f0fdf4;
+      border:1px solid #bbf7d0;
+      border-radius:22px;
+      padding:16px;
+    }
+    .successTick{
+      width:72px;height:72px;border-radius:50%;
+      background:var(--greenSoft);
+      color:var(--green);
+      display:flex;align-items:center;justify-content:center;
+      font-size:36px;font-weight:900;margin:0 auto 12px auto;
+    }
+    .successTitle{
+      text-align:center;
+      font-weight:900;
+      font-size:22px;
+      color:var(--green);
+      margin-bottom:8px;
+    }
+    .successSub{
+      text-align:center;
+      font-size:13px;
+      color:#4b5563;
+      margin-bottom:12px;
+    }
+    .receiptRow{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:9px 0;
+      border-bottom:1px dashed #dbe4ee;
+      font-size:13px;
+    }
+    .receiptRow:last-child{border-bottom:none;}
+    .muted{color:#64748b;}
+    .value{font-weight:800;text-align:right;word-break:break-word;}
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <div class="topbar">
+    <button class="backBtn" onclick="history.back()">← Back</button>
+    <div class="title">Bills</div>
+    <button class="homeBtn" onclick="goHome()">Home</button>
+  </div>
+
+  <div class="hero">
+    <div class="heroTitle">Pay Bills Instantly</div>
+    <div class="heroSub">
+      Electricity, water, gas, broadband, DTH, insurance, credit card and more.
+    </div>
+  </div>
+
+  <div class="grid" id="billGrid">
+    <div class="billType active" onclick="selectBillType(this,'Electricity')">
+      <div class="billIcon">⚡</div>
+      <div class="billLabel">Electricity</div>
+    </div>
+    <div class="billType" onclick="selectBillType(this,'Water')">
+      <div class="billIcon">💧</div>
+      <div class="billLabel">Water</div>
+    </div>
+    <div class="billType" onclick="selectBillType(this,'Gas')">
+      <div class="billIcon">🔥</div>
+      <div class="billLabel">Gas</div>
+    </div>
+    <div class="billType" onclick="selectBillType(this,'Broadband')">
+      <div class="billIcon">📶</div>
+      <div class="billLabel">Broadband</div>
+    </div>
+    <div class="billType" onclick="selectBillType(this,'DTH')">
+      <div class="billIcon">📺</div>
+      <div class="billLabel">DTH</div>
+    </div>
+    <div class="billType" onclick="selectBillType(this,'Credit Card')">
+      <div class="billIcon">💳</div>
+      <div class="billLabel">Credit Card</div>
+    </div>
+    <div class="billType" onclick="selectBillType(this,'Insurance')">
+      <div class="billIcon">🛡️</div>
+      <div class="billLabel">Insurance</div>
+    </div>
+    <div class="billType" onclick="selectBillType(this,'Landline')">
+      <div class="billIcon">☎️</div>
+      <div class="billLabel">Landline</div>
+    </div>
+    <div class="billType" onclick="selectBillType(this,'More Bills')">
+      <div class="billIcon">➕</div>
+      <div class="billLabel">More</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="cardTitle">Bill Payment Details</div>
+
+    <input id="billType" class="input" type="text" value="Electricity" readonly>
+    <input id="provider" class="input" type="text" placeholder="Provider name (EB / Airtel / Tata Play)">
+    <input id="customerId" class="input" type="text" placeholder="Consumer / Customer ID">
+    <input id="billAmount" class="input" type="number" min="1" step="0.01" placeholder="Bill amount">
+    <select id="billMethod" class="select">
+      <option value="">Select payment method</option>
+      <option>Wallet</option>
+      <option>UPI</option>
+      <option>Debit Card</option>
+      <option>Credit Card</option>
+      <option>Net Banking</option>
+    </select>
+    <input id="billPassword" class="input" type="password" placeholder="Enter password / PIN">
+    <div class="error" id="billError">Please fill all fields correctly.</div>
+    <button class="btn" onclick="payBill()">Pay Bill</button>
+  </div>
+
+  <div class="success" id="billSuccess">
+    <div class="successTick">✓</div>
+    <div class="successTitle">Bill Paid Successfully</div>
+    <div class="successSub" id="billSuccessText">Your payment has been completed.</div>
+
+    <div class="receiptRow"><div class="muted">Bill Type</div><div class="value" id="rType">-</div></div>
+    <div class="receiptRow"><div class="muted">Provider</div><div class="value" id="rProvider">-</div></div>
+    <div class="receiptRow"><div class="muted">Customer ID</div><div class="value" id="rCustomer">-</div></div>
+    <div class="receiptRow"><div class="muted">Amount</div><div class="value" id="rAmount">-</div></div>
+    <div class="receiptRow"><div class="muted">Method</div><div class="value" id="rMethod">-</div></div>
+    <div class="receiptRow"><div class="muted">Txn ID</div><div class="value" id="rTxn">-</div></div>
+    <div class="receiptRow"><div class="muted">Time</div><div class="value" id="rTime">-</div></div>
+  </div>
+</div>
+
+<script>
+if (!sessionStorage.getItem("user")) {
+  window.location = "index.html";
+}
+
+function goHome(){
+  window.location = "dashboard.html";
+}
+
+function selectBillType(el,type){
+  document.querySelectorAll(".billType").forEach(item=>item.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById("billType").value = type;
+}
+
+function getPassword(){
+  return (sessionStorage.getItem("pass") || "123").trim();
+}
+
+function makeTxnId(){
+  return "BILL" + Date.now() + Math.floor(Math.random()*900+100);
+}
+
+function formatNow(){
+  return new Date().toLocaleString("en-IN",{
+    day:"2-digit",
+    month:"short",
+    year:"numeric",
+    hour:"2-digit",
+    minute:"2-digit",
+    second:"2-digit"
+  });
+}
+
+function payBill(){
+  const type = (document.getElementById("billType").value || "").trim();
+  const provider = (document.getElementById("provider").value || "").trim();
+  const customerId = (document.getElementById("customerId").value || "").trim();
+  const amount = parseFloat(document.getElementById("billAmount").value || "0");
+  const method = (document.getElementById("billMethod").value || "").trim();
+  const pass = (document.getElementById("billPassword").value || "").trim();
+  const error = document.getElementById("billError");
+
+  error.style.display = "none";
+
+  if (!type || !provider || !customerId || !amount || amount <= 0 || !method || !pass) {
+    error.textContent = "Please fill all fields correctly.";
+    error.style.display = "block";
+    return;
+  }
+
+  if (pass !== getPassword()) {
+    error.textContent = "Wrong password / PIN.";
+    error.style.display = "block";
+    return;
+  }
+
+  const txn = makeTxnId();
+  const time = formatNow();
+
+  document.getElementById("billSuccess").style.display = "block";
+  document.getElementById("billSuccessText").textContent = `₹ ${amount.toFixed(2)} paid for ${type}`;
+  document.getElementById("rType").textContent = type;
+  document.getElementById("rProvider").textContent = provider;
+  document.getElementById("rCustomer").textContent = customerId;
+  document.getElementById("rAmount").textContent = "₹ " + amount.toFixed(2);
+  document.getElementById("rMethod").textContent = method;
+  document.getElementById("rTxn").textContent = txn;
+  document.getElementById("rTime").textContent = time;
+
+  window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+}
+</script>
+
+</body>
+</html>
