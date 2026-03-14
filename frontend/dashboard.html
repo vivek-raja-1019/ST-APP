@@ -281,9 +281,9 @@
       Add
     </div>
 
-    <div class="qItem feature" data-label="history transactions" onclick="goPage('history.html')">
-      <img class="qIcon" alt="history" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='64' height='64' rx='14' fill='%2300c6ff'/><path d='M32 18a14 14 0 1014 14h-4a10 10 0 11-3-7l-3 3h10V18l-3 3a13.9 13.9 0 00-11-3z' fill='%23000'/><path d='M30 24h4v10l7 4-2 3-9-5z' fill='%23fff'/></svg>">
-      History
+    <div class="qItem feature" data-label="statement account summary transactions" onclick="goPage('statement.html')">
+      <img class="qIcon" alt="statement" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='64' height='64' rx='14' fill='%2300c6ff'/><path d='M20 16h24v32H20z' fill='%23000'/><path d='M26 24h12v3H26zM26 31h12v3H26zM26 38h8v3H26z' fill='%23fff'/></svg>">
+      Statement
     </div>
 
     <div class="qItem feature" data-label="file transfer upload document" onclick="goPage('filetransfer.html')">
@@ -307,11 +307,11 @@
     <div class="person personItem" data-name="Aravind" onclick="quickPay('Aravind')">
       <div class="avatar" style="background:#ff3b30;">A</div><div class="pName">Aravind</div>
     </div>
-    <div class="person personItem" data-name="gojo" onclick="quickPay('gojo')">
-      <div class="avatar" style="background:#ff9500;">G</div><div class="pName">gojo</div>
+    <div class="person personItem" data-name="Gojo" onclick="quickPay('Gojo')">
+      <div class="avatar" style="background:#ff9500;">G</div><div class="pName">Gojo</div>
     </div>
-    <div class="person personItem" data-name="rosyy" onclick="quickPay('rosyy')">
-      <div class="avatar" style="background:#34c759;">R</div><div class="pName">rosyy</div>
+    <div class="person personItem" data-name="Rosyy" onclick="quickPay('Rosyy')">
+      <div class="avatar" style="background:#34c759;">R</div><div class="pName">Rosyy</div>
     </div>
     <div class="person personItem" data-name="Vivek" onclick="quickPay('Vivek')">
       <div class="avatar" style="background:#007aff;">V</div><div class="pName">Vivek</div>
@@ -322,11 +322,11 @@
     <div class="person personItem" data-name="Siva" onclick="quickPay('Siva')">
       <div class="avatar" style="background:#ff2d55;">S</div><div class="pName">Siva</div>
     </div>
-    <div class="person personItem" data-name="vetri" onclick="quickPay('vetri')">
-      <div class="avatar" style="background:#5856d6;">V</div><div class="pName">vetri</div>
+    <div class="person personItem" data-name="Vetri" onclick="quickPay('Vetri')">
+      <div class="avatar" style="background:#5856d6;">V</div><div class="pName">Vetri</div>
     </div>
-    <div class="person personItem" data-name="advika" onclick="quickPay('advika')">
-      <div class="avatar" style="background:#00c7be;">A</div><div class="pName">advika</div>
+    <div class="person personItem" data-name="Advika" onclick="quickPay('Advika')">
+      <div class="avatar" style="background:#00c7be;">A</div><div class="pName">Advika</div>
     </div>
   </div>
 
@@ -337,7 +337,7 @@
       <div class="actionLeft">
         <div class="miniIcon">💸</div>
         <div class="actionText">
-          <b>Send money</b><br><span>Pay to any user</span>
+          <b>Send Money</b><br><span>Pay to any user</span>
         </div>
       </div>
       <div class="arrow">›</div>
@@ -347,7 +347,7 @@
       <div class="actionLeft">
         <div class="miniIcon">🧾</div>
         <div class="actionText">
-          <b>History</b><br><span>All payments & files</span>
+          <b>History</b><br><span>All payments and files</span>
         </div>
       </div>
       <div class="arrow">›</div>
@@ -357,7 +357,7 @@
       <div class="actionLeft">
         <div class="miniIcon">📎</div>
         <div class="actionText">
-          <b>File transfer</b><br><span>Send documents/media</span>
+          <b>File Transfer</b><br><span>Send documents and media</span>
         </div>
       </div>
       <div class="arrow">›</div>
@@ -367,7 +367,7 @@
       <div class="actionLeft">
         <div class="miniIcon">🛟</div>
         <div class="actionText">
-          <b>Support</b><br><span>Help & FAQs</span>
+          <b>Support</b><br><span>Help and FAQs</span>
         </div>
       </div>
       <div class="arrow">›</div>
@@ -378,7 +378,6 @@
 </div>
 
 <script>
-/* --------- BASIC LOGIN CHECK --------- */
 if(!sessionStorage.getItem("user")){
   window.location = "index.html";
 }
@@ -387,7 +386,6 @@ function goPage(page){
   window.location = page;
 }
 
-/* --------- INIT --------- */
 async function initDashboard(){
   let u = (sessionStorage.getItem("user") || "User").trim();
   document.getElementById("userPill").innerText = u;
@@ -404,7 +402,6 @@ async function initDashboard(){
   }
 }
 
-/* --------- SEARCH --------- */
 function applySearch(){
   let q = (document.getElementById("searchBox").value || "").trim().toLowerCase();
 
@@ -424,13 +421,11 @@ function clearSearch(){
   applySearch();
 }
 
-/* --------- QUICK PAY --------- */
 function quickPay(name){
   sessionStorage.setItem("quick_receiver", name);
   goPage("transaction.html");
 }
 
-/* --------- BALANCE LOCK --------- */
 function getDashboardPassword(){
   const p = (sessionStorage.getItem("pass") || "").trim();
   if(p) return p;
@@ -477,7 +472,7 @@ function toggleBalanceLock(){
     }
     setBalanceVisible(true);
   }else{
-    alert("Wrong password! Balance still hidden.");
+    alert("Wrong password. Balance is still hidden.");
     setBalanceVisible(false);
   }
 }
