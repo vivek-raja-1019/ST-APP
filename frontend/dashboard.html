@@ -4,7 +4,7 @@
   <title>ST PAY - Dashboard</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="script.js"></script>
+  <script src="script.js" defer></script>
 
   <style>
   :root{
@@ -14,7 +14,14 @@
     --cardText:#fff;
     --muted:#666;
     --shadow: rgba(0,0,0,0.10);
+    --line:#e7e7e7;
+    --green:#16a34a;
+    --greenSoft:#dcfce7;
+    --red:#dc2626;
+    --blue:#2563eb;
   }
+
+  *{ box-sizing:border-box; }
 
   body{
     margin:0;
@@ -81,34 +88,6 @@
     cursor:pointer;
   }
 
-  .card{
-    background:var(--card);
-    color:var(--cardText);
-    border-radius:16px;
-    padding:14px;
-    box-shadow:0 8px 22px var(--shadow);
-  }
-
-  .balanceCard{ margin-top:10px; }
-
-  .balanceTop{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-  }
-
-  .balanceLabel{ font-size:12px; opacity:0.8; }
-
-  .balanceValue{
-    font-size:22px;
-    font-weight:800;
-    margin-top:6px;
-    display:flex;
-    align-items:center;
-    gap:10px;
-  }
-
   .quickGrid{
     margin-top:12px;
     display:grid;
@@ -130,7 +109,8 @@
   }
 
   .qIcon{
-    width:28px; height:28px;
+    width:28px;
+    height:28px;
     margin:0 auto 6px auto;
     display:block;
   }
@@ -154,6 +134,11 @@
     padding:10px 8px;
     text-align:center;
     cursor:pointer;
+    transition:0.15s ease;
+  }
+
+  .person:active{
+    transform:scale(0.98);
   }
 
   .avatar{
@@ -219,6 +204,262 @@
 
   .hidden{display:none !important;}
 
+  .modalOverlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.45);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    z-index:999;
+  }
+
+  .modalBox{
+    width:100%;
+    max-width:370px;
+    background:#fff;
+    border-radius:22px;
+    padding:18px;
+    box-shadow:0 18px 50px rgba(0,0,0,0.18);
+    animation:popIn .18s ease;
+    max-height:90vh;
+    overflow:auto;
+  }
+
+  @keyframes popIn{
+    from{transform:scale(0.95); opacity:0;}
+    to{transform:scale(1); opacity:1;}
+  }
+
+  .modalTitle{
+    font-size:20px;
+    font-weight:800;
+    margin-bottom:6px;
+  }
+
+  .modalSub{
+    font-size:13px;
+    color:#666;
+    margin-bottom:14px;
+  }
+
+  .modalInput,
+  .modalSelect{
+    width:100%;
+    box-sizing:border-box;
+    padding:13px 14px;
+    border-radius:14px;
+    border:1px solid #e5e5e5;
+    outline:none;
+    font-size:14px;
+    margin-bottom:12px;
+    background:#fff;
+  }
+
+  .modalBtns{
+    display:flex;
+    gap:10px;
+  }
+
+  .btn{
+    flex:1;
+    border:none;
+    border-radius:14px;
+    padding:12px 14px;
+    font-weight:800;
+    cursor:pointer;
+  }
+
+  .btnDark{
+    background:#000;
+    color:#fff;
+  }
+
+  .btnLight{
+    background:#f2f2f2;
+    color:#111;
+  }
+
+  .secureAmountBox{
+    margin-top:14px;
+    background:#000;
+    color:#fff;
+    border-radius:18px;
+    padding:14px;
+    text-align:center;
+    display:none;
+  }
+
+  .secureAmountLabel{
+    font-size:12px;
+    opacity:0.8;
+    margin-bottom:6px;
+  }
+
+  .secureAmountValue{
+    font-size:28px;
+    font-weight:900;
+    letter-spacing:0.3px;
+  }
+
+  .errorText{
+    color:#d11a2a;
+    font-size:12px;
+    margin-top:-4px;
+    margin-bottom:10px;
+    display:none;
+  }
+
+  .payUserCard{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:16px;
+    padding:12px;
+    margin-bottom:14px;
+  }
+
+  .payAvatar{
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-weight:800;
+    font-size:18px;
+    background:#111827;
+  }
+
+  .payUserCard b{
+    display:block;
+    font-size:15px;
+  }
+
+  .payUserCard span{
+    color:#666;
+    font-size:12px;
+  }
+
+  .successWrap{
+    text-align:center;
+    display:none;
+  }
+
+  .successTick{
+    width:78px;
+    height:78px;
+    margin:6px auto 14px auto;
+    border-radius:50%;
+    background:var(--greenSoft);
+    color:var(--green);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:40px;
+    font-weight:900;
+  }
+
+  .successTitle{
+    font-size:22px;
+    font-weight:900;
+    color:var(--green);
+    margin-bottom:6px;
+  }
+
+  .successSub{
+    font-size:13px;
+    color:#666;
+    margin-bottom:14px;
+  }
+
+  .receiptCard{
+    margin-top:14px;
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    border-radius:18px;
+    padding:14px;
+    display:none;
+  }
+
+  .receiptTitle{
+    font-weight:800;
+    margin-bottom:10px;
+    font-size:14px;
+  }
+
+  .receiptRow{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:8px 0;
+    border-bottom:1px dashed #e5e7eb;
+    font-size:13px;
+  }
+
+  .receiptRow:last-child{
+    border-bottom:none;
+  }
+
+  .receiptLabel{
+    color:#64748b;
+  }
+
+  .receiptValue{
+    font-weight:700;
+    text-align:right;
+    word-break:break-word;
+  }
+
+  .receiptSection{
+    margin-top:16px;
+    display:none;
+  }
+
+  .receiptBanner{
+    background:linear-gradient(135deg,#ecfdf5,#f0fdf4);
+    border:1px solid #bbf7d0;
+    border-radius:18px;
+    padding:14px;
+    box-shadow:0 10px 24px rgba(0,0,0,0.05);
+  }
+
+  .receiptBannerTop{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+  }
+
+  .receiptBadge{
+    background:#16a34a;
+    color:#fff;
+    font-size:11px;
+    font-weight:800;
+    padding:6px 10px;
+    border-radius:999px;
+  }
+
+  .receiptAmountBig{
+    font-size:28px;
+    font-weight:900;
+    color:#14532d;
+    margin-bottom:10px;
+  }
+
+  .loadingText{
+    display:none;
+    font-size:12px;
+    color:#555;
+    text-align:center;
+    margin-top:8px;
+  }
+
   @media (max-width:360px){
     .quickGrid{grid-template-columns:repeat(3,1fr);}
     .people{grid-template-columns:repeat(3,1fr);}
@@ -226,37 +467,19 @@
   </style>
 </head>
 
-<body onload="initDashboard()">
+<body>
 
 <div class="app">
 
   <div class="topbar">
     <div class="titleRow">
       <div class="brand">ST PAY</div>
-      <div class="pill">Home</div>
+      <div class="pill" id="userPill">Home</div>
     </div>
 
     <div class="search">
       <input id="searchBox" placeholder="Search people, features..." oninput="applySearch()">
       <button onclick="clearSearch()">Clear</button>
-    </div>
-  </div>
-
-  <div class="card balanceCard">
-    <div class="balanceTop">
-      <div>
-        <div class="balanceLabel">Available balance</div>
-
-        <div class="balanceValue">
-          <span id="balanceMasked">₹ •••••</span>
-          <span id="balanceWrap" class="hidden">₹ <span id="balance">0</span></span>
-        </div>
-      </div>
-
-      <div style="display:flex; gap:8px; align-items:center;">
-        <button class="pill" style="cursor:pointer;" id="balBtn" onclick="toggleBalanceLock()">🔒 Show</button>
-        <div class="pill" id="userPill">User</div>
-      </div>
     </div>
   </div>
 
@@ -271,9 +494,9 @@
       Scan
     </div>
 
-    <div class="qItem feature" data-label="receive money" onclick="goPage('receive.html')">
-      <img class="qIcon" alt="receive" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='64' height='64' rx='14' fill='%2300c6ff'/><path d='M32 44l-12-12h8V18h8v14h8z' fill='%23000'/></svg>">
-      Receive
+    <div class="qItem feature" data-label="recharge mobile sim plans prepaid postpaid" onclick="goPage('recharge.html')">
+      <img class="qIcon" alt="recharge" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='64' height='64' rx='14' fill='%2300c6ff'/><rect x='24' y='14' width='16' height='36' rx='4' fill='%23000'/><rect x='28' y='18' width='8' height='20' rx='2' fill='%23fff'/><circle cx='32' cy='43' r='2' fill='%23fff'/></svg>">
+      Recharge
     </div>
 
     <div class="qItem feature" data-label="add money topup" onclick="goPage('addmoney.html')">
@@ -281,9 +504,9 @@
       Add
     </div>
 
-    <div class="qItem feature" data-label="statement account summary transactions" onclick="goPage('statement.html')">
-      <img class="qIcon" alt="statement" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='64' height='64' rx='14' fill='%2300c6ff'/><path d='M20 16h24v32H20z' fill='%23000'/><path d='M26 24h12v3H26zM26 31h12v3H26zM26 38h8v3H26z' fill='%23fff'/></svg>">
-      Statement
+    <div class="qItem feature" data-label="balance wallet amount secure" onclick="openBalanceFeature()">
+      <img class="qIcon" alt="balance" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='64' height='64' rx='14' fill='%2300c6ff'/><rect x='14' y='20' width='36' height='24' rx='6' fill='%23000'/><circle cx='42' cy='32' r='3' fill='%23fff'/><path d='M20 26h14v3H20z' fill='%23fff'/></svg>">
+      Balance
     </div>
 
     <div class="qItem feature" data-label="file transfer upload document" onclick="goPage('filetransfer.html')">
@@ -304,29 +527,65 @@
 
   <div class="sectionTitle">People</div>
   <div class="people" id="peopleGrid">
-    <div class="person personItem" data-name="Aravind" onclick="quickPay('Aravind')">
+    <div class="person personItem" data-name="Aravind" onclick="openQuickPayModal('Aravind')">
       <div class="avatar" style="background:#ff3b30;">A</div><div class="pName">Aravind</div>
     </div>
-    <div class="person personItem" data-name="Gojo" onclick="quickPay('Gojo')">
+    <div class="person personItem" data-name="Gojo" onclick="openQuickPayModal('gojo')">
       <div class="avatar" style="background:#ff9500;">G</div><div class="pName">Gojo</div>
     </div>
-    <div class="person personItem" data-name="Rosyy" onclick="quickPay('Rosyy')">
+    <div class="person personItem" data-name="Rosyy" onclick="openQuickPayModal('rosyy')">
       <div class="avatar" style="background:#34c759;">R</div><div class="pName">Rosyy</div>
     </div>
-    <div class="person personItem" data-name="Vivek" onclick="quickPay('Vivek')">
+    <div class="person personItem" data-name="Vivek" onclick="openQuickPayModal('Vivek')">
       <div class="avatar" style="background:#007aff;">V</div><div class="pName">Vivek</div>
     </div>
-    <div class="person personItem" data-name="Mani" onclick="quickPay('Mani')">
+    <div class="person personItem" data-name="Mani" onclick="openQuickPayModal('Mani')">
       <div class="avatar" style="background:#af52de;">M</div><div class="pName">Mani</div>
     </div>
-    <div class="person personItem" data-name="Siva" onclick="quickPay('Siva')">
+    <div class="person personItem" data-name="Siva" onclick="openQuickPayModal('Siva')">
       <div class="avatar" style="background:#ff2d55;">S</div><div class="pName">Siva</div>
     </div>
-    <div class="person personItem" data-name="Vetri" onclick="quickPay('Vetri')">
+    <div class="person personItem" data-name="Vetri" onclick="openQuickPayModal('Vetri')">
       <div class="avatar" style="background:#5856d6;">V</div><div class="pName">Vetri</div>
     </div>
-    <div class="person personItem" data-name="Advika" onclick="quickPay('Advika')">
+    <div class="person personItem" data-name="Advika" onclick="openQuickPayModal('advika')">
       <div class="avatar" style="background:#00c7be;">A</div><div class="pName">Advika</div>
+    </div>
+  </div>
+
+  <div class="receiptSection" id="receiptSection">
+    <div class="sectionTitle">Latest Receipt</div>
+    <div class="receiptBanner">
+      <div class="receiptBannerTop">
+        <div style="font-weight:800;">Payment Receipt</div>
+        <div class="receiptBadge">SUCCESS</div>
+      </div>
+      <div class="receiptAmountBig">₹ <span id="receiptBigAmount">0.00</span></div>
+
+      <div class="receiptRow">
+        <div class="receiptLabel">To</div>
+        <div class="receiptValue" id="receiptTo">-</div>
+      </div>
+      <div class="receiptRow">
+        <div class="receiptLabel">Bank</div>
+        <div class="receiptValue" id="receiptBank">-</div>
+      </div>
+      <div class="receiptRow">
+        <div class="receiptLabel">Method</div>
+        <div class="receiptValue" id="receiptMethod">-</div>
+      </div>
+      <div class="receiptRow">
+        <div class="receiptLabel">Date & Time</div>
+        <div class="receiptValue" id="receiptTime">-</div>
+      </div>
+      <div class="receiptRow">
+        <div class="receiptLabel">Txn ID</div>
+        <div class="receiptValue" id="receiptTxnId">-</div>
+      </div>
+      <div class="receiptRow">
+        <div class="receiptLabel">Status</div>
+        <div class="receiptValue" style="color:#16a34a;">Paid Successfully</div>
+      </div>
     </div>
   </div>
 
@@ -338,6 +597,16 @@
         <div class="miniIcon">💸</div>
         <div class="actionText">
           <b>Send Money</b><br><span>Pay to any user</span>
+        </div>
+      </div>
+      <div class="arrow">›</div>
+    </div>
+
+    <div class="actionRow feature" data-label="mobile recharge sim plans prepaid postpaid" onclick="goPage('recharge.html')">
+      <div class="actionLeft">
+        <div class="miniIcon">📱</div>
+        <div class="actionText">
+          <b>Recharge</b><br><span>Jio, Airtel, VI and more</span>
         </div>
       </div>
       <div class="arrow">›</div>
@@ -377,105 +646,590 @@
 
 </div>
 
+<!-- Secure Balance Modal -->
+<div class="modalOverlay" id="balanceModal">
+  <div class="modalBox">
+    <div class="modalTitle">Secure Balance</div>
+    <div class="modalSub">Password enter pannina apram than amount show agum.</div>
+
+    <input
+      id="balancePasswordInput"
+      class="modalInput"
+      type="password"
+      placeholder="Enter password"
+      onkeydown="if(event.key==='Enter'){verifyBalancePassword();}"
+    >
+
+    <div class="errorText" id="balanceError">Wrong password. Try again.</div>
+
+    <div class="modalBtns">
+      <button class="btn btnLight" onclick="closeBalanceModal()">Close</button>
+      <button class="btn btnDark" onclick="verifyBalancePassword()">Show</button>
+    </div>
+
+    <div class="secureAmountBox" id="secureAmountBox">
+      <div class="secureAmountLabel">Available Balance</div>
+      <div class="secureAmountValue">₹ <span id="secureBalanceValue">0</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Pay Modal -->
+<div class="modalOverlay" id="quickPayModal">
+  <div class="modalBox">
+
+    <div id="quickPayFormWrap">
+      <div class="modalTitle">Quick Pay</div>
+      <div class="modalSub">User ah select pannita. Amount, PIN, bank, method select panni pay pannalaam.</div>
+
+      <div class="payUserCard">
+        <div class="payAvatar" id="quickPayAvatar">A</div>
+        <div>
+          <b id="quickPayUserName">Aravind</b>
+          <span>Secure instant payment</span>
+        </div>
+      </div>
+
+      <input id="quickPayAmount" class="modalInput" type="number" min="1" step="0.01" placeholder="Enter amount">
+      <input id="quickPayPin" class="modalInput" type="password" maxlength="10" placeholder="Enter PIN / Password">
+
+      <select id="quickPayBank" class="modalSelect">
+        <option value="">Select bank</option>
+        <option>ST PAY Wallet</option>
+        <option>State Bank of India</option>
+        <option>Indian Bank</option>
+        <option>Canara Bank</option>
+        <option>HDFC Bank</option>
+        <option>ICICI Bank</option>
+      </select>
+
+      <select id="quickPayMethod" class="modalSelect">
+        <option value="">Select payment method</option>
+        <option>Wallet</option>
+        <option>UPI</option>
+        <option>Bank Transfer</option>
+        <option>Card</option>
+      </select>
+
+      <div class="errorText" id="quickPayError">Please fill all details correctly.</div>
+      <div class="loadingText" id="quickPayLoading">Processing payment...</div>
+
+      <div class="modalBtns">
+        <button class="btn btnLight" onclick="closeQuickPayModal()">Cancel</button>
+        <button class="btn btnDark" onclick="submitQuickPay()">Pay Now</button>
+      </div>
+    </div>
+
+    <div class="successWrap" id="quickPaySuccessWrap">
+      <div class="successTick">✓</div>
+      <div class="successTitle">Payment Successful</div>
+      <div class="successSub" id="quickPaySuccessText">Amount sent successfully.</div>
+
+      <div class="receiptCard" id="quickReceiptCard">
+        <div class="receiptTitle">Receipt</div>
+        <div class="receiptRow">
+          <div class="receiptLabel">Receiver</div>
+          <div class="receiptValue" id="modalReceiptTo">-</div>
+        </div>
+        <div class="receiptRow">
+          <div class="receiptLabel">Amount</div>
+          <div class="receiptValue" id="modalReceiptAmount">-</div>
+        </div>
+        <div class="receiptRow">
+          <div class="receiptLabel">Bank</div>
+          <div class="receiptValue" id="modalReceiptBank">-</div>
+        </div>
+        <div class="receiptRow">
+          <div class="receiptLabel">Method</div>
+          <div class="receiptValue" id="modalReceiptMethod">-</div>
+        </div>
+        <div class="receiptRow">
+          <div class="receiptLabel">Txn ID</div>
+          <div class="receiptValue" id="modalReceiptTxnId">-</div>
+        </div>
+      </div>
+
+      <div class="modalBtns" style="margin-top:14px;">
+        <button class="btn btnDark" onclick="closeQuickPayModal()">Done</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <script>
-if(!sessionStorage.getItem("user")){
+if (!sessionStorage.getItem("user")) {
   window.location = "index.html";
 }
 
-function goPage(page){
+let lastReceiptData = null;
+let currentQuickReceiver = "";
+
+function goPage(page) {
   window.location = page;
 }
 
-async function initDashboard(){
-  let u = (sessionStorage.getItem("user") || "User").trim();
-  document.getElementById("userPill").innerText = u;
+function getApiBase() {
+  try {
+    if (typeof API !== "undefined" && API) {
+      return API;
+    }
+  } catch (e) {}
 
-  setBalanceVisible(false);
-
-  if(typeof loadBalance === "function"){
-    await loadBalance();
+  if (
+    location.hostname === "127.0.0.1" ||
+    location.hostname === "localhost"
+  ) {
+    return "http://127.0.0.1:5000";
   }
 
-  const bal = document.getElementById("balance");
-  if(bal && !bal.innerText.trim()){
-    bal.innerText = "0";
-  }
+  return location.origin;
 }
 
-function applySearch(){
+function sanitizeBalanceValue(value) {
+  if (value === undefined || value === null) return "0.00";
+
+  let txt = String(value).trim();
+
+  if (!txt || txt === "undefined" || txt === "null" || txt === "NaN") {
+    return "0.00";
+  }
+
+  txt = txt.replace(/[₹,\s]/g, "");
+
+  if (txt === "" || isNaN(Number(txt))) {
+    return "0.00";
+  }
+
+  return Number(txt).toFixed(2);
+}
+
+function saveCurrentBalance(value) {
+  const clean = sanitizeBalanceValue(value);
+  sessionStorage.setItem("current_balance", clean);
+  sessionStorage.setItem("balance", clean);
+  sessionStorage.setItem("wallet_balance", clean);
+  return clean;
+}
+
+function getCurrentBalance() {
+  return sanitizeBalanceValue(
+    sessionStorage.getItem("current_balance") ||
+    sessionStorage.getItem("balance") ||
+    sessionStorage.getItem("wallet_balance") ||
+    "0"
+  );
+}
+
+async function refreshBalanceFromAPI() {
+  try {
+    const user = (sessionStorage.getItem("user") || "").trim();
+    if (!user) return "0.00";
+
+    const API_BASE = getApiBase();
+    const url = `${API_BASE}/api/balance/${encodeURIComponent(user)}`;
+
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (jsonErr) {
+      data = {};
+    }
+
+    if (res.ok && data && (data.ok === true || data.balance !== undefined)) {
+      const amount = sanitizeBalanceValue(data.balance);
+      sessionStorage.setItem("balance", amount);
+      sessionStorage.setItem("wallet_balance", amount);
+      sessionStorage.setItem("current_balance", amount);
+      return amount;
+    }
+  } catch (e) {
+    console.error("Balance API error:", e);
+  }
+
+  return getCurrentBalance();
+}
+
+async function initDashboard() {
+  const u = (sessionStorage.getItem("user") || "User").trim();
+  const userPill = document.getElementById("userPill");
+
+  if (userPill) {
+    userPill.innerText = u;
+    userPill.textContent = u;
+  }
+
+  saveCurrentBalance(
+    sessionStorage.getItem("balance") ||
+    sessionStorage.getItem("wallet_balance") ||
+    sessionStorage.getItem("current_balance") ||
+    "0"
+  );
+
+  const latest = await refreshBalanceFromAPI();
+  saveCurrentBalance(latest);
+
+  tryLoadSavedReceipt();
+}
+
+function applySearch() {
   let q = (document.getElementById("searchBox").value || "").trim().toLowerCase();
 
-  document.querySelectorAll(".feature").forEach(el=>{
+  document.querySelectorAll(".feature").forEach(el => {
     let label = (el.getAttribute("data-label") || "").toLowerCase();
     el.classList.toggle("hidden", q && !label.includes(q));
   });
 
-  document.querySelectorAll(".personItem").forEach(el=>{
+  document.querySelectorAll(".personItem").forEach(el => {
     let name = (el.getAttribute("data-name") || "").toLowerCase();
     el.classList.toggle("hidden", q && !name.includes(q));
   });
 }
 
-function clearSearch(){
+function clearSearch() {
   document.getElementById("searchBox").value = "";
   applySearch();
 }
 
-function quickPay(name){
-  sessionStorage.setItem("quick_receiver", name);
-  goPage("transaction.html");
-}
-
-function getDashboardPassword(){
+function getDashboardPassword() {
   const p = (sessionStorage.getItem("pass") || "").trim();
-  if(p) return p;
+  if (p) return p;
   return "123";
 }
 
-function setBalanceVisible(show){
-  const masked = document.getElementById("balanceMasked");
-  const wrap = document.getElementById("balanceWrap");
-  const btn = document.getElementById("balBtn");
+function openBalanceFeature() {
+  const modal = document.getElementById("balanceModal");
+  const input = document.getElementById("balancePasswordInput");
+  const error = document.getElementById("balanceError");
+  const box = document.getElementById("secureAmountBox");
+  const val = document.getElementById("secureBalanceValue");
 
-  if(!masked || !wrap || !btn) return;
-
-  if(show){
-    masked.classList.add("hidden");
-    wrap.classList.remove("hidden");
-    btn.innerText = "👁 Hide";
-  }else{
-    wrap.classList.add("hidden");
-    masked.classList.remove("hidden");
-    btn.innerText = "🔒 Show";
+  if (error) error.style.display = "none";
+  if (box) box.style.display = "none";
+  if (input) input.value = "";
+  if (val) {
+    val.innerText = getCurrentBalance();
+    val.textContent = getCurrentBalance();
   }
 
-  sessionStorage.setItem("balance_visible", show ? "1" : "0");
+  if (modal) {
+    modal.style.display = "flex";
+    setTimeout(() => {
+      if (input) input.focus();
+    }, 100);
+  }
 }
 
-function toggleBalanceLock(){
-  const currentlyVisible = sessionStorage.getItem("balance_visible") === "1";
+function closeBalanceModal() {
+  const modal = document.getElementById("balanceModal");
+  if (modal) modal.style.display = "none";
+}
 
-  if(currentlyVisible){
-    setBalanceVisible(false);
+async function verifyBalancePassword() {
+  const inputEl = document.getElementById("balancePasswordInput");
+  const entered = ((inputEl && inputEl.value) || "").trim();
+  const correct = String(getDashboardPassword()).trim();
+  const error = document.getElementById("balanceError");
+  const box = document.getElementById("secureAmountBox");
+  const val = document.getElementById("secureBalanceValue");
+
+  if (entered !== correct) {
+    if (box) box.style.display = "none";
+    if (error) error.style.display = "block";
     return;
   }
 
-  const entered = prompt("Enter password to show balance:");
-  if(entered === null) return;
+  if (error) error.style.display = "none";
 
-  const correct = getDashboardPassword();
+  const latestBalance = await refreshBalanceFromAPI();
+  const finalAmount = saveCurrentBalance(latestBalance);
 
-  if(String(entered).trim() === String(correct).trim()){
-    const bal = document.getElementById("balance");
-    if(bal && !bal.innerText.trim()){
-      bal.innerText = "0";
-    }
-    setBalanceVisible(true);
-  }else{
-    alert("Wrong password. Balance is still hidden.");
-    setBalanceVisible(false);
+  if (val) {
+    val.innerText = finalAmount;
+    val.textContent = finalAmount;
+  }
+
+  if (box) box.style.display = "block";
+}
+
+/* ---------------- QUICK PAY MODAL ---------------- */
+
+function getAvatarColor(name) {
+  const map = {
+    aravind:"#ff3b30",
+    gojo:"#ff9500",
+    rosyy:"#34c759",
+    vivek:"#007aff",
+    mani:"#af52de",
+    siva:"#ff2d55",
+    vetri:"#5856d6",
+    advika:"#00c7be"
+  };
+  return map[String(name || "").toLowerCase()] || "#111827";
+}
+
+function openQuickPayModal(name) {
+  currentQuickReceiver = name;
+
+  const modal = document.getElementById("quickPayModal");
+  const formWrap = document.getElementById("quickPayFormWrap");
+  const successWrap = document.getElementById("quickPaySuccessWrap");
+  const error = document.getElementById("quickPayError");
+  const loading = document.getElementById("quickPayLoading");
+
+  document.getElementById("quickPayUserName").textContent = name;
+  document.getElementById("quickPayAvatar").textContent = String(name).charAt(0).toUpperCase();
+  document.getElementById("quickPayAvatar").style.background = getAvatarColor(name);
+
+  document.getElementById("quickPayAmount").value = "";
+  document.getElementById("quickPayPin").value = "";
+  document.getElementById("quickPayBank").value = "";
+  document.getElementById("quickPayMethod").value = "";
+
+  if (error) error.style.display = "none";
+  if (loading) loading.style.display = "none";
+
+  if (formWrap) formWrap.style.display = "block";
+  if (successWrap) successWrap.style.display = "none";
+
+  if (modal) {
+    modal.style.display = "flex";
   }
 }
+
+function closeQuickPayModal() {
+  const modal = document.getElementById("quickPayModal");
+  if (modal) modal.style.display = "none";
+}
+
+function makeTxnId() {
+  return "STP" + Date.now() + Math.floor(Math.random() * 900 + 100);
+}
+
+function formatNow() {
+  const d = new Date();
+  return d.toLocaleString("en-IN", {
+    day:"2-digit",
+    month:"short",
+    year:"numeric",
+    hour:"2-digit",
+    minute:"2-digit",
+    second:"2-digit"
+  });
+}
+
+function validateQuickPayForm() {
+  const amount = parseFloat(document.getElementById("quickPayAmount").value || "0");
+  const pin = (document.getElementById("quickPayPin").value || "").trim();
+  const bank = (document.getElementById("quickPayBank").value || "").trim();
+  const method = (document.getElementById("quickPayMethod").value || "").trim();
+  const currentUser = (sessionStorage.getItem("user") || "").trim();
+
+  if (!currentQuickReceiver) return "Receiver missing";
+  if (!amount || amount <= 0) return "Enter valid amount";
+  if (!pin) return "Enter PIN";
+  if (!bank) return "Select bank";
+  if (!method) return "Select payment method";
+  if (!currentUser) return "Login required";
+  if (String(currentUser).toLowerCase() === String(currentQuickReceiver).toLowerCase()) {
+    return "Own account ku pay panna mudiyadhu";
+  }
+
+  const correctPin = String(getDashboardPassword()).trim();
+  if (pin !== correctPin) {
+    return "Wrong PIN / Password";
+  }
+
+  const balance = parseFloat(getCurrentBalance() || "0");
+  if (amount > balance) {
+    return "Insufficient balance";
+  }
+
+  return "";
+}
+
+async function postQuickPayToBackend(payload) {
+  const API_BASE = getApiBase();
+
+  const endpoints = [
+    "/api/send-money",
+    "/api/send",
+    "/api/transfer",
+    "/api/pay",
+    "/api/transaction"
+  ];
+
+  for (const endpoint of endpoints) {
+    try {
+      const res = await fetch(API_BASE + endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      let data = {};
+      try {
+        data = await res.json();
+      } catch (e) {
+        data = {};
+      }
+
+      if (res.ok && (data.ok === true || data.success === true || data.message || data.balance !== undefined)) {
+        return { ok:true, data, endpoint };
+      }
+    } catch (err) {
+      console.log("QuickPay endpoint failed:", endpoint, err);
+    }
+  }
+
+  return { ok:false };
+}
+
+function saveReceiptToSession(receipt) {
+  sessionStorage.setItem("last_receipt", JSON.stringify(receipt));
+}
+
+function tryLoadSavedReceipt() {
+  try {
+    const txt = sessionStorage.getItem("last_receipt");
+    if (!txt) return;
+    const receipt = JSON.parse(txt);
+    if (receipt) {
+      renderLatestReceipt(receipt);
+    }
+  } catch (e) {}
+}
+
+function renderLatestReceipt(receipt) {
+  if (!receipt) return;
+
+  document.getElementById("receiptSection").style.display = "block";
+  document.getElementById("receiptBigAmount").textContent = sanitizeBalanceValue(receipt.amount);
+  document.getElementById("receiptTo").textContent = receipt.to || "-";
+  document.getElementById("receiptBank").textContent = receipt.bank || "-";
+  document.getElementById("receiptMethod").textContent = receipt.method || "-";
+  document.getElementById("receiptTime").textContent = receipt.time || "-";
+  document.getElementById("receiptTxnId").textContent = receipt.txnId || "-";
+}
+
+async function submitQuickPay() {
+  const error = document.getElementById("quickPayError");
+  const loading = document.getElementById("quickPayLoading");
+
+  if (error) {
+    error.style.display = "none";
+    error.textContent = "Please fill all details correctly.";
+  }
+
+  const validationMsg = validateQuickPayForm();
+  if (validationMsg) {
+    if (error) {
+      error.textContent = validationMsg;
+      error.style.display = "block";
+    }
+    return;
+  }
+
+  const sender = (sessionStorage.getItem("user") || "").trim();
+  const receiver = currentQuickReceiver;
+  const amount = parseFloat(document.getElementById("quickPayAmount").value || "0");
+  const bank = (document.getElementById("quickPayBank").value || "").trim();
+  const method = (document.getElementById("quickPayMethod").value || "").trim();
+  const txnId = makeTxnId();
+  const time = formatNow();
+
+  if (loading) loading.style.display = "block";
+
+  const payload = {
+    sender: sender,
+    from: sender,
+    receiver: receiver,
+    to: receiver,
+    amount: amount,
+    pin: (document.getElementById("quickPayPin").value || "").trim(),
+    bank: bank,
+    method: method,
+    txnId: txnId,
+    time: time,
+    type: "payment",
+    source: "dashboard_quick_pay"
+  };
+
+  let finalBalance = getCurrentBalance();
+
+  const result = await postQuickPayToBackend(payload);
+
+  if (result.ok) {
+    if (result.data && result.data.balance !== undefined) {
+      finalBalance = sanitizeBalanceValue(result.data.balance);
+    } else {
+      finalBalance = sanitizeBalanceValue(
+        (parseFloat(getCurrentBalance()) - amount).toFixed(2)
+      );
+    }
+  } else {
+    finalBalance = sanitizeBalanceValue(
+      (parseFloat(getCurrentBalance()) - amount).toFixed(2)
+    );
+  }
+
+  saveCurrentBalance(finalBalance);
+
+  const receipt = {
+    to: receiver,
+    amount: amount.toFixed(2),
+    bank: bank,
+    method: method,
+    txnId: txnId,
+    time: time,
+    sender: sender,
+    status: "success"
+  };
+
+  lastReceiptData = receipt;
+  saveReceiptToSession(receipt);
+  renderLatestReceipt(receipt);
+
+  if (loading) loading.style.display = "none";
+
+  document.getElementById("quickPayFormWrap").style.display = "none";
+  document.getElementById("quickPaySuccessWrap").style.display = "block";
+  document.getElementById("quickPaySuccessText").textContent =
+    `₹ ${amount.toFixed(2)} sent to ${receiver}`;
+
+  document.getElementById("quickReceiptCard").style.display = "block";
+  document.getElementById("modalReceiptTo").textContent = receiver;
+  document.getElementById("modalReceiptAmount").textContent = "₹ " + amount.toFixed(2);
+  document.getElementById("modalReceiptBank").textContent = bank;
+  document.getElementById("modalReceiptMethod").textContent = method;
+  document.getElementById("modalReceiptTxnId").textContent = txnId;
+}
+
+window.addEventListener("click", function(e) {
+  const balanceModal = document.getElementById("balanceModal");
+  const quickPayModal = document.getElementById("quickPayModal");
+
+  if (e.target === balanceModal) {
+    closeBalanceModal();
+  }
+
+  if (e.target === quickPayModal) {
+    closeQuickPayModal();
+  }
+});
+
+window.addEventListener("DOMContentLoaded", async function () {
+  await initDashboard();
+});
 </script>
 
 </body>

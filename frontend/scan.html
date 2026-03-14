@@ -1,97 +1,1616 @@
-<script>
-  // session check
-  if(!sessionStorage.getItem("user")){
-    window.location="index.html";
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
+  <title>ST PAY - Scan</title>
 
-  const codeReader = new ZXing.BrowserMultiFormatReader();
-  let currentDeviceId = null;
-  let lastScannedText = "";
-  let isScanning = false;
+  <script src="https://unpkg.com/html5-qrcode" defer></script>
 
-  async function startScan(){
-    if(isScanning) return;   // ✅ prevent double start
-    isScanning = true;
+  <style>
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
 
-    lastScannedText = "";
-    setStatus("Starting camera...");
+    :root{
+      --bg1:#eef5ff;
+      --bg2:#f9fbff;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --brand:#111827;
+      --brand2:#2563eb;
+      --brandSoft:#dbeafe;
+      --green:#16a34a;
+      --greenSoft:#dcfce7;
+      --red:#dc2626;
+      --redSoft:#fee2e2;
+      --amber:#d97706;
+      --amberSoft:#fef3c7;
+      --shadow:0 18px 40px rgba(15,23,42,.12);
+      --radius:24px;
+    }
 
-    try{
-      const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
-      if(!devices || devices.length === 0){
-        setStatus("❌ No camera found.");
-        isScanning = false;
+    html,body{
+      width:100%;
+      overflow-x:hidden;
+    }
+
+    body{
+      margin:0;
+      font-family:Segoe UI, Arial, sans-serif;
+      background:linear-gradient(140deg,var(--bg1),var(--bg2));
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      padding:14px;
+    }
+
+    .app{
+      width:100%;
+      max-width:430px;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      padding-top:4px;
+    }
+
+    .leftTop{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+      flex:1;
+    }
+
+    .rightTop{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-shrink:0;
+    }
+
+    .iconBtn{
+      width:44px;
+      height:44px;
+      min-width:44px;
+      min-height:44px;
+      border:none;
+      border-radius:14px;
+      background:#fff;
+      box-shadow:0 8px 22px rgba(15,23,42,.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      font-size:18px;
+      font-weight:800;
+      color:#111827;
+      padding:0;
+      flex-shrink:0;
+    }
+
+    .titleWrap{
+      min-width:0;
+      flex:1;
+      padding-top:2px;
+    }
+
+    .titleWrap h1{
+      margin:0;
+      font-size:24px;
+      line-height:1.15;
+      font-weight:800;
+      letter-spacing:-0.4px;
+      word-break:break-word;
+    }
+
+    .titleWrap p{
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    .scannerCard{
+      background:var(--card);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .scannerHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:18px 16px 10px;
+    }
+
+    .scannerHead .label{
+      font-size:15px;
+      font-weight:800;
+      color:#111827;
+      line-height:1.2;
+    }
+
+    .scannerHead .sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:3px;
+      line-height:1.4;
+    }
+
+    .scannerTools{
+      display:flex;
+      gap:8px;
+      flex-shrink:0;
+    }
+
+    .miniBtn{
+      border:none;
+      background:#f3f4f6;
+      color:#111827;
+      border-radius:12px;
+      padding:10px 14px;
+      font-weight:800;
+      cursor:pointer;
+      font-size:13px;
+      min-height:40px;
+      white-space:nowrap;
+    }
+
+    .cameraWrap{
+      position:relative;
+      margin:0 14px 14px;
+      border-radius:24px;
+      overflow:hidden;
+      background:#0f172a;
+      min-height:360px;
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    #reader{
+      width:100%;
+      min-height:360px;
+      background:#0f172a;
+    }
+
+    #reader video{
+      object-fit:cover !important;
+    }
+
+    .scanOverlay{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      z-index:5;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:18px;
+    }
+
+    .scanFrame{
+      width:min(250px, 78vw);
+      height:min(250px, 78vw);
+      border:2px solid rgba(255,255,255,.88);
+      border-radius:28px;
+      position:relative;
+      box-shadow:0 0 0 2000px rgba(15,23,42,.28);
+      overflow:hidden;
+      max-width:250px;
+      max-height:250px;
+    }
+
+    .corner{
+      position:absolute;
+      width:34px;
+      height:34px;
+      border-color:#60a5fa;
+      border-style:solid;
+      border-width:0;
+    }
+
+    .corner.tl{ top:0; left:0; border-top-width:5px; border-left-width:5px; border-top-left-radius:16px; }
+    .corner.tr{ top:0; right:0; border-top-width:5px; border-right-width:5px; border-top-right-radius:16px; }
+    .corner.bl{ bottom:0; left:0; border-bottom-width:5px; border-left-width:5px; border-bottom-left-radius:16px; }
+    .corner.br{ bottom:0; right:0; border-bottom-width:5px; border-right-width:5px; border-bottom-right-radius:16px; }
+
+    .scanLine{
+      position:absolute;
+      left:12px;
+      right:12px;
+      top:16px;
+      height:4px;
+      border-radius:999px;
+      background:linear-gradient(90deg,transparent,#38bdf8,#60a5fa,transparent);
+      box-shadow:0 0 20px rgba(56,189,248,.9);
+      animation:scanMove 2.2s linear infinite;
+    }
+
+    @keyframes scanMove{
+      0%{ top:18px; opacity:1; }
+      50%{ top:calc(100% - 22px); opacity:.95; }
+      100%{ top:18px; opacity:1; }
+    }
+
+    .hintBar{
+      position:absolute;
+      left:12px;
+      right:12px;
+      bottom:12px;
+      z-index:6;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background:rgba(17,24,39,.7);
+      backdrop-filter:blur(10px);
+      color:#fff;
+      padding:12px 14px;
+      border-radius:16px;
+      flex-wrap:wrap;
+    }
+
+    .hintBar span{
+      font-size:12px;
+      color:#e5e7eb;
+      line-height:1.4;
+    }
+
+    .hintBar strong{
+      font-size:13px;
+      white-space:nowrap;
+    }
+
+    .status{
+      margin:0 14px 14px;
+      padding:14px;
+      border-radius:18px;
+      background:#f3f4f6;
+      color:#111827;
+      font-size:14px;
+      font-weight:700;
+      text-align:center;
+      min-height:52px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      line-height:1.5;
+      word-break:break-word;
+    }
+
+    .status.ok{
+      background:var(--greenSoft);
+      color:#166534;
+    }
+
+    .status.err{
+      background:var(--redSoft);
+      color:#991b1b;
+    }
+
+    .manualCard{
+      background:#fff;
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:16px;
+    }
+
+    .cardTitle{
+      font-size:17px;
+      font-weight:800;
+      margin:0 0 5px;
+      line-height:1.3;
+    }
+
+    .cardSub{
+      color:var(--muted);
+      font-size:13px;
+      margin:0 0 14px;
+      line-height:1.5;
+    }
+
+    .inputWrap{
+      display:flex;
+      gap:10px;
+    }
+
+    .inputWrap input{
+      flex:1;
+      min-width:0;
+      border:none;
+      outline:none;
+      border-radius:16px;
+      background:#f3f4f6;
+      padding:15px 14px;
+      font-size:15px;
+      color:#111827;
+      min-height:50px;
+    }
+
+    .findBtn{
+      border:none;
+      border-radius:16px;
+      background:#111827;
+      color:#fff;
+      padding:0 16px;
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+      min-width:92px;
+      min-height:50px;
+      white-space:nowrap;
+    }
+
+    .foundUser{
+      margin-top:14px;
+      background:#f8fafc;
+      border:1px solid #e5e7eb;
+      border-radius:18px;
+      padding:14px;
+      display:none;
+    }
+
+    .foundUser.show{
+      display:block;
+    }
+
+    .userTop{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .avatar{
+      width:52px;
+      height:52px;
+      border-radius:50%;
+      background:linear-gradient(135deg,#111827,#2563eb);
+      color:#fff;
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+      flex-shrink:0;
+    }
+
+    .userInfo{
+      min-width:0;
+      flex:1;
+    }
+
+    .userInfo h3{
+      margin:0;
+      font-size:17px;
+      line-height:1.25;
+      word-break:break-word;
+    }
+
+    .userInfo p{
+      margin:4px 0 0;
+      font-size:13px;
+      color:var(--muted);
+      word-break:break-word;
+      line-height:1.5;
+    }
+
+    .userActions{
+      display:flex;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .ghostBtn,.primaryBtn{
+      flex:1;
+      border:none;
+      border-radius:14px;
+      padding:13px 14px;
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+      min-height:46px;
+    }
+
+    .ghostBtn{
+      background:#e5e7eb;
+      color:#111827;
+    }
+
+    .primaryBtn{
+      background:#111827;
+      color:#fff;
+    }
+
+    .quickGrid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:12px;
+      padding-bottom:10px;
+    }
+
+    .qCard{
+      background:#fff;
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      padding:16px;
+      cursor:pointer;
+      min-width:0;
+    }
+
+    .qIcon{
+      width:44px;
+      height:44px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#eff6ff;
+      font-size:21px;
+      margin-bottom:12px;
+    }
+
+    .qCard h4{
+      margin:0;
+      font-size:15px;
+      font-weight:800;
+      line-height:1.3;
+      word-break:break-word;
+    }
+
+    .qCard p{
+      margin:6px 0 0;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.55;
+    }
+
+    .sheetBackdrop,
+    .panelBackdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,.42);
+      opacity:0;
+      visibility:hidden;
+      transition:.25s ease;
+      z-index:98;
+    }
+
+    .sheetBackdrop.show,
+    .panelBackdrop.show{
+      opacity:1;
+      visibility:visible;
+    }
+
+    .sheet{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      z-index:99;
+      background:#fff;
+      border-radius:28px 28px 0 0;
+      padding:14px 16px 22px;
+      transform:translateY(110%);
+      transition:.28s ease;
+      max-width:430px;
+      margin:0 auto;
+      box-shadow:0 -10px 40px rgba(15,23,42,.14);
+      max-height:86vh;
+      overflow:auto;
+    }
+
+    .sheet.show{
+      transform:translateY(0);
+    }
+
+    .grab{
+      width:54px;
+      height:5px;
+      border-radius:999px;
+      background:#d1d5db;
+      margin:6px auto 14px;
+    }
+
+    .sheetTitle{
+      font-size:18px;
+      font-weight:800;
+      margin-bottom:4px;
+      text-align:center;
+      line-height:1.3;
+    }
+
+    .sheetSub{
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+      margin-bottom:14px;
+      line-height:1.5;
+    }
+
+    .menuList{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .menuItem{
+      border:none;
+      background:#f8fafc;
+      border-radius:18px;
+      padding:14px;
+      text-align:left;
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      cursor:pointer;
+      width:100%;
+    }
+
+    .menuItem .miIcon{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      background:#e5edff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+      flex-shrink:0;
+    }
+
+    .menuItem h5{
+      margin:0;
+      font-size:15px;
+      font-weight:800;
+      line-height:1.3;
+      word-break:break-word;
+    }
+
+    .menuItem p{
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+    }
+
+    .panel{
+      position:fixed;
+      left:50%;
+      top:50%;
+      width:min(430px, calc(100% - 24px));
+      max-height:86vh;
+      overflow:auto;
+      transform:translate(-50%, -50%) scale(.95);
+      background:#fff;
+      border-radius:28px;
+      box-shadow:0 20px 60px rgba(15,23,42,.18);
+      z-index:100;
+      opacity:0;
+      visibility:hidden;
+      transition:.25s ease;
+    }
+
+    .panel.show{
+      opacity:1;
+      visibility:visible;
+      transform:translate(-50%, -50%) scale(1);
+    }
+
+    .panelHead{
+      position:sticky;
+      top:0;
+      background:#fff;
+      padding:18px 18px 10px;
+      border-bottom:1px solid #f1f5f9;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      z-index:2;
+      border-radius:28px 28px 0 0;
+    }
+
+    .panelTitle{
+      font-size:18px;
+      font-weight:800;
+      margin:0;
+      line-height:1.3;
+      word-break:break-word;
+    }
+
+    .closeBtn{
+      border:none;
+      width:40px;
+      height:40px;
+      min-width:40px;
+      border-radius:12px;
+      background:#f3f4f6;
+      font-size:18px;
+      cursor:pointer;
+      flex-shrink:0;
+    }
+
+    .panelBody{
+      padding:16px 18px 20px;
+    }
+
+    .miniCard{
+      background:#f8fafc;
+      border-radius:18px;
+      padding:14px;
+      margin-bottom:12px;
+      border:1px solid #e5e7eb;
+    }
+
+    .miniCard h4{
+      margin:0 0 6px;
+      font-size:15px;
+      font-weight:800;
+      line-height:1.3;
+    }
+
+    .miniCard p,
+    .miniCard li{
+      margin:0;
+      color:#475569;
+      font-size:13px;
+      line-height:1.65;
+    }
+
+    .miniCard ul{
+      padding-left:18px;
+      margin:8px 0 0;
+    }
+
+    .receiveQR{
+      background:#fff;
+      border:1px dashed #cbd5e1;
+      border-radius:22px;
+      padding:18px;
+      text-align:center;
+    }
+
+    .qrBox{
+      width:min(210px, 100%);
+      aspect-ratio:1/1;
+      margin:0 auto 14px;
+      border-radius:18px;
+      background:
+        linear-gradient(90deg,#111 10px,transparent 10px) 0 0/40px 40px,
+        linear-gradient(#111 10px,transparent 10px) 0 0/40px 40px,
+        linear-gradient(90deg,transparent 30px,#111 30px) 0 0/40px 40px,
+        linear-gradient(transparent 30px,#111 30px) 0 0/40px 40px,
+        #fff;
+      box-shadow:inset 0 0 0 12px #fff;
+      border:8px solid #111827;
+    }
+
+    .statRow{
+      display:flex;
+      gap:10px;
+      margin-top:10px;
+    }
+
+    .statBox{
+      flex:1;
+      background:#f8fafc;
+      border:1px solid #e5e7eb;
+      border-radius:18px;
+      padding:14px;
+      text-align:center;
+      min-width:0;
+    }
+
+    .statBox .big{
+      font-size:18px;
+      font-weight:800;
+      color:#111827;
+      line-height:1.2;
+      word-break:break-word;
+    }
+
+    .statBox .small{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:4px;
+      line-height:1.4;
+    }
+
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:#eff6ff;
+      color:#1d4ed8;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:12px;
+      font-weight:700;
+      margin:4px 6px 0 0;
+      flex-wrap:wrap;
+    }
+
+    .hiddenInput{
+      display:none;
+    }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:22px;
+      transform:translateX(-50%) translateY(20px);
+      background:#111827;
+      color:#fff;
+      padding:12px 16px;
+      border-radius:14px;
+      font-size:13px;
+      font-weight:700;
+      opacity:0;
+      visibility:hidden;
+      transition:.25s ease;
+      z-index:110;
+      max-width:calc(100% - 28px);
+      text-align:center;
+      line-height:1.45;
+    }
+
+    .toast.show{
+      opacity:1;
+      visibility:visible;
+      transform:translateX(-50%) translateY(0);
+    }
+
+    @media (max-width:430px){
+      body{
+        padding:10px;
+      }
+
+      .app{
+        gap:12px;
+      }
+
+      .topbar{
+        gap:8px;
+      }
+
+      .leftTop{
+        gap:8px;
+      }
+
+      .rightTop{
+        gap:6px;
+      }
+
+      .iconBtn{
+        width:40px;
+        height:40px;
+        min-width:40px;
+        min-height:40px;
+        border-radius:12px;
+        font-size:16px;
+      }
+
+      .titleWrap h1{
+        font-size:21px;
+      }
+
+      .titleWrap p{
+        font-size:12px;
+      }
+
+      .scannerHead{
+        padding:16px 14px 10px;
+      }
+
+      .scannerHead .label{
+        font-size:14px;
+      }
+
+      .scannerHead .sub{
+        font-size:11px;
+      }
+
+      .miniBtn{
+        padding:9px 12px;
+        font-size:12px;
+        min-height:38px;
+      }
+
+      .cameraWrap{
+        min-height:320px;
+        margin:0 12px 12px;
+        border-radius:20px;
+      }
+
+      #reader{
+        min-height:320px;
+      }
+
+      .scanFrame{
+        width:min(220px, 74vw);
+        height:min(220px, 74vw);
+        border-radius:24px;
+      }
+
+      .hintBar{
+        padding:10px 12px;
+      }
+
+      .status{
+        margin:0 12px 12px;
+        font-size:13px;
+        min-height:50px;
+      }
+
+      .manualCard{
+        padding:14px;
+      }
+
+      .cardTitle{
+        font-size:16px;
+      }
+
+      .cardSub{
+        font-size:12px;
+      }
+
+      .inputWrap{
+        flex-direction:column;
+      }
+
+      .findBtn{
+        width:100%;
+      }
+
+      .userActions{
+        flex-direction:column;
+      }
+
+      .quickGrid{
+        grid-template-columns:1fr;
+        gap:10px;
+      }
+
+      .qCard{
+        padding:15px;
+      }
+
+      .panel{
+        width:calc(100% - 18px);
+        border-radius:24px;
+      }
+
+      .panelHead{
+        padding:16px 16px 10px;
+      }
+
+      .panelTitle{
+        font-size:17px;
+      }
+
+      .panelBody{
+        padding:14px 16px 18px;
+      }
+
+      .sheet{
+        max-width:100%;
+        border-radius:24px 24px 0 0;
+      }
+
+      .statRow{
+        flex-direction:column;
+      }
+
+      .qrBox{
+        width:min(190px, 100%);
+      }
+    }
+
+    @media (max-width:340px){
+      .titleWrap h1{
+        font-size:19px;
+      }
+
+      .titleWrap p{
+        font-size:11px;
+      }
+
+      .iconBtn{
+        width:38px;
+        height:38px;
+        min-width:38px;
+        min-height:38px;
+        font-size:15px;
+      }
+
+      .scanFrame{
+        width:min(200px, 72vw);
+        height:min(200px, 72vw);
+      }
+
+      .scannerTools{
+        gap:6px;
+      }
+
+      .miniBtn{
+        padding:8px 10px;
+        font-size:11px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app">
+    <div class="topbar">
+      <div class="leftTop">
+        <button class="iconBtn" onclick="goBack()">←</button>
+        <div class="titleWrap">
+          <h1>Scan & Pay</h1>
+          <p>Scan QR or enter mobile / UPI ID</p>
+        </div>
+      </div>
+
+      <div class="rightTop">
+        <button class="iconBtn" id="flashBtn" onclick="toggleFlash()">🔦</button>
+        <button class="iconBtn" onclick="openSheet()">⋯</button>
+      </div>
+    </div>
+
+    <div class="scannerCard">
+      <div class="scannerHead">
+        <div>
+          <div class="label">QR Scanner</div>
+          <div class="sub">Point camera at any ST PAY QR</div>
+        </div>
+
+        <div class="scannerTools">
+          <button class="miniBtn" onclick="restartScanner()">Retry</button>
+        </div>
+      </div>
+
+      <div class="cameraWrap">
+        <div id="reader"></div>
+
+        <div class="scanOverlay">
+          <div class="scanFrame">
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
+            <div class="scanLine"></div>
+          </div>
+        </div>
+
+        <div class="hintBar">
+          <span>Keep QR inside the frame</span>
+          <strong id="torchStatus">Torch Off</strong>
+        </div>
+      </div>
+
+      <div id="result" class="status">Waiting for camera permission...</div>
+    </div>
+
+    <div class="manualCard">
+      <h3 class="cardTitle">Pay to mobile number / UPI ID</h3>
+      <p class="cardSub">Type mobile number, username, or UPI ID and find user instantly</p>
+
+      <div class="inputWrap">
+        <input
+          type="text"
+          id="manualInput"
+          placeholder="Enter number or UPI ID"
+          autocomplete="off"
+        />
+        <button class="findBtn" onclick="findUser()">Find</button>
+      </div>
+
+      <div id="foundUser" class="foundUser">
+        <div class="userTop">
+          <div class="avatar" id="avatarText">U</div>
+          <div class="userInfo">
+            <h3 id="foundName">User Name</h3>
+            <p id="foundMeta">upi@stpay</p>
+          </div>
+        </div>
+
+        <div class="userActions">
+          <button class="ghostBtn" onclick="clearFoundUser()">Clear</button>
+          <button class="primaryBtn" onclick="continueToPay()">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="quickGrid">
+      <div class="qCard" onclick="openPanel('receive')">
+        <div class="qIcon">📥</div>
+        <h4>Show QR</h4>
+        <p>Receive money from others using your personal QR code.</p>
+      </div>
+
+      <div class="qCard" onclick="openPanel('summary')">
+        <div class="qIcon">📊</div>
+        <h4>Monthly Spend</h4>
+        <p>See how much you spent and track your payment flow.</p>
+      </div>
+
+      <div class="qCard" onclick="openPanel('powers')">
+        <div class="qIcon">⚡</div>
+        <h4>Superpowers</h4>
+        <p>Discover cashback, smart pay, fast scan and more.</p>
+      </div>
+
+      <div class="qCard" onclick="openPanel('settings')">
+        <div class="qIcon">⚙️</div>
+        <h4>UPI Settings</h4>
+        <p>Manage UPI ID, bank link, security and payment defaults.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheetBackdrop" id="sheetBackdrop" onclick="closeSheet()"></div>
+  <div class="sheet" id="sheet">
+    <div class="grab"></div>
+    <div class="sheetTitle">More options</div>
+    <div class="sheetSub">ST PAY scan page extra tools</div>
+
+    <div class="menuList">
+      <button class="menuItem" onclick="triggerImageScan()">
+        <div class="miIcon">🖼️</div>
+        <div>
+          <h5>Scan image</h5>
+          <p>Choose QR image from gallery and detect instantly.</p>
+        </div>
+      </button>
+
+      <button class="menuItem" onclick="openPanel('steps')">
+        <div class="miIcon">🧭</div>
+        <div>
+          <h5>Step by step</h5>
+          <p>How to scan and send money in simple steps.</p>
+        </div>
+      </button>
+
+      <button class="menuItem" onclick="openPanel('homescreen')">
+        <div class="miIcon">🏠</div>
+        <div>
+          <h5>Add scan shortcut to home screen</h5>
+          <p>Keep scanner ready like quick access app shortcut.</p>
+        </div>
+      </button>
+
+      <button class="menuItem" onclick="openPanel('receive')">
+        <div class="miIcon">💸</div>
+        <div>
+          <h5>Show QR to receive money</h5>
+          <p>Display your own receive QR and collect payments.</p>
+        </div>
+      </button>
+
+      <button class="menuItem" onclick="openPanel('summary')">
+        <div class="miIcon">📈</div>
+        <div>
+          <h5>Monthly spend summary</h5>
+          <p>Track total spending, received amount and trends.</p>
+        </div>
+      </button>
+
+      <button class="menuItem" onclick="openPanel('powers')">
+        <div class="miIcon">✨</div>
+        <div>
+          <h5>Your ST PAY superpowers</h5>
+          <p>Fast scan, cashback, send money and smart controls.</p>
+        </div>
+      </button>
+
+      <button class="menuItem" onclick="openPanel('settings')">
+        <div class="miIcon">🔐</div>
+        <div>
+          <h5>UPI settings</h5>
+          <p>Security, linked bank, UPI ID and payment settings.</p>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <div class="panelBackdrop" id="panelBackdrop" onclick="closePanel()"></div>
+  <div class="panel" id="panel">
+    <div class="panelHead">
+      <h3 class="panelTitle" id="panelTitle">Title</h3>
+      <button class="closeBtn" onclick="closePanel()">✕</button>
+    </div>
+    <div class="panelBody" id="panelBody"></div>
+  </div>
+
+  <input type="file" id="imageInput" class="hiddenInput" accept="image/*" />
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let html5QrCode = null;
+    let scannerRunning = false;
+    let currentCameraId = null;
+    let torchOn = false;
+    let detectedUser = null;
+
+    const demoUsers = [
+      { name: "Aravind", phone: "9876543210", upi: "aravind@stpay" },
+      { name: "Gojo", phone: "9876501111", upi: "gojo@stpay" },
+      { name: "Rosyy", phone: "9876502222", upi: "rosyy@stpay" },
+      { name: "Vivek", phone: "9876503333", upi: "vivek@stpay" },
+      { name: "Advika", phone: "9876504444", upi: "advika@stpay" },
+      { name: "Kavin", phone: "9876505555", upi: "kavin@stpay" },
+      { name: "Nisha", phone: "9876506666", upi: "nisha@stpay" },
+      { name: "Hari", phone: "9876507777", upi: "hari@stpay" }
+    ];
+
+    function goBack() {
+      window.location.href = "dashboard.html";
+    }
+
+    function setResult(message, type = "") {
+      const box = document.getElementById("result");
+      box.className = "status";
+      box.textContent = message;
+
+      if (type === "ok") box.classList.add("ok");
+      if (type === "err") box.classList.add("err");
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2200);
+    }
+
+    function normalizeQRText(text) {
+      const t = String(text || "").trim();
+
+      if (t.startsWith("upi://pay")) {
+        try {
+          const url = new URL(t);
+          const pa = url.searchParams.get("pa");
+          const pn = url.searchParams.get("pn");
+          return pa || pn || t;
+        } catch {
+          return t;
+        }
+      }
+
+      return t;
+    }
+
+    function findUserByQuery(query) {
+      const q = String(query || "").trim().toLowerCase();
+      if (!q) return null;
+
+      return demoUsers.find(u =>
+        u.name.toLowerCase() === q ||
+        u.phone.toLowerCase() === q ||
+        u.upi.toLowerCase() === q
+      ) || demoUsers.find(u =>
+        u.name.toLowerCase().includes(q) ||
+        u.phone.toLowerCase().includes(q) ||
+        u.upi.toLowerCase().includes(q)
+      ) || null;
+    }
+
+    function showFoundUser(user, sourceValue) {
+      detectedUser = user;
+
+      const box = document.getElementById("foundUser");
+      const avatar = document.getElementById("avatarText");
+      const foundName = document.getElementById("foundName");
+      const foundMeta = document.getElementById("foundMeta");
+
+      avatar.textContent = (user.name || "U").charAt(0).toUpperCase();
+      foundName.textContent = user.name;
+      foundMeta.textContent = `${user.phone} • ${user.upi}`;
+
+      box.classList.add("show");
+
+      sessionStorage.setItem("scanUser", user.name);
+      sessionStorage.setItem("scanUserPhone", user.phone);
+      sessionStorage.setItem("scanUserUpi", user.upi);
+      sessionStorage.setItem("scanSource", sourceValue || "");
+    }
+
+    function clearFoundUser() {
+      detectedUser = null;
+      document.getElementById("foundUser").classList.remove("show");
+      document.getElementById("manualInput").value = "";
+    }
+
+    function continueToPay() {
+      if (!detectedUser) {
+        showToast("First select a valid user");
+        return;
+      }
+      window.location.href = "send.html";
+    }
+
+    function handleDetectedValue(rawValue, source = "qr") {
+      const value = normalizeQRText(rawValue);
+      const user = findUserByQuery(value);
+
+      if (user) {
+        setResult(`User found: ${user.name}`, "ok");
+        showFoundUser(user, value);
+
+        if (source === "qr") {
+          setTimeout(() => {
+            window.location.href = "send.html";
+          }, 900);
+        }
+      } else {
+        setResult(`No ST PAY user found for "${value}"`, "err");
+        clearFoundUser();
+      }
+    }
+
+    async function startScanner() {
+      try {
+        setResult("Starting camera...");
+
+        if (typeof Html5Qrcode === "undefined") {
+          setResult("QR library failed to load", "err");
+          return;
+        }
+
+        html5QrCode = new Html5Qrcode("reader");
+
+        const cameras = await Html5Qrcode.getCameras();
+
+        if (!cameras || !cameras.length) {
+          setResult("Camera not found", "err");
+          return;
+        }
+
+        currentCameraId = cameras[0].id;
+
+        await html5QrCode.start(
+          currentCameraId,
+          {
+            fps: 10,
+            qrbox: { width: 220, height: 220 },
+            aspectRatio: 1.2
+          },
+          (decodedText) => {
+            if (!scannerRunning) return;
+            scannerRunning = false;
+            handleDetectedValue(decodedText, "qr");
+          },
+          () => {}
+        );
+
+        scannerRunning = true;
+        setResult("Camera started. Point to QR code.");
+      } catch (err) {
+        console.log("Scanner error:", err);
+        setResult("Camera permission denied or scanner failed", "err");
+      }
+    }
+
+    async function restartScanner() {
+      try {
+        if (html5QrCode) {
+          const state = html5QrCode.getState && html5QrCode.getState();
+          if (state === 2 || scannerRunning) {
+            await html5QrCode.stop();
+          }
+          await html5QrCode.clear();
+        }
+      } catch (e) {
+        console.log(e);
+      }
+
+      scannerRunning = false;
+      torchOn = false;
+      updateTorchText();
+      document.getElementById("reader").innerHTML = "";
+      setTimeout(startScanner, 250);
+    }
+
+    async function toggleFlash() {
+      try {
+        if (!html5QrCode || !scannerRunning) {
+          showToast("Start scanner first");
+          return;
+        }
+
+        const capabilities = html5QrCode.getRunningTrackCapabilities && html5QrCode.getRunningTrackCapabilities();
+
+        if (!capabilities || !capabilities.torch) {
+          showToast("Torch not supported on this device/browser");
+          return;
+        }
+
+        torchOn = !torchOn;
+        await html5QrCode.applyVideoConstraints({
+          advanced: [{ torch: torchOn }]
+        });
+
+        updateTorchText();
+        showToast(torchOn ? "Flashlight turned on" : "Flashlight turned off");
+      } catch (err) {
+        console.log(err);
+        torchOn = false;
+        updateTorchText();
+        showToast("Unable to control flashlight");
+      }
+    }
+
+    function updateTorchText() {
+      document.getElementById("torchStatus").textContent = torchOn ? "Torch On" : "Torch Off";
+      document.getElementById("flashBtn").style.background = torchOn ? "#fff7ed" : "#ffffff";
+    }
+
+    function findUser() {
+      const value = document.getElementById("manualInput").value.trim();
+      if (!value) {
+        setResult("Enter mobile number or UPI ID", "err");
+        clearFoundUser();
         return;
       }
 
-      // Prefer back camera on phones (usually last device)
-      currentDeviceId = devices[devices.length - 1].deviceId;
-
-      document.getElementById("resultBox").style.display = "none";
-      document.getElementById("resultText").innerText = "";
-
-      await codeReader.decodeFromVideoDevice(
-        currentDeviceId,
-        "preview",
-        (result, err) => {
-          if(result){
-            lastScannedText = (result.getText() || "").trim(); // ✅ trim
-            showResult(lastScannedText);
-            setStatus("✅ QR scanned! Tap Pay or Copy.");
-            stopScan(); // Auto stop after first scan
-          }
-        }
-      );
-
-      setStatus("📷 Camera ON. Point to QR...");
-
-    }catch(e){
-      setStatus("❌ Camera permission denied / not available. Use Live Server or HTTPS. ("+ (e.name || "Error") +")");
-      isScanning = false;
+      handleDetectedValue(value, "manual");
     }
-  }
 
-  function stopScan(){
-    try{
-      codeReader.reset();
-    }catch(e){}
-    isScanning = false; // ✅ release lock
-    setStatus("Camera stopped.");
-  }
+    function openSheet() {
+      document.getElementById("sheetBackdrop").classList.add("show");
+      document.getElementById("sheet").classList.add("show");
+    }
 
-  function showResult(text){
-    const box = document.getElementById("resultBox");
-    const out = document.getElementById("resultText");
-    out.innerText = text;
-    box.style.display = "block";
-  }
+    function closeSheet() {
+      document.getElementById("sheetBackdrop").classList.remove("show");
+      document.getElementById("sheet").classList.remove("show");
+    }
 
-  function copyResult(){
-    if(!lastScannedText){ alert("No scan data"); return; }
-    navigator.clipboard?.writeText(lastScannedText);
-    alert("Copied ✔");
-  }
+    function openPanel(type) {
+      closeSheet();
 
-  function payNow(){
-    if(!lastScannedText){ alert("No scan data"); return; }
+      const panel = document.getElementById("panel");
+      const backdrop = document.getElementById("panelBackdrop");
+      const title = document.getElementById("panelTitle");
+      const body = document.getElementById("panelBody");
 
-    // store receiver and open transaction page
-    sessionStorage.setItem("quick_receiver", lastScannedText); // ✅ already trimmed
-    window.location = "transaction.html";
-  }
+      const content = getPanelContent(type);
+      title.textContent = content.title;
+      body.innerHTML = content.body;
 
-  function setStatus(msg){
-    document.getElementById("status").innerHTML = msg;
-  }
+      backdrop.classList.add("show");
+      panel.classList.add("show");
+    }
 
-  function back(){
-    stopScan();
-    window.location="dashboard.html";
-  }
+    function closePanel() {
+      document.getElementById("panelBackdrop").classList.remove("show");
+      document.getElementById("panel").classList.remove("show");
+    }
 
-  // auto start when page opens (nice for mobile)
-  window.addEventListener("load", () => startScan());
+    function getPanelContent(type) {
+      const map = {
+        steps: {
+          title: "Step by step",
+          body: `
+            <div class="miniCard">
+              <h4>How to scan and pay</h4>
+              <ul>
+                <li>Open ST PAY scan page.</li>
+                <li>Allow camera permission.</li>
+                <li>Keep QR inside the square frame.</li>
+                <li>User name will be detected automatically.</li>
+                <li>Tap continue and send money safely.</li>
+              </ul>
+            </div>
+            <div class="miniCard">
+              <h4>Manual option</h4>
+              <p>If QR is not available, enter mobile number or UPI ID and find the user directly.</p>
+            </div>
+            <div class="miniCard">
+              <h4>Tips</h4>
+              <ul>
+                <li>Use flashlight in low light.</li>
+                <li>Use scan image from gallery if QR screenshot is available.</li>
+                <li>Check user name before sending money.</li>
+              </ul>
+            </div>
+          `
+        },
 
-  // ✅ important: stop camera when leaving page
-  window.addEventListener("beforeunload", () => stopScan());
-</script>
+        homescreen: {
+          title: "Add scan shortcut to home screen",
+          body: `
+            <div class="miniCard">
+              <h4>For Chrome / mobile browser</h4>
+              <ul>
+                <li>Open ST PAY in browser.</li>
+                <li>Tap browser menu.</li>
+                <li>Select <strong>Add to Home screen</strong>.</li>
+                <li>Name it as <strong>ST PAY Scan</strong>.</li>
+                <li>Now scanner opens fast like app shortcut.</li>
+              </ul>
+            </div>
+            <div class="miniCard">
+              <h4>Best setup</h4>
+              <p>Pin this page for faster access during daily payments and QR scanning.</p>
+            </div>
+          `
+        },
+
+        receive: {
+          title: "Show QR to receive money",
+          body: `
+            <div class="receiveQR">
+              <div class="qrBox"></div>
+              <h4 style="margin:0 0 6px; font-size:18px;">Vivek</h4>
+              <p style="margin:0; color:#6b7280; font-size:13px;">vivek@stpay</p>
+              <div style="margin-top:14px;">
+                <span class="tag">✅ Receive to wallet</span>
+                <span class="tag">🔒 Secure QR</span>
+              </div>
+            </div>
+            <div class="miniCard" style="margin-top:12px;">
+              <h4>How it works</h4>
+              <p>Show this QR to others. They scan and your ST PAY receive details open instantly.</p>
+            </div>
+          `
+        },
+
+        summary: {
+          title: "Monthly spend summary",
+          body: `
+            <div class="statRow">
+              <div class="statBox">
+                <div class="big">₹8,420</div>
+                <div class="small">Spent this month</div>
+              </div>
+              <div class="statBox">
+                <div class="big">₹3,180</div>
+                <div class="small">Received</div>
+              </div>
+            </div>
+            <div class="statRow">
+              <div class="statBox">
+                <div class="big">26</div>
+                <div class="small">Transactions</div>
+              </div>
+              <div class="statBox">
+                <div class="big">₹324</div>
+                <div class="small">Average spend</div>
+              </div>
+            </div>
+            <div class="miniCard" style="margin-top:12px;">
+              <h4>Top categories</h4>
+              <ul>
+                <li>Food & snacks - ₹3,100</li>
+                <li>Friends transfer - ₹2,450</li>
+                <li>Travel - ₹1,870</li>
+                <li>Recharge / utility - ₹1,000</li>
+              </ul>
+            </div>
+          `
+        },
+
+        powers: {
+          title: "Your ST PAY superpowers",
+          body: `
+            <div class="miniCard">
+              <h4>⚡ Lightning scan</h4>
+              <p>Fast camera scanner with manual UPI fallback.</p>
+            </div>
+            <div class="miniCard">
+              <h4>🛡️ Safe pay</h4>
+              <p>Verify user name before pay and avoid wrong transfer.</p>
+            </div>
+            <div class="miniCard">
+              <h4>🎁 Cashback ready</h4>
+              <p>Use promo flow and reward engine for future upgrades.</p>
+            </div>
+            <div class="miniCard">
+              <h4>📊 Smart insights</h4>
+              <p>View spend summary, history and payment patterns.</p>
+            </div>
+          `
+        },
+
+        settings: {
+          title: "UPI settings",
+          body: `
+            <div class="miniCard">
+              <h4>Primary UPI ID</h4>
+              <p>vivek@stpay</p>
+            </div>
+            <div class="miniCard">
+              <h4>Linked bank account</h4>
+              <p>ST Bank • Savings • **** 2401</p>
+            </div>
+            <div class="miniCard">
+              <h4>Security</h4>
+              <ul>
+                <li>UPI PIN enabled</li>
+                <li>App lock enabled</li>
+                <li>Device bound session active</li>
+              </ul>
+            </div>
+            <div class="miniCard">
+              <h4>Scan preferences</h4>
+              <ul>
+                <li>Auto-detect QR: ON</li>
+                <li>Sound on success: ON</li>
+                <li>Auto-open send page: ON</li>
+              </ul>
+            </div>
+          `
+        }
+      };
+
+      return map[type] || {
+        title: "ST PAY",
+        body: `<div class="miniCard"><h4>Coming soon</h4><p>This section will be available soon.</p></div>`
+      };
+    }
+
+    function triggerImageScan() {
+      closeSheet();
+      document.getElementById("imageInput").click();
+    }
+
+    async function scanImageFile(file) {
+      if (!file) return;
+
+      try {
+        setResult("Scanning image...");
+
+        if (!html5QrCode) {
+          html5QrCode = new Html5Qrcode("reader");
+        }
+
+        const decodedText = await html5QrCode.scanFile(file, true);
+        handleDetectedValue(decodedText, "image");
+        showToast("QR image scanned successfully");
+      } catch (err) {
+        console.log(err);
+        setResult("Could not read QR from image", "err");
+        showToast("Image scan failed");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("manualInput").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") findUser();
+      });
+
+      document.getElementById("imageInput").addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        await scanImageFile(file);
+        e.target.value = "";
+      });
+
+      updateTorchText();
+      setTimeout(startScanner, 300);
+    });
+  </script>
+</body>
+</html>

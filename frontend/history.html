@@ -12,12 +12,13 @@
     }
 
     :root{
-      --bg:#f5f7fb;
+      --bg:#ffffff;
       --card:#ffffff;
       --text:#111827;
       --muted:#6b7280;
       --line:#e5e7eb;
       --brand:#111827;
+      --brand-soft:#f3f4f6;
       --green:#16a34a;
       --green-soft:#dcfce7;
       --red:#dc2626;
@@ -26,12 +27,13 @@
       --blue-soft:#dbeafe;
       --amber:#d97706;
       --amber-soft:#fef3c7;
-      --shadow:0 10px 26px rgba(15,23,42,0.08);
+      --shadow:0 10px 30px rgba(15,23,42,0.08);
+      --radius:18px;
     }
 
     body{
       margin:0;
-      font-family:Inter,Segoe UI,Arial,sans-serif;
+      font-family: "Segoe UI", Arial, sans-serif;
       background:var(--bg);
       color:var(--text);
     }
@@ -40,160 +42,146 @@
       max-width:430px;
       margin:0 auto;
       min-height:100vh;
-      padding:14px 14px 30px;
+      padding:14px 14px 28px;
+      background:#fff;
+      position:relative;
     }
 
     .topbar{
       display:flex;
       align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:14px;
-    }
-
-    .title{
-      font-size:28px;
-      font-weight:900;
-      letter-spacing:-0.5px;
-    }
-
-    .sub{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:4px;
-    }
-
-    .btn{
-      border:none;
-      background:#fff;
-      color:#111;
-      padding:10px 13px;
-      border-radius:14px;
-      font-weight:800;
-      cursor:pointer;
-      box-shadow:var(--shadow);
-    }
-
-    .hero{
-      background:linear-gradient(135deg,#0f172a,#1e293b 55%,#334155);
-      color:#fff;
-      border-radius:28px;
-      padding:18px;
-      box-shadow:0 14px 30px rgba(15,23,42,0.22);
-      margin-bottom:14px;
-      position:relative;
-      overflow:hidden;
-    }
-
-    .hero::after{
-      content:"";
-      position:absolute;
-      width:160px;
-      height:160px;
-      border-radius:50%;
-      right:-35px;
-      top:-35px;
-      background:rgba(255,255,255,0.07);
-    }
-
-    .heroLabel{
-      font-size:12px;
-      opacity:0.82;
-      position:relative;
-      z-index:1;
-    }
-
-    .heroUser{
-      font-size:24px;
-      font-weight:900;
-      margin-top:4px;
-      position:relative;
-      z-index:1;
-    }
-
-    .heroDate{
-      margin-top:8px;
-      font-size:12px;
-      opacity:0.8;
-      position:relative;
-      z-index:1;
-    }
-
-    .heroGrid{
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr;
       gap:10px;
-      margin-top:16px;
-      position:relative;
-      z-index:1;
-    }
-
-    .heroStat{
-      background:rgba(255,255,255,0.09);
-      border-radius:18px;
-      padding:12px 10px;
-    }
-
-    .heroStatLabel{
-      font-size:11px;
-      opacity:0.75;
-      margin-bottom:4px;
-    }
-
-    .heroStatValue{
-      font-size:16px;
-      font-weight:900;
-    }
-
-    .panel{
-      background:var(--card);
-      border-radius:24px;
-      padding:14px;
-      box-shadow:var(--shadow);
-      margin-bottom:14px;
-    }
-
-    .panelTitle{
-      font-size:14px;
-      font-weight:900;
       margin-bottom:10px;
-    }
-
-    .input, .select{
-      width:100%;
-      padding:13px 14px;
-      border:1px solid var(--line);
-      border-radius:16px;
-      font-size:15px;
-      outline:none;
+      position:sticky;
+      top:0;
+      z-index:10;
       background:#fff;
+      padding:6px 0 10px;
     }
 
-    .input:focus, .select:focus{
-      border-color:#b7c6ff;
-      box-shadow:0 0 0 3px rgba(37,99,235,0.08);
+    .back-btn{
+      width:42px;
+      height:42px;
+      border:none;
+      border-radius:50%;
+      background:#f3f4f6;
+      color:#111;
+      font-size:22px;
+      cursor:pointer;
+      flex-shrink:0;
     }
 
-    .row{
-      display:flex;
-      gap:9px;
-      margin-bottom:10px;
+    .menu-btn{
+      width:42px;
+      height:42px;
+      border:none;
+      border-radius:50%;
+      background:#f3f4f6;
+      color:#111;
+      font-size:22px;
+      cursor:pointer;
+      flex-shrink:0;
+      margin-left:auto;
     }
 
-    .row:last-child{
-      margin-bottom:0;
-    }
-
-    .row > *{
+    .title-wrap{
       flex:1;
     }
 
-    .chipRow{
+    .title{
+      font-size:24px;
+      font-weight:800;
+      margin:0;
+      letter-spacing:-0.5px;
+    }
+
+    .subtitle{
+      margin-top:2px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .top-menu{
+      position:absolute;
+      top:62px;
+      right:0;
+      width:210px;
+      background:#fff;
+      border:1px solid #eef2f7;
+      border-radius:18px;
+      box-shadow:0 18px 40px rgba(15,23,42,0.14);
+      padding:8px;
+      display:none;
+      z-index:30;
+    }
+
+    .top-menu.show{
+      display:block;
+    }
+
+    .menu-item{
+      width:100%;
+      border:none;
+      background:#fff;
+      text-align:left;
+      padding:13px 14px;
+      border-radius:14px;
+      font-size:14px;
+      font-weight:700;
+      color:#111827;
+      cursor:pointer;
       display:flex;
-      gap:8px;
-      overflow:auto;
-      margin-bottom:12px;
-      padding-bottom:2px;
+      align-items:center;
+      gap:10px;
+    }
+
+    .menu-item:hover{
+      background:#f9fafb;
+    }
+
+    .search-box{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      background:#f9fafb;
+      border:1px solid #e5e7eb;
+      border-radius:16px;
+      padding:12px 14px;
+      margin:8px 0 14px;
+    }
+
+    .search-box input{
+      border:none;
+      outline:none;
+      background:transparent;
+      width:100%;
+      font-size:14px;
+      color:#111;
+    }
+
+    .search-icon{
+      font-size:18px;
+      color:#6b7280;
+    }
+
+    .section-label{
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:8px;
+      color:#111827;
+    }
+
+    .filters{
+      display:flex;
+      gap:10px;
+      overflow-x:auto;
+      padding-bottom:8px;
+      margin-bottom:14px;
+      scrollbar-width:none;
+    }
+
+    .filters::-webkit-scrollbar{
+      display:none;
     }
 
     .chip{
@@ -201,11 +189,16 @@
       border:none;
       border-radius:999px;
       padding:10px 14px;
-      background:#eef2ff;
-      color:#1d4ed8;
       font-size:13px;
-      font-weight:800;
+      font-weight:700;
       cursor:pointer;
+      background:#f3f4f6;
+      color:#111827;
+      transition:0.2s ease;
+      box-shadow:none;
+      display:flex;
+      align-items:center;
+      gap:6px;
     }
 
     .chip.active{
@@ -213,1071 +206,1368 @@
       color:#fff;
     }
 
-    .summary{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-bottom:14px;
+    .summary-card{
+      background:#111827;
+      color:#fff;
+      border-radius:22px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      margin-bottom:16px;
     }
 
-    .card{
-      background:#fff;
-      border-radius:20px;
-      padding:14px;
-      border:1px solid #edf2f7;
-      box-shadow:0 6px 18px rgba(15,23,42,0.04);
+    .summary-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
     }
 
-    .label{
-      font-size:12px;
-      color:var(--muted);
-      font-weight:700;
+    .summary-label{
+      font-size:13px;
+      opacity:0.8;
       margin-bottom:6px;
     }
 
-    .value{
-      font-size:22px;
-      font-weight:900;
-    }
-
-    .small{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:6px;
-    }
-
-    .sectionHead{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      margin:14px 0 10px;
-    }
-
-    .sectionTitle{
-      font-size:16px;
-      font-weight:900;
-    }
-
-    .count{
-      background:#e5e7eb;
-      color:#111827;
-      font-size:12px;
+    .summary-value{
+      font-size:28px;
       font-weight:800;
-      padding:6px 10px;
-      border-radius:999px;
+      line-height:1;
+      letter-spacing:-0.8px;
     }
 
-    .list{
+    .summary-mini{
+      text-align:right;
+    }
+
+    .summary-mini .mini-label{
+      font-size:12px;
+      opacity:0.8;
+    }
+
+    .summary-mini .mini-value{
+      font-size:15px;
+      font-weight:700;
+      margin-top:4px;
+    }
+
+    .history-list{
       display:flex;
       flex-direction:column;
       gap:12px;
+      margin-bottom:16px;
     }
 
-    .tx{
+    .history-card{
       background:#fff;
-      border-radius:24px;
+      border:1px solid #eef2f7;
+      border-radius:20px;
       padding:14px;
-      box-shadow:var(--shadow);
-      border:1px solid #edf0f5;
+      box-shadow:0 8px 20px rgba(15,23,42,0.05);
+      cursor:pointer;
+      transition:0.18s ease;
     }
 
-    .tx.deleted{
-      opacity:0.65;
-      border:1px dashed #f59e0b;
-      background:#fffdf7;
+    .history-card:hover{
+      transform:translateY(-1px);
     }
 
-    .txTop{
+    .row1{
       display:flex;
-      align-items:flex-start;
       justify-content:space-between;
-      gap:12px;
+      align-items:flex-start;
+      gap:10px;
+      margin-bottom:10px;
     }
 
-    .txLeft{
+    .user-wrap{
       display:flex;
+      align-items:center;
       gap:12px;
-      flex:1;
       min-width:0;
     }
 
-    .icon{
-      width:52px;
-      height:52px;
-      border-radius:18px;
+    .avatar{
+      width:48px;
+      height:48px;
+      border-radius:50%;
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:20px;
-      font-weight:900;
+      font-size:18px;
+      font-weight:800;
+      color:#111;
+      background:#f3f4f6;
       flex-shrink:0;
     }
 
-    .icon.sent{
-      background:var(--red-soft);
-      color:var(--red);
+    .info{
+      min-width:0;
     }
 
-    .icon.received{
-      background:var(--green-soft);
-      color:var(--green);
-    }
-
-    .icon.deposit{
-      background:var(--blue-soft);
-      color:var(--blue);
-    }
-
-    .txName{
+    .name{
       font-size:16px;
-      font-weight:900;
-      margin-bottom:4px;
-      line-height:1.25;
+      font-weight:800;
+      color:#111827;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:180px;
     }
 
-    .txMeta{
+    .meta{
+      margin-top:4px;
       font-size:12px;
-      color:var(--muted);
-      line-height:1.5;
+      color:#6b7280;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:200px;
     }
 
-    .badge{
-      display:inline-block;
-      margin-top:7px;
-      padding:5px 10px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:900;
-    }
-
-    .badge.sent{
-      background:var(--red-soft);
-      color:var(--red);
-    }
-
-    .badge.received{
-      background:var(--green-soft);
-      color:var(--green);
-    }
-
-    .badge.deposit{
-      background:var(--blue-soft);
-      color:var(--blue);
-    }
-
-    .badge.deleted{
-      background:var(--amber-soft);
-      color:var(--amber);
-    }
-
-    .txRight{
+    .amount-wrap{
       text-align:right;
-      min-width:110px;
       flex-shrink:0;
     }
 
     .amount{
-      font-size:19px;
+      font-size:17px;
+      font-weight:800;
+    }
+
+    .amount.credit{
+      color:var(--green);
+    }
+
+    .amount.debit{
+      color:var(--red);
+    }
+
+    .mini-date{
+      margin-top:4px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .row2{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .tag{
+      font-size:11px;
+      font-weight:700;
+      padding:7px 10px;
+      border-radius:999px;
+    }
+
+    .tag.status-success{
+      background:var(--green-soft);
+      color:var(--green);
+    }
+
+    .tag.status-failed{
+      background:var(--red-soft);
+      color:var(--red);
+    }
+
+    .tag.status-pending{
+      background:var(--amber-soft);
+      color:var(--amber);
+    }
+
+    .tag.method{
+      background:var(--blue-soft);
+      color:var(--blue);
+    }
+
+    .tag.type{
+      background:#f3f4f6;
+      color:#111827;
+    }
+
+    .empty{
+      text-align:center;
+      padding:40px 18px;
+      color:#6b7280;
+      background:#f9fafb;
+      border:1px dashed #d1d5db;
+      border-radius:18px;
+      font-size:14px;
+    }
+
+    .detail-panel,
+    .statement-panel,
+    .help-panel,
+    .feedback-panel,
+    .filter-panel{
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:-100%;
+      width:min(430px, 100%);
+      background:#fff;
+      border-radius:26px 26px 0 0;
+      box-shadow:0 -10px 35px rgba(15,23,42,0.15);
+      z-index:50;
+      padding:18px 16px 28px;
+      transition:0.28s ease;
+      max-height:85vh;
+      overflow:auto;
+    }
+
+    .detail-panel.show,
+    .statement-panel.show,
+    .help-panel.show,
+    .feedback-panel.show,
+    .filter-panel.show{
+      bottom:0;
+    }
+
+    .overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.28);
+      opacity:0;
+      pointer-events:none;
+      transition:0.25s ease;
+      z-index:40;
+    }
+
+    .overlay.show{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .drag{
+      width:54px;
+      height:6px;
+      background:#d1d5db;
+      border-radius:999px;
+      margin:0 auto 14px;
+    }
+
+    .detail-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .detail-title{
+      font-size:20px;
+      font-weight:800;
+      margin:0;
+    }
+
+    .close-btn{
+      border:none;
+      background:#f3f4f6;
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      font-size:18px;
+      cursor:pointer;
+    }
+
+    .big-status{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 14px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:800;
+      margin-bottom:14px;
+    }
+
+    .success-bg{
+      background:var(--green-soft);
+      color:var(--green);
+    }
+
+    .failed-bg{
+      background:var(--red-soft);
+      color:var(--red);
+    }
+
+    .pending-bg{
+      background:var(--amber-soft);
+      color:var(--amber);
+    }
+
+    .detail-amount{
+      font-size:34px;
       font-weight:900;
+      letter-spacing:-1px;
+      margin-bottom:16px;
+    }
+
+    .detail-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .detail-box{
+      background:#f9fafb;
+      border:1px solid #eef2f7;
+      border-radius:18px;
+      padding:14px;
+    }
+
+    .detail-box .label{
+      font-size:12px;
+      color:#6b7280;
       margin-bottom:6px;
     }
 
-    .amount.sent{ color:var(--red); }
-    .amount.received{ color:var(--green); }
-    .amount.deposit{ color:var(--blue); }
-
-    .status{
-      font-size:12px;
-      color:var(--muted);
+    .detail-box .value{
+      font-size:15px;
       font-weight:800;
-      text-transform:capitalize;
+      color:#111827;
+      word-break:break-word;
     }
 
-    .actionBtns{
+    .detail-full{
+      background:#fff;
+      border:1px solid #eef2f7;
+      border-radius:18px;
+      overflow:hidden;
+    }
+
+    .detail-row{
       display:flex;
-      gap:8px;
-      justify-content:flex-end;
-      margin-top:8px;
-      flex-wrap:wrap;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 16px;
+      border-bottom:1px solid #f3f4f6;
     }
 
-    .miniBtn{
+    .detail-row:last-child{
+      border-bottom:none;
+    }
+
+    .detail-row .left{
+      font-size:13px;
+      color:#6b7280;
+    }
+
+    .detail-row .right{
+      font-size:14px;
+      font-weight:800;
+      color:#111827;
+      text-align:right;
+      max-width:60%;
+      word-break:break-word;
+    }
+
+    .statement-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:14px;
+      margin-bottom:16px;
+    }
+
+    .action-btn{
       border:none;
-      border-radius:12px;
-      padding:8px 12px;
-      font-size:12px;
+      background:#111827;
+      color:#fff;
+      border-radius:16px;
+      padding:14px 14px;
+      font-size:14px;
       font-weight:800;
       cursor:pointer;
     }
 
-    .miniBtn.view{
-      background:#eef2ff;
-      color:#1d4ed8;
+    .action-btn.light{
+      background:#f3f4f6;
+      color:#111827;
     }
 
-    .miniBtn.delete{
-      background:#fee2e2;
-      color:#b91c1c;
+    .statement-card{
+      background:linear-gradient(180deg,#111827,#1f2937);
+      color:#fff;
+      border-radius:22px;
+      padding:18px;
+      margin-bottom:14px;
     }
 
-    .miniBtn.restore{
-      background:#dcfce7;
-      color:#166534;
+    .statement-card .small{
+      font-size:12px;
+      opacity:0.78;
+      margin-bottom:8px;
     }
 
-    .details{
-      margin-top:13px;
-      padding-top:12px;
-      border-top:1px solid #edf0f5;
+    .statement-card .big{
+      font-size:28px;
+      font-weight:900;
+      letter-spacing:-0.8px;
+    }
+
+    .statement-meta-grid{
       display:grid;
       grid-template-columns:1fr 1fr;
-      gap:10px;
+      gap:12px;
+      margin-bottom:14px;
     }
 
-    .detail{
-      background:#f8fafc;
-      border-radius:16px;
-      padding:10px;
+    .help-card,
+    .feedback-card,
+    .filter-card{
+      border:1px solid #eef2f7;
+      background:#fff;
+      border-radius:20px;
+      padding:16px;
+      margin-bottom:12px;
     }
 
-    .detailLabel{
-      font-size:10px;
-      color:var(--muted);
-      text-transform:uppercase;
-      letter-spacing:.6px;
-      font-weight:900;
+    .help-title,
+    .feedback-title,
+    .filter-title{
+      font-size:16px;
+      font-weight:800;
+      margin:0 0 10px;
+    }
+
+    .help-text,
+    .feedback-text{
+      color:#6b7280;
+      font-size:13px;
+      line-height:1.6;
+      margin-bottom:12px;
+    }
+
+    .help-point{
+      background:#f9fafb;
+      border:1px solid #eef2f7;
+      border-radius:14px;
+      padding:12px;
+      margin-bottom:10px;
+      font-size:13px;
+      color:#111827;
+    }
+
+    .help-point b{
+      display:block;
       margin-bottom:4px;
     }
 
-    .detailValue{
-      font-size:13px;
-      font-weight:800;
-      word-break:break-word;
-      color:#0f172a;
-    }
-
-    .message, .empty, .loading{
+    .feedback-card input,
+    .feedback-card textarea{
+      width:100%;
+      border:1px solid #dbe1ea;
+      border-radius:14px;
+      padding:12px 13px;
+      font-size:14px;
+      outline:none;
+      margin-bottom:10px;
+      font-family:inherit;
       background:#fff;
-      border-radius:24px;
-      padding:20px 16px;
-      text-align:center;
-      box-shadow:var(--shadow);
-      color:var(--muted);
+    }
+
+    .feedback-card textarea{
+      min-height:120px;
+      resize:none;
+    }
+
+    .submit-btn{
+      width:100%;
+      border:none;
+      background:#111827;
+      color:#fff;
+      border-radius:16px;
+      padding:14px;
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .secondary-btn{
+      width:100%;
+      border:none;
+      background:#f3f4f6;
+      color:#111827;
+      border-radius:16px;
+      padding:14px;
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+      margin-top:10px;
+    }
+
+    .filter-option{
+      width:100%;
+      text-align:left;
+      border:none;
+      background:#f9fafb;
+      border-radius:14px;
+      padding:13px 14px;
+      font-size:14px;
       font-weight:700;
+      color:#111827;
+      margin-bottom:10px;
+      cursor:pointer;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
     }
 
-    .message.error{
-      background:#fff1f2;
-      color:#be123c;
-      border:1px solid #fecdd3;
-      text-align:left;
+    .filter-option.active-option{
+      background:#111827;
+      color:#fff;
     }
 
-    .message.warning{
-      background:#fff7ed;
-      color:#9a3412;
-      border:1px solid #fed7aa;
-      text-align:left;
+    .toast{
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:24px;
+      background:#111827;
+      color:#fff;
+      padding:12px 16px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:700;
+      z-index:80;
+      opacity:0;
+      pointer-events:none;
+      transition:0.25s ease;
+      box-shadow:0 12px 24px rgba(0,0,0,0.18);
     }
 
-    @media (max-width:450px){
-      .heroGrid, .summary, .details{
-        grid-template-columns:1fr;
+    .toast.show{
+      opacity:1;
+    }
+
+    @media print{
+      body *{
+        visibility:hidden;
+      }
+      #statementPrintArea,
+      #statementPrintArea *{
+        visibility:visible;
+      }
+      #statementPrintArea{
+        position:absolute;
+        left:0;
+        top:0;
+        width:100%;
+        background:#fff;
+        color:#111;
+        padding:20px;
+      }
+    }
+
+    @media (max-width:440px){
+      .detail-panel,
+      .statement-panel,
+      .help-panel,
+      .feedback-panel,
+      .filter-panel{
+        width:100%;
       }
     }
   </style>
 </head>
 <body>
   <div class="app">
+
     <div class="topbar">
-      <div>
+      <button class="back-btn" onclick="goBack()">←</button>
+
+      <div class="title-wrap">
         <div class="title">History</div>
-        <div class="sub">ST PAY transaction history</div>
+        <div class="subtitle">All your ST PAY transactions</div>
       </div>
-      <button class="btn" id="refreshBtn">Refresh</button>
+
+      <button class="menu-btn" onclick="toggleTopMenu(event)">⋮</button>
+
+      <div class="top-menu" id="topMenu">
+        <button class="menu-item" onclick="openStatementPanel()">📄 Statement</button>
+        <button class="menu-item" onclick="openHelpPanel()">🛟 Get Help</button>
+        <button class="menu-item" onclick="openFeedbackPanel()">💬 Send Feedback</button>
+      </div>
     </div>
 
-    <div class="hero">
-      <div class="heroLabel">Account holder</div>
-      <div class="heroUser" id="heroUser">Loading...</div>
-      <div class="heroDate" id="todayDate">-</div>
+    <div class="search-box">
+      <div class="search-icon">🔍</div>
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Search name, type, method, status..."
+        oninput="renderHistory()"
+      />
+    </div>
 
-      <div class="heroGrid">
-        <div class="heroStat">
-          <div class="heroStatLabel">Transactions</div>
-          <div class="heroStatValue" id="heroTxnCount">0</div>
+    <div class="section-label">Quick Filters</div>
+    <div class="filters" id="filters">
+      <button class="chip active" onclick="resetAllFilters()">All</button>
+      <button class="chip" id="statusChip" onclick="openFilterPanel('status')">Status ⌄</button>
+      <button class="chip" id="methodChip" onclick="openFilterPanel('method')">Payment Method ⌄</button>
+      <button class="chip" id="dateChip" onclick="openFilterPanel('date')">Date ⌄</button>
+      <button class="chip" id="amountChip" onclick="openFilterPanel('amount')">Amount ⌄</button>
+      <button class="chip" id="typeChip" onclick="openFilterPanel('type')">Payment Type ⌄</button>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-top">
+        <div>
+          <div class="summary-label">Total Transactions</div>
+          <div class="summary-value" id="totalCount">0</div>
         </div>
-        <div class="heroStat">
-          <div class="heroStatLabel">Money In</div>
-          <div class="heroStatValue" id="heroMoneyIn">₹0</div>
-        </div>
-        <div class="heroStat">
-          <div class="heroStatLabel">Money Out</div>
-          <div class="heroStatValue" id="heroMoneyOut">₹0</div>
+        <div class="summary-mini">
+          <div class="mini-label">Last Updated</div>
+          <div class="mini-value" id="updatedTime">--</div>
         </div>
       </div>
     </div>
 
-    <div class="panel">
-      <div class="panelTitle">Search and sort</div>
-      <div class="row">
-        <input id="searchInput" class="input" type="text" placeholder="Search by person, ID, reference, amount, date, block, hash">
-      </div>
-      <div class="row">
-        <select id="sortSelect" class="select">
-          <option value="latest">Latest first</option>
-          <option value="oldest">Oldest first</option>
-          <option value="high">Amount high to low</option>
-          <option value="low">Amount low to high</option>
-        </select>
+    <div class="history-list" id="historyList"></div>
+  </div>
 
-        <select id="showDeletedSelect" class="select">
-          <option value="hide">Hide deleted</option>
-          <option value="show">Show deleted</option>
-        </select>
-      </div>
+  <div class="overlay" id="overlay" onclick="closeAllPanels()"></div>
+
+  <div class="detail-panel" id="detailPanel">
+    <div class="drag"></div>
+    <div class="detail-head">
+      <h3 class="detail-title">Transaction Details</h3>
+      <button class="close-btn" onclick="closeDetails()">✕</button>
+    </div>
+    <div id="detailContent"></div>
+  </div>
+
+  <div class="statement-panel" id="statementPanel">
+    <div class="drag"></div>
+    <div class="detail-head">
+      <h3 class="detail-title">Account Statement</h3>
+      <button class="close-btn" onclick="closeStatementPanel()">✕</button>
     </div>
 
-    <div class="chipRow">
-      <button class="chip active" data-filter="all">All</button>
-      <button class="chip" data-filter="sent">Sent</button>
-      <button class="chip" data-filter="received">Received</button>
-      <button class="chip" data-filter="deposit">Added</button>
+    <div id="statementPrintArea">
+      <div class="statement-card">
+        <div class="small">ST PAY Statement</div>
+        <div class="big" id="statementUserName">User</div>
+        <div class="small" id="statementGeneratedAt">Generated on --</div>
+      </div>
+
+      <div class="statement-meta-grid">
+        <div class="detail-box">
+          <div class="label">Total Transactions</div>
+          <div class="value" id="stmtTotalCount">0</div>
+        </div>
+        <div class="detail-box">
+          <div class="label">Total Sent</div>
+          <div class="value" id="stmtTotalSent">₹0</div>
+        </div>
+        <div class="detail-box">
+          <div class="label">Total Received</div>
+          <div class="value" id="stmtTotalReceived">₹0</div>
+        </div>
+        <div class="detail-box">
+          <div class="label">Successful</div>
+          <div class="value" id="stmtSuccessCount">0</div>
+        </div>
+      </div>
+
+      <div class="detail-full" id="statementRows"></div>
     </div>
 
-    <div class="summary">
-      <div class="card">
-        <div class="label">Net flow</div>
-        <div class="value" id="netFlow">₹0</div>
-        <div class="small">Incoming minus outgoing</div>
-      </div>
-
-      <div class="card">
-        <div class="label">History range</div>
-        <div class="value" style="font-size:16px;" id="historyRange">-</div>
-        <div class="small">From first to latest transaction</div>
-      </div>
-
-      <div class="card">
-        <div class="label">Total received</div>
-        <div class="value" id="receivedTotal">₹0</div>
-        <div class="small">Money received to this account</div>
-      </div>
-
-      <div class="card">
-        <div class="label">Total sent</div>
-        <div class="value" id="sentTotal">₹0</div>
-        <div class="small">Money sent from this account</div>
-      </div>
-    </div>
-
-    <div id="messageBox"></div>
-
-    <div class="sectionHead">
-      <div class="sectionTitle">All history entries</div>
-      <div class="count" id="countBadge">0</div>
-    </div>
-
-    <div class="list" id="historyList">
-      <div class="loading">Loading history...</div>
+    <div class="statement-actions">
+      <button class="action-btn" onclick="downloadStatement()">Download</button>
+      <button class="action-btn light" onclick="shareStatement()">Share</button>
     </div>
   </div>
 
-  <script>
-    let allHistory = [];
-    let filteredHistory = [];
-    let currentFilter = "all";
+  <div class="help-panel" id="helpPanel">
+    <div class="drag"></div>
+    <div class="detail-head">
+      <h3 class="detail-title">Get Help</h3>
+      <button class="close-btn" onclick="closeHelpPanel()">✕</button>
+    </div>
 
-    function escapeHtml(value){
-      if(value === null || value === undefined) return "";
-      return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
+    <div class="help-card">
+      <h4 class="help-title">Need help with your payments?</h4>
+      <div class="help-text">
+        We are here for you da. Un transaction history, payment status, statement, wrong entry, pending payment, balance mismatch ellam safe ah check panna help panrom.
+      </div>
+
+      <div class="help-point">
+        <b>Payment not showing?</b>
+        Refresh history once. Network issue or backend save issue irundha recent transaction konjam delay ah varalam.
+      </div>
+
+      <div class="help-point">
+        <b>Wrong amount or status?</b>
+        Transaction details open panni Transaction ID note pannu. Appo support ku share panna easy ah resolve pannalam.
+      </div>
+
+      <div class="help-point">
+        <b>Statement venuma?</b>
+        Top menu la Statement click panni download or share pannalaam.
+      </div>
+
+      <div class="help-point">
+        <b>Safe usage tip</b>
+        Password, OTP, private details yar kitayum share pannadhe. History la unfamiliar payment irundha immediate ah report pannu.
+      </div>
+
+      <button class="submit-btn" onclick="openFeedbackFromHelp()">Report an issue</button>
+      <button class="secondary-btn" onclick="showToast('Support request ready da')">Contact Support</button>
+    </div>
+  </div>
+
+  <div class="feedback-panel" id="feedbackPanel">
+    <div class="drag"></div>
+    <div class="detail-head">
+      <h3 class="detail-title">Send Feedback</h3>
+      <button class="close-btn" onclick="closeFeedbackPanel()">✕</button>
+    </div>
+
+    <div class="feedback-card">
+      <h4 class="feedback-title">Tell us what happened</h4>
+      <div class="feedback-text">
+        Un experience improve panna unga feedback romba mukkiyam da. Problem, suggestion, UI change, transaction issue, history bug edhu venalum sollu.
+      </div>
+
+      <input type="text" id="feedbackSubject" placeholder="Subject (example: History issue / Statement problem)" />
+      <textarea id="feedbackMessage" placeholder="Describe your issue or feedback..."></textarea>
+      <button class="submit-btn" onclick="submitFeedback()">Submit Feedback</button>
+      <button class="secondary-btn" onclick="prefillFeedback()">Auto Fill Example</button>
+    </div>
+  </div>
+
+  <div class="filter-panel" id="filterPanel">
+    <div class="drag"></div>
+    <div class="detail-head">
+      <h3 class="detail-title" id="filterPanelTitle">Filter Options</h3>
+      <button class="close-btn" onclick="closeFilterPanel()">✕</button>
+    </div>
+    <div class="filter-card" id="filterOptionsWrap"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let API = "";
+    if (
+      location.hostname === "127.0.0.1" ||
+      location.hostname === "localhost"
+    ) {
+      API = "http://127.0.0.1:5000";
+    } else {
+      API = location.origin;
     }
 
-    function formatAmount(value){
-      const num = Number(value || 0);
-      return num.toLocaleString("en-IN", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2
+    let allHistory = [];
+    let currentFilterPanel = "";
+    let selectedFilters = {
+      status: "all",
+      method: "all",
+      date: "latest",
+      amount: "default",
+      type: "all"
+    };
+
+    function goBack(){
+      if(document.referrer){
+        history.back();
+      }else{
+        window.location.href = "dashboard.html";
+      }
+    }
+
+    function getCurrentUser(){
+      return (sessionStorage.getItem("user") || "").trim();
+    }
+
+    function formatAmount(v){
+      const num = Number(v || 0);
+      return "₹" + num.toLocaleString("en-IN");
+    }
+
+    function formatDateTime(dateStr){
+      if(!dateStr) return "No date";
+      const d = new Date(dateStr);
+      if(isNaN(d)) return dateStr;
+      return d.toLocaleString("en-IN", {
+        day:"2-digit",
+        month:"short",
+        year:"numeric",
+        hour:"2-digit",
+        minute:"2-digit"
       });
     }
 
-    function normalizeType(rawType){
-      const t = String(rawType || "").toLowerCase().trim();
-
-      if (
-        t.includes("sent") ||
-        t.includes("debit") ||
-        t === "pay" ||
-        t === "send" ||
-        t === "paid" ||
-        t === "transfer_sent"
-      ) return "sent";
-
-      if (
-        t.includes("received") ||
-        t.includes("credit") ||
-        t === "receive" ||
-        t === "payment_received" ||
-        t === "transfer_received"
-      ) return "received";
-
-      if (
-        t.includes("deposit") ||
-        t.includes("topup") ||
-        t.includes("add") ||
-        t === "money_added"
-      ) return "deposit";
-
-      return "received";
-    }
-
-    function getType(tx){
-      return normalizeType(tx.type);
-    }
-
-    function getIcon(type){
-      if(type === "sent") return "↗";
-      if(type === "received") return "↙";
-      if(type === "deposit") return "₹";
-      return "•";
-    }
-
-    function getBadge(type){
-      if(type === "sent") return "Sent";
-      if(type === "received") return "Received";
-      if(type === "deposit") return "Added";
-      return "Done";
-    }
-
-    function getTitle(tx, type){
-      if(tx.title) return tx.title;
-      if(type === "sent") return `Sent to ${tx.to || "User"}`;
-      if(type === "received") return `Received from ${tx.from || "User"}`;
-      if(type === "deposit") return "Money added";
-      return "Transaction";
-    }
-
-    function normalizeStatus(status){
-      const s = String(status || "success").toLowerCase().trim();
-      return s || "success";
-    }
-
-    function parseDateValue(value){
-      if(!value) return null;
-
-      if (typeof value === "number") {
-        const d = new Date(value);
-        return isNaN(d.getTime()) ? null : d;
-      }
-
-      const raw = String(value).trim();
-      if(!raw) return null;
-
-      let d = new Date(raw);
-      if (!isNaN(d.getTime())) return d;
-
-      const m1 = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})(?:\s+(.*))?$/);
-      if (m1) {
-        let day = m1[1].padStart(2, "0");
-        let month = m1[2].padStart(2, "0");
-        let year = m1[3];
-        if (year.length === 2) year = "20" + year;
-        const time = m1[4] ? " " + m1[4] : "";
-        d = new Date(`${year}-${month}-${day}${time}`);
-        if (!isNaN(d.getTime())) return d;
-      }
-
-      return null;
-    }
-
-    function safeDate(tx){
-      const d = parseDateValue(tx.time || tx.date || tx.timestamp || "");
-      return d ? d.getTime() : 0;
-    }
-
-    function formatDisplayDate(value){
-      const d = parseDateValue(value);
-      if(!d) return value || "-";
-
-      const datePart = d.toLocaleDateString("en-IN", {
+    function formatShortDate(dateStr){
+      if(!dateStr) return "No date";
+      const d = new Date(dateStr);
+      if(isNaN(d)) return dateStr;
+      return d.toLocaleDateString("en-IN", {
         day:"2-digit",
         month:"short",
         year:"numeric"
       });
-
-      const timePart = d.toLocaleTimeString("en-IN", {
-        hour:"2-digit",
-        minute:"2-digit"
-      });
-
-      return `${datePart}, ${timePart}`;
     }
 
-    function buildSearchText(tx){
-      const rawDate = tx.time || "";
-      const d = parseDateValue(rawDate);
-      let dateSearch = rawDate ? String(rawDate) : "";
+    function getInitial(name){
+      return (name || "?").trim().charAt(0).toUpperCase();
+    }
 
-      if (d) {
-        const dd = String(d.getDate()).padStart(2, "0");
-        const mm = String(d.getMonth() + 1).padStart(2, "0");
-        const yyyy = String(d.getFullYear());
-        const shortMonth = d.toLocaleDateString("en-IN", { month: "short" }).toLowerCase();
-        const longMonth = d.toLocaleDateString("en-IN", { month: "long" }).toLowerCase();
+    function normalizeItem(item, currentUser){
+      const from = item.from || item.sender || item.sentBy || item.user || "";
+      const to = item.to || item.receiver || item.receivedBy || item.name || "";
+      const amount = Number(item.amount || item.value || 0);
+      const status = (item.status || "Success").toString();
+      const method = item.method || item.paymentMethod || "Bank";
+      const type = item.type || (
+        from.toLowerCase() === currentUser.toLowerCase() ? "Sent" :
+        to.toLowerCase() === currentUser.toLowerCase() ? "Received" :
+        "Payment"
+      );
+      const date = item.date || item.time || item.createdAt || item.timestamp || "";
+      const note = item.note || item.remark || item.description || "";
+      const txnId = item.txnId || item.transactionId || item.id || ("TXN" + Math.random().toString(36).slice(2,10).toUpperCase());
 
-        dateSearch += " " + [
-          `${dd}/${mm}/${yyyy}`,
-          `${yyyy}-${mm}-${dd}`,
-          `${dd}-${mm}-${yyyy}`,
-          `${dd} ${shortMonth} ${yyyy}`,
-          `${dd} ${longMonth} ${yyyy}`
-        ].join(" ");
+      let person = "";
+      if(type.toLowerCase() === "sent"){
+        person = to || "Unknown";
+      }else if(type.toLowerCase() === "received"){
+        person = from || "Unknown";
+      }else{
+        person = to || from || "Unknown";
       }
 
-      return [
-        tx.id,
-        tx.title,
-        tx.from,
-        tx.to,
-        tx.reference,
-        tx.status,
-        tx.amount,
-        tx.hash,
-        tx.previous_hash,
-        tx.block_no,
-        tx.time,
-        tx.deleted ? "deleted" : "active",
-        dateSearch
-      ].join(" ").toLowerCase();
+      return {
+        from,
+        to,
+        amount,
+        status,
+        method,
+        type,
+        date,
+        note,
+        txnId,
+        person
+      };
     }
 
-    function generateReference(tx){
-      if(tx.reference) return tx.reference;
-      if(tx.id) return "REF-" + String(tx.id).slice(-8).toUpperCase();
-      return "REF-NA";
-    }
-
-    function generateHash(tx){
-      if(tx.hash) return tx.hash;
-      if(tx.id) return "0x" + String(tx.id).toLowerCase().replace(/\s+/g, "");
-      return "0xstpayhash";
-    }
-
-    function generatePrevHash(tx){
-      if(tx.previous_hash) return tx.previous_hash;
-      return "0x0000000000000000";
-    }
-
-    function generateBlock(tx, index){
-      if(tx.block_no !== undefined && tx.block_no !== null && tx.block_no !== "") return tx.block_no;
-      return index + 1;
-    }
-
-    function setFilter(filter, btn){
-      currentFilter = filter;
-      document.querySelectorAll(".chip").forEach(el => el.classList.remove("active"));
-      btn.classList.add("active");
-      applyFilters();
-    }
-
-    function getCurrentUser(){
-      const possibleKeys = [
-        sessionStorage.getItem("user"),
-        sessionStorage.getItem("username"),
-        sessionStorage.getItem("stpay_user"),
-        localStorage.getItem("user"),
-        localStorage.getItem("username"),
-        localStorage.getItem("stpay_user")
-      ];
-
-      for(const item of possibleKeys){
-        if(item && String(item).trim()){
-          return String(item).trim();
-        }
-      }
-      return "";
-    }
-
-    function normalizeHistoryItems(rawList, currentUser){
-      if(!Array.isArray(rawList)) return [];
-
-      return rawList.map((tx, index) => {
-        const originalType = tx.type || tx.kind || tx.transaction_type || "";
-        const t = normalizeType(originalType);
-        const fromName = tx.from || tx.sender || tx.sent_from || "";
-        const toName = tx.to || tx.receiver || tx.sent_to || "";
-        const current = String(currentUser || "").toLowerCase().trim();
-        let finalType = t;
-
-        if (current) {
-          const fromLower = String(fromName || "").toLowerCase().trim();
-          const toLower = String(toName || "").toLowerCase().trim();
-
-          if (fromLower === current && toLower && t !== "deposit") {
-            finalType = "sent";
-          } else if (toLower === current && fromLower && t !== "deposit") {
-            finalType = "received";
-          }
-        }
-
-        let title = tx.title || tx.name || "";
-        if (!title) {
-          if (finalType === "sent") title = `Sent to ${toName || "User"}`;
-          else if (finalType === "received") title = `Received from ${fromName || "User"}`;
-          else title = "Money added";
-        }
-
-        return {
-          id: tx.id || tx.tx_id || tx.transaction_id || ("TXN" + (index + 1)),
-          user: tx.user || currentUser || "",
-          title,
-          from: fromName,
-          to: toName,
-          amount: Number(tx.amount || 0),
-          type: finalType,
-          status: normalizeStatus(tx.status),
-          time: tx.time || tx.date || tx.timestamp || "",
-          balance_after: tx.balance_after ?? tx.balance ?? tx.balanceAfter ?? "",
-          reference: tx.reference || tx.ref || "",
-          block_no: tx.block_no ?? tx.block ?? null,
-          hash: tx.hash || tx.tx_hash || "",
-          previous_hash: tx.previous_hash || tx.prev_hash || "",
-          deleted: Boolean(tx.deleted),
-          deleted_at: tx.deleted_at || "",
-          deleted_by: tx.deleted_by || ""
-        };
-      });
-    }
-
-    function renderSummary(history){
-      let moneyIn = 0;
-      let moneyOut = 0;
-
-      history.forEach(tx => {
-        if(tx.deleted) return;
-
-        const amount = Number(tx.amount || 0);
-        const type = getType(tx);
-
-        if(type === "sent") moneyOut += amount;
-        else moneyIn += amount;
-      });
-
-      const net = moneyIn - moneyOut;
-
-      document.getElementById("heroTxnCount").textContent = history.filter(tx => !tx.deleted).length;
-      document.getElementById("heroMoneyIn").textContent = "₹" + formatAmount(moneyIn);
-      document.getElementById("heroMoneyOut").textContent = "₹" + formatAmount(moneyOut);
-      document.getElementById("receivedTotal").textContent = "₹" + formatAmount(moneyIn);
-      document.getElementById("sentTotal").textContent = "₹" + formatAmount(moneyOut);
-      document.getElementById("netFlow").textContent = (net < 0 ? "-₹" : "₹") + formatAmount(Math.abs(net));
-      document.getElementById("countBadge").textContent = history.length;
-
-      const activeHistory = history.filter(tx => !tx.deleted);
-      if(activeHistory.length){
-        const sorted = [...activeHistory].sort((a,b) => safeDate(a) - safeDate(b));
-        const start = formatDisplayDate(sorted[0].time || "-");
-        const end = formatDisplayDate(sorted[sorted.length - 1].time || "-");
-        document.getElementById("historyRange").textContent = start + " to " + end;
-      } else {
-        document.getElementById("historyRange").textContent = "-";
-      }
-    }
-
-    function renderHistory(history){
+    async function loadHistory(){
+      const currentUser = getCurrentUser();
       const list = document.getElementById("historyList");
 
-      if(!history.length){
-        list.innerHTML = `<div class="empty">No history records found.</div>`;
+      if(!currentUser){
+        list.innerHTML = `<div class="empty">User login illa da. First login pannitu va.</div>`;
         return;
       }
 
-      list.innerHTML = history.map((tx, index) => {
-        const type = getType(tx);
-        const sign = type === "sent" ? "-" : "+";
-        const title = getTitle(tx, type);
-        const badge = tx.deleted ? "Deleted" : getBadge(type);
-        const badgeClass = tx.deleted ? "deleted" : type;
-        const reference = generateReference(tx);
-        const hash = generateHash(tx);
-        const prevHash = generatePrevHash(tx);
-        const block = generateBlock(tx, index);
-        const balanceAfter = tx.balance_after !== undefined && tx.balance_after !== null && tx.balance_after !== ""
-          ? "₹" + formatAmount(tx.balance_after)
-          : "-";
+      try{
+        const res = await fetch(`${API}/api/history/${encodeURIComponent(currentUser)}`);
+        const data = await res.json();
 
+        if(Array.isArray(data)){
+          allHistory = data.map(item => normalizeItem(item, currentUser));
+        } else if (Array.isArray(data.history)) {
+          allHistory = data.history.map(item => normalizeItem(item, currentUser));
+        } else {
+          allHistory = [];
+        }
+      }catch(err){
+        console.log("History load error:", err);
+        allHistory = [];
+      }
+
+      allHistory.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+      document.getElementById("totalCount").textContent = allHistory.length;
+      document.getElementById("updatedTime").textContent =
+        new Date().toLocaleTimeString("en-IN", { hour:"2-digit", minute:"2-digit" });
+
+      renderHistory();
+    }
+
+    function getFilteredHistory(){
+      const q = document.getElementById("searchInput").value.trim().toLowerCase();
+      let result = [...allHistory];
+
+      if(q){
+        result = result.filter(item =>
+          (item.person || "").toLowerCase().includes(q) ||
+          (item.status || "").toLowerCase().includes(q) ||
+          (item.method || "").toLowerCase().includes(q) ||
+          (item.type || "").toLowerCase().includes(q) ||
+          (item.date || "").toLowerCase().includes(q) ||
+          (item.txnId || "").toLowerCase().includes(q)
+        );
+      }
+
+      if(selectedFilters.status !== "all"){
+        result = result.filter(item => (item.status || "").toLowerCase() === selectedFilters.status);
+      }
+
+      if(selectedFilters.method !== "all"){
+        result = result.filter(item => (item.method || "").toLowerCase().includes(selectedFilters.method));
+      }
+
+      if(selectedFilters.type !== "all"){
+        result = result.filter(item => (item.type || "").toLowerCase() === selectedFilters.type);
+      }
+
+      if(selectedFilters.date === "latest"){
+        result.sort((a,b) => new Date(b.date) - new Date(a.date));
+      }else if(selectedFilters.date === "oldest"){
+        result.sort((a,b) => new Date(a.date) - new Date(b.date));
+      }
+
+      if(selectedFilters.amount === "high"){
+        result.sort((a,b) => Number(b.amount) - Number(a.amount));
+      }else if(selectedFilters.amount === "low"){
+        result.sort((a,b) => Number(a.amount) - Number(b.amount));
+      }
+
+      return result;
+    }
+
+    function getStatusClass(status){
+      const s = (status || "").toLowerCase();
+      if(s === "success") return "status-success";
+      if(s === "failed") return "status-failed";
+      return "status-pending";
+    }
+
+    function getStatusBgClass(status){
+      const s = (status || "").toLowerCase();
+      if(s === "success") return "success-bg";
+      if(s === "failed") return "failed-bg";
+      return "pending-bg";
+    }
+
+    function renderHistory(){
+      const list = document.getElementById("historyList");
+      const filtered = getFilteredHistory();
+
+      document.getElementById("totalCount").textContent = filtered.length;
+
+      if(!filtered.length){
+        list.innerHTML = `
+          <div class="empty">
+            No transactions found da.<br>
+            Search or filter change panni paru.
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = filtered.map((item, index) => {
+        const isCredit = (item.type || "").toLowerCase() === "received";
         return `
-          <div class="tx ${tx.deleted ? "deleted" : ""}">
-            <div class="txTop">
-              <div class="txLeft">
-                <div class="icon ${type}">${getIcon(type)}</div>
-                <div style="min-width:0;">
-                  <div class="txName">${escapeHtml(title)}</div>
-                  <div class="txMeta">${escapeHtml(formatDisplayDate(tx.time || "No date available"))}</div>
-                  <div class="badge ${badgeClass}">${badge}</div>
+          <div class="history-card" onclick="openDetailsByTxnId('${item.txnId}')">
+            <div class="row1">
+              <div class="user-wrap">
+                <div class="avatar">${getInitial(item.person)}</div>
+                <div class="info">
+                  <div class="name">${item.person}</div>
+                  <div class="meta">${item.type} • ${item.method}</div>
                 </div>
               </div>
 
-              <div class="txRight">
-                <div class="amount ${type}">${sign} ₹${formatAmount(tx.amount)}</div>
-                <div class="status">${escapeHtml(tx.status || "success")}</div>
-                <div class="actionBtns">
-                  ${tx.deleted
-                    ? `<button class="miniBtn restore" onclick="restoreHistory('${escapeHtml(tx.id)}')">Restore</button>`
-                    : `<button class="miniBtn delete" onclick="deleteHistory('${escapeHtml(tx.id)}')">Delete</button>`
-                  }
+              <div class="amount-wrap">
+                <div class="amount ${isCredit ? "credit" : "debit"}">
+                  ${isCredit ? "+" : "-"}${formatAmount(item.amount)}
                 </div>
+                <div class="mini-date">${formatShortDate(item.date)}</div>
               </div>
             </div>
 
-            <div class="details">
-              <div class="detail">
-                <div class="detailLabel">Transaction ID</div>
-                <div class="detailValue">${escapeHtml(tx.id || "-")}</div>
-              </div>
-
-              <div class="detail">
-                <div class="detailLabel">Reference</div>
-                <div class="detailValue">${escapeHtml(reference)}</div>
-              </div>
-
-              <div class="detail">
-                <div class="detailLabel">Sent From</div>
-                <div class="detailValue">${escapeHtml(tx.from || "-")}</div>
-              </div>
-
-              <div class="detail">
-                <div class="detailLabel">Sent To</div>
-                <div class="detailValue">${escapeHtml(tx.to || "-")}</div>
-              </div>
-
-              <div class="detail">
-                <div class="detailLabel">Date & Time</div>
-                <div class="detailValue">${escapeHtml(formatDisplayDate(tx.time || "-"))}</div>
-              </div>
-
-              <div class="detail">
-                <div class="detailLabel">Balance After</div>
-                <div class="detailValue">${escapeHtml(balanceAfter)}</div>
-              </div>
-
-              <div class="detail">
-                <div class="detailLabel">Block No</div>
-                <div class="detailValue">${escapeHtml(block)}</div>
-              </div>
-
-              <div class="detail">
-                <div class="detailLabel">Hash</div>
-                <div class="detailValue">${escapeHtml(hash)}</div>
-              </div>
-
-              <div class="detail">
-                <div class="detailLabel">Previous Hash</div>
-                <div class="detailValue">${escapeHtml(prevHash)}</div>
-              </div>
-
-              <div class="detail">
-                <div class="detailLabel">Deleted Status</div>
-                <div class="detailValue">${tx.deleted ? "Soft deleted" : "Active"}</div>
-              </div>
+            <div class="row2">
+              <div class="tag ${getStatusClass(item.status)}">${item.status}</div>
+              <div class="tag method">${item.method}</div>
+              <div class="tag type">${item.type}</div>
             </div>
           </div>
         `;
       }).join("");
+
+      updateChipState();
     }
 
-    function applyFilters(){
-      const searchEl = document.getElementById("searchInput");
-      const sortEl = document.getElementById("sortSelect");
-      const showDeletedEl = document.getElementById("showDeletedSelect");
+    function updateChipState(){
+      document.querySelectorAll(".chip").forEach(ch => ch.classList.remove("active"));
 
-      if(!searchEl || !sortEl || !showDeletedEl) return;
+      const isDefault =
+        selectedFilters.status === "all" &&
+        selectedFilters.method === "all" &&
+        selectedFilters.date === "latest" &&
+        selectedFilters.amount === "default" &&
+        selectedFilters.type === "all";
 
-      const query = searchEl.value.trim().toLowerCase();
-      const sort = sortEl.value;
-      const showDeleted = showDeletedEl.value === "show";
+      if(isDefault){
+        document.querySelector(".filters .chip").classList.add("active");
+      }else{
+        if(selectedFilters.status !== "all") document.getElementById("statusChip").classList.add("active");
+        if(selectedFilters.method !== "all") document.getElementById("methodChip").classList.add("active");
+        if(selectedFilters.date !== "latest") document.getElementById("dateChip").classList.add("active");
+        if(selectedFilters.amount !== "default") document.getElementById("amountChip").classList.add("active");
+        if(selectedFilters.type !== "all") document.getElementById("typeChip").classList.add("active");
+      }
+    }
 
-      filteredHistory = allHistory.filter(tx => {
-        const type = getType(tx);
-        const filterOk = currentFilter === "all" || currentFilter === type;
-        const deletedOk = showDeleted ? true : !tx.deleted;
-        const haystack = buildSearchText(tx);
-        const queryOk = !query || haystack.includes(query);
-        return filterOk && deletedOk && queryOk;
+    function resetAllFilters(){
+      selectedFilters = {
+        status: "all",
+        method: "all",
+        date: "latest",
+        amount: "default",
+        type: "all"
+      };
+      renderHistory();
+    }
+
+    function openDetailsByTxnId(txnId){
+      const item = allHistory.find(x => String(x.txnId) === String(txnId));
+      if(!item) return;
+
+      const isCredit = (item.type || "").toLowerCase() === "received";
+      const amountColor = isCredit ? "#16a34a" : "#dc2626";
+
+      document.getElementById("detailContent").innerHTML = `
+        <div class="big-status ${getStatusBgClass(item.status)}">
+          ${item.status.toLowerCase() === "success" ? "✅" : item.status.toLowerCase() === "failed" ? "❌" : "⏳"}
+          ${item.status}
+        </div>
+
+        <div class="detail-amount" style="color:${amountColor}">
+          ${isCredit ? "+" : "-"}${formatAmount(item.amount)}
+        </div>
+
+        <div class="detail-grid">
+          <div class="detail-box">
+            <div class="label">Person</div>
+            <div class="value">${item.person}</div>
+          </div>
+          <div class="detail-box">
+            <div class="label">Type</div>
+            <div class="value">${item.type}</div>
+          </div>
+          <div class="detail-box">
+            <div class="label">Method</div>
+            <div class="value">${item.method}</div>
+          </div>
+          <div class="detail-box">
+            <div class="label">Date</div>
+            <div class="value">${formatShortDate(item.date)}</div>
+          </div>
+        </div>
+
+        <div class="detail-full">
+          <div class="detail-row">
+            <div class="left">Transaction ID</div>
+            <div class="right">${item.txnId}</div>
+          </div>
+          <div class="detail-row">
+            <div class="left">Status</div>
+            <div class="right">${item.status}</div>
+          </div>
+          <div class="detail-row">
+            <div class="left">From</div>
+            <div class="right">${item.from || "-"}</div>
+          </div>
+          <div class="detail-row">
+            <div class="left">To</div>
+            <div class="right">${item.to || "-"}</div>
+          </div>
+          <div class="detail-row">
+            <div class="left">Payment Method</div>
+            <div class="right">${item.method}</div>
+          </div>
+          <div class="detail-row">
+            <div class="left">Payment Type</div>
+            <div class="right">${item.type}</div>
+          </div>
+          <div class="detail-row">
+            <div class="left">Date & Time</div>
+            <div class="right">${formatDateTime(item.date)}</div>
+          </div>
+          <div class="detail-row">
+            <div class="left">Amount</div>
+            <div class="right">${formatAmount(item.amount)}</div>
+          </div>
+          <div class="detail-row">
+            <div class="left">Note</div>
+            <div class="right">${item.note || "No note"}</div>
+          </div>
+        </div>
+      `;
+
+      openPanel("detailPanel");
+    }
+
+    function toggleTopMenu(event){
+      event.stopPropagation();
+      const menu = document.getElementById("topMenu");
+      menu.classList.toggle("show");
+    }
+
+    document.addEventListener("click", function(e){
+      const menu = document.getElementById("topMenu");
+      if(!menu.contains(e.target) && !e.target.classList.contains("menu-btn")){
+        menu.classList.remove("show");
+      }
+    });
+
+    function openPanel(id){
+      document.getElementById("overlay").classList.add("show");
+      document.getElementById(id).classList.add("show");
+      document.getElementById("topMenu").classList.remove("show");
+    }
+
+    function closeAllPanels(){
+      document.getElementById("overlay").classList.remove("show");
+      document.querySelectorAll(".detail-panel, .statement-panel, .help-panel, .feedback-panel, .filter-panel").forEach(el=>{
+        el.classList.remove("show");
+      });
+    }
+
+    function closeDetails(){ closeAllPanels(); }
+    function closeStatementPanel(){ closeAllPanels(); }
+    function closeHelpPanel(){ closeAllPanels(); }
+    function closeFeedbackPanel(){ closeAllPanels(); }
+    function closeFilterPanel(){ closeAllPanels(); }
+
+    function openStatementPanel(){
+      buildStatement();
+      openPanel("statementPanel");
+    }
+
+    function openHelpPanel(){
+      openPanel("helpPanel");
+    }
+
+    function openFeedbackPanel(){
+      openPanel("feedbackPanel");
+    }
+
+    function openFeedbackFromHelp(){
+      closeAllPanels();
+      setTimeout(() => {
+        prefillFeedback();
+        openPanel("feedbackPanel");
+      }, 180);
+    }
+
+    function buildStatement(){
+      const currentUser = getCurrentUser() || "User";
+      const filtered = getFilteredHistory();
+
+      let sentTotal = 0;
+      let receivedTotal = 0;
+      let successCount = 0;
+
+      filtered.forEach(item=>{
+        if((item.type || "").toLowerCase() === "sent") sentTotal += Number(item.amount || 0);
+        if((item.type || "").toLowerCase() === "received") receivedTotal += Number(item.amount || 0);
+        if((item.status || "").toLowerCase() === "success") successCount += 1;
       });
 
-      if(sort === "latest"){
-        filteredHistory.sort((a,b) => safeDate(b) - safeDate(a));
-      }else if(sort === "oldest"){
-        filteredHistory.sort((a,b) => safeDate(a) - safeDate(b));
-      }else if(sort === "high"){
-        filteredHistory.sort((a,b) => Number(b.amount || 0) - Number(a.amount || 0));
-      }else if(sort === "low"){
-        filteredHistory.sort((a,b) => Number(a.amount || 0) - Number(b.amount || 0));
-      }
-
-      renderSummary(filteredHistory);
-      renderHistory(filteredHistory);
-    }
-
-    function getApiUrls(currentUser){
-      const user = encodeURIComponent(currentUser);
-      const urls = [];
-
-      const bases = [];
-      if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
-        bases.push("http://127.0.0.1:5000");
-        bases.push("http://localhost:5000");
-      } else {
-        bases.push(location.origin);
-      }
-
-      for(const base of bases){
-        urls.push(`${base}/api/history/${user}`);
-        urls.push(`${base}/history/${user}`);
-        urls.push(`${base}/api/history?user=${user}`);
-        urls.push(`${base}/history?user=${user}`);
-      }
-
-      return [...new Set(urls)];
-    }
-
-    async function fetchJsonWithTimeout(url, timeout = 8000, options = {}){
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeout);
-
-      try{
-        const res = await fetch(url, {
-          headers: { "Accept": "application/json" },
-          signal: controller.signal,
-          ...options
-        });
-
-        const text = await res.text();
-        let data = {};
-
-        try{
-          data = text ? JSON.parse(text) : {};
-        }catch{
-          data = { ok:false, message:"Invalid JSON response", raw:text };
-        }
-
-        return { res, data };
-      }finally{
-        clearTimeout(timer);
-      }
-    }
-
-    function pickHistoryArray(data){
-      if (Array.isArray(data)) return data;
-      if (Array.isArray(data.history)) return data.history;
-      if (Array.isArray(data.data)) return data.data;
-      if (Array.isArray(data.transactions)) return data.transactions;
-      if (Array.isArray(data.result)) return data.result;
-      return [];
-    }
-
-    async function loadHistory(){
-      const msg = document.getElementById("messageBox");
-      const list = document.getElementById("historyList");
-      const currentUser = getCurrentUser();
-
-      if(!currentUser){
-        document.getElementById("heroUser").textContent = "User not logged in";
-        renderSummary([]);
-        list.innerHTML = `<div class="empty">No history records found.</div>`;
-        msg.innerHTML = `<div class="message error">Please log in first. sessionStorage must contain user or username.</div>`;
-        return;
-      }
-
-      document.getElementById("heroUser").textContent = currentUser;
-      localStorage.setItem("stpay_user", currentUser);
-
-      msg.innerHTML = `<div class="message warning">For blockchain-style safety, delete works as soft delete. Original records should remain stored in backend audit history.</div>`;
-      list.innerHTML = `<div class="loading">Loading history...</div>`;
-
-      const urls = getApiUrls(currentUser);
-      let success = false;
-      let lastError = "Unable to load history.";
-
-      for(const url of urls){
-        try{
-          const { res, data } = await fetchJsonWithTimeout(url, 8000, {
-            method: "GET"
-          });
-
-          if(!res.ok){
-            lastError = data.message || data.error || `HTTP ${res.status}`;
-            continue;
-          }
-
-          const historyArray = pickHistoryArray(data);
-          allHistory = normalizeHistoryItems(historyArray, currentUser);
-          filteredHistory = [...allHistory];
-          applyFilters();
-
-          if(!allHistory.length){
-            msg.innerHTML += `<div class="message">No history entries found for ${escapeHtml(currentUser)}.</div>`;
-          }
-
-          success = true;
-          break;
-        }catch(err){
-          if(err.name === "AbortError"){
-            lastError = "Backend timeout. API is slow.";
-          }else{
-            lastError = err.message || "Unable to connect to backend.";
-          }
-        }
-      }
-
-      if(!success){
-        allHistory = [];
-        filteredHistory = [];
-        renderSummary([]);
-        list.innerHTML = `<div class="empty">No history records found.</div>`;
-        msg.innerHTML = `<div class="message error">${escapeHtml(lastError)}</div>`;
-      }
-    }
-
-    async function deleteHistory(id){
-      const currentUser = getCurrentUser();
-      if(!currentUser) return;
-
-      const ok = confirm("Do you want to delete this transaction from visible history?");
-      if(!ok) return;
-
-      let deletedByBackend = false;
-
-      const deleteUrls = [];
-      const user = encodeURIComponent(currentUser);
-
-      const bases = [];
-      if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
-        bases.push("http://127.0.0.1:5000");
-        bases.push("http://localhost:5000");
-      } else {
-        bases.push(location.origin);
-      }
-
-      for(const base of bases){
-        deleteUrls.push(`${base}/api/history/${encodeURIComponent(id)}?user=${user}`);
-        deleteUrls.push(`${base}/history/${encodeURIComponent(id)}?user=${user}`);
-        deleteUrls.push(`${base}/api/history/delete/${encodeURIComponent(id)}?user=${user}`);
-      }
-
-      for(const url of deleteUrls){
-        try{
-          const { res } = await fetchJsonWithTimeout(url, 8000, {
-            method: "DELETE"
-          });
-
-          if(res.ok){
-            deletedByBackend = true;
-            break;
-          }
-        }catch(err){}
-      }
-
-      const index = allHistory.findIndex(tx => String(tx.id) === String(id));
-      if(index !== -1){
-        allHistory[index].deleted = true;
-        allHistory[index].deleted_at = new Date().toISOString();
-        allHistory[index].deleted_by = currentUser;
-      }
-
-      applyFilters();
-
-      const msg = document.getElementById("messageBox");
-      msg.innerHTML = deletedByBackend
-        ? `<div class="message">Transaction marked as deleted successfully.</div>`
-        : `<div class="message warning">Transaction hidden in UI. Backend delete endpoint was not confirmed. For blockchain safety, soft delete is recommended.</div>`;
-    }
-
-    async function restoreHistory(id){
-      const currentUser = getCurrentUser();
-      if(!currentUser) return;
-
-      let restoredByBackend = false;
-      const restoreUrls = [];
-      const user = encodeURIComponent(currentUser);
-
-      const bases = [];
-      if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
-        bases.push("http://127.0.0.1:5000");
-        bases.push("http://localhost:5000");
-      } else {
-        bases.push(location.origin);
-      }
-
-      for(const base of bases){
-        restoreUrls.push(`${base}/api/history/restore/${encodeURIComponent(id)}?user=${user}`);
-        restoreUrls.push(`${base}/history/restore/${encodeURIComponent(id)}?user=${user}`);
-      }
-
-      for(const url of restoreUrls){
-        try{
-          const { res } = await fetchJsonWithTimeout(url, 8000, {
-            method: "PATCH"
-          });
-
-          if(res.ok){
-            restoredByBackend = true;
-            break;
-          }
-        }catch(err){}
-      }
-
-      const index = allHistory.findIndex(tx => String(tx.id) === String(id));
-      if(index !== -1){
-        allHistory[index].deleted = false;
-        allHistory[index].deleted_at = "";
-        allHistory[index].deleted_by = "";
-      }
-
-      applyFilters();
-
-      const msg = document.getElementById("messageBox");
-      msg.innerHTML = restoredByBackend
-        ? `<div class="message">Transaction restored successfully.</div>`
-        : `<div class="message">Transaction restored in visible history.</div>`;
-    }
-
-    function setToday(){
-      const now = new Date();
-      document.getElementById("todayDate").textContent =
-        now.toLocaleDateString("en-IN", {
+      document.getElementById("statementUserName").textContent = currentUser;
+      document.getElementById("statementGeneratedAt").textContent =
+        "Generated on " + new Date().toLocaleString("en-IN", {
           day:"2-digit",
-          month:"long",
-          year:"numeric"
-        }) + " • " +
-        now.toLocaleTimeString("en-IN", {
+          month:"short",
+          year:"numeric",
           hour:"2-digit",
           minute:"2-digit"
         });
+
+      document.getElementById("stmtTotalCount").textContent = filtered.length;
+      document.getElementById("stmtTotalSent").textContent = formatAmount(sentTotal);
+      document.getElementById("stmtTotalReceived").textContent = formatAmount(receivedTotal);
+      document.getElementById("stmtSuccessCount").textContent = successCount;
+
+      const rows = filtered.length ? filtered.map(item => `
+        <div class="detail-row">
+          <div class="left">
+            <div style="font-weight:800;color:#111827;margin-bottom:4px;">${item.person}</div>
+            <div>${item.type} • ${item.method}</div>
+            <div style="margin-top:4px;">${formatShortDate(item.date)}</div>
+          </div>
+          <div class="right">
+            <div style="font-size:15px;">${formatAmount(item.amount)}</div>
+            <div style="margin-top:5px;color:#6b7280;font-weight:700;">${item.status}</div>
+          </div>
+        </div>
+      `).join("") : `
+        <div class="detail-row">
+          <div class="left">No transactions</div>
+          <div class="right">-</div>
+        </div>
+      `;
+
+      document.getElementById("statementRows").innerHTML = rows;
     }
 
-    document.addEventListener("DOMContentLoaded", function(){
-      setToday();
+    function downloadStatement(){
+      buildStatement();
+      window.print();
+      showToast("Statement download/print ready da");
+    }
 
-      document.getElementById("searchInput").addEventListener("input", applyFilters);
-      document.getElementById("sortSelect").addEventListener("change", applyFilters);
-      document.getElementById("showDeletedSelect").addEventListener("change", applyFilters);
-      document.getElementById("refreshBtn").addEventListener("click", loadHistory);
+    async function shareStatement(){
+      const currentUser = getCurrentUser() || "User";
+      const filtered = getFilteredHistory();
+      const sent = filtered
+        .filter(x => (x.type || "").toLowerCase() === "sent")
+        .reduce((sum, x) => sum + Number(x.amount || 0), 0);
+      const received = filtered
+        .filter(x => (x.type || "").toLowerCase() === "received")
+        .reduce((sum, x) => sum + Number(x.amount || 0), 0);
 
-      document.querySelectorAll(".chip").forEach(btn => {
-        btn.addEventListener("click", function(){
-          setFilter(this.dataset.filter, this);
-        });
+      const text = `ST PAY Statement
+User: ${currentUser}
+Total Transactions: ${filtered.length}
+Total Sent: ${formatAmount(sent)}
+Total Received: ${formatAmount(received)}
+Generated: ${new Date().toLocaleString("en-IN")}`;
+
+      if(navigator.share){
+        try{
+          await navigator.share({
+            title:"ST PAY Statement",
+            text
+          });
+          showToast("Statement shared successfully da");
+        }catch(e){
+          console.log(e);
+        }
+      }else{
+        try{
+          await navigator.clipboard.writeText(text);
+          showToast("Share text copied da");
+        }catch(e){
+          showToast("Share not supported da");
+        }
+      }
+    }
+
+    function prefillFeedback(){
+      document.getElementById("feedbackSubject").value = "History / Statement Support";
+      document.getElementById("feedbackMessage").value =
+`Hi ST PAY Support,
+
+I need help with my transaction history page.
+
+Issue:
+- Recent transaction details need review
+- Please verify statement and payment status
+- Kindly help me resolve this safely
+
+Thanks.`;
+    }
+
+    function submitFeedback(){
+      const subject = document.getElementById("feedbackSubject").value.trim();
+      const message = document.getElementById("feedbackMessage").value.trim();
+
+      if(!subject || !message){
+        showToast("Subject and feedback fill pannu da");
+        return;
+      }
+
+      const feedbacks = JSON.parse(localStorage.getItem("stpay_feedbacks") || "[]");
+      feedbacks.unshift({
+        subject,
+        message,
+        user:getCurrentUser() || "Unknown",
+        time:new Date().toISOString()
       });
+      localStorage.setItem("stpay_feedbacks", JSON.stringify(feedbacks));
 
-      loadHistory();
-    });
+      document.getElementById("feedbackSubject").value = "";
+      document.getElementById("feedbackMessage").value = "";
+      showToast("Feedback submitted da");
+      closeAllPanels();
+    }
+
+    function openFilterPanel(type){
+      currentFilterPanel = type;
+      const titleMap = {
+        status: "Status Options",
+        method: "Payment Method Options",
+        date: "Date Options",
+        amount: "Amount Options",
+        type: "Payment Type Options"
+      };
+
+      const optionsMap = {
+        status: [
+          {label:"All Status", value:"all"},
+          {label:"Success", value:"success"},
+          {label:"Pending", value:"pending"},
+          {label:"Failed", value:"failed"}
+        ],
+        method: [
+          {label:"All Methods", value:"all"},
+          {label:"Bank", value:"bank"},
+          {label:"UPI", value:"upi"},
+          {label:"Wallet", value:"wallet"},
+          {label:"Card", value:"card"}
+        ],
+        date: [
+          {label:"Latest First", value:"latest"},
+          {label:"Oldest First", value:"oldest"}
+        ],
+        amount: [
+          {label:"Default", value:"default"},
+          {label:"High to Low", value:"high"},
+          {label:"Low to High", value:"low"}
+        ],
+        type: [
+          {label:"All Types", value:"all"},
+          {label:"Sent", value:"sent"},
+          {label:"Received", value:"received"},
+          {label:"Payment", value:"payment"}
+        ]
+      };
+
+      document.getElementById("filterPanelTitle").textContent = titleMap[type];
+
+      const selectedValue = selectedFilters[type];
+      document.getElementById("filterOptionsWrap").innerHTML = `
+        <h4 class="filter-title">${titleMap[type]}</h4>
+        ${optionsMap[type].map(opt => `
+          <button
+            class="filter-option ${selectedValue === opt.value ? "active-option" : ""}"
+            onclick="applyFilterOption('${type}','${opt.value}')"
+          >
+            <span>${opt.label}</span>
+            <span>${selectedValue === opt.value ? "✓" : ""}</span>
+          </button>
+        `).join("")}
+      `;
+
+      openPanel("filterPanel");
+    }
+
+    function applyFilterOption(type, value){
+      selectedFilters[type] = value;
+      renderHistory();
+      closeAllPanels();
+    }
+
+    function showToast(msg){
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{
+        toast.classList.remove("show");
+      }, 2200);
+    }
+
+    loadHistory();
   </script>
 </body>
 </html>
