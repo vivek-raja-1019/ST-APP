@@ -198,7 +198,7 @@ def normalize_history_item(tx, current_user=None):
         s = (sender or "").lower().strip()
         r = (receiver or "").lower().strip()
 
-        if tx_type == "transfer_sent":
+        if normalized["type"] == "transfer_sent":
             if cu == r:
                 normalized["type"] = "transfer_received"
                 normalized["title"] = f"Received from {sender or 'User'}"
@@ -206,7 +206,7 @@ def normalize_history_item(tx, current_user=None):
                 normalized["type"] = "transfer_sent"
                 normalized["title"] = f"Sent to {receiver or 'User'}"
 
-        elif tx_type == "transfer_received":
+        elif normalized["type"] == "transfer_received":
             if cu == s:
                 normalized["type"] = "transfer_sent"
                 normalized["title"] = f"Sent to {receiver or 'User'}"
@@ -264,19 +264,23 @@ def health():
 def login():
     data = request.get_json(force=True) or {}
 
-    name = (data.get("name") or "").strip()
+    name = (data.get("name") or data.get("username") or "").strip()
     password = (data.get("password") or "").strip()
 
     users = read_json(USERS_FILE, [])
     u = find_user(users, name)
 
-    if not u or u.get("password") != password:
-        return jsonify({"error": "Invalid credentials"}), 401
+    if not u or str(u.get("password", "")).strip() != password:
+        return jsonify({
+            "ok": False,
+            "error": "Invalid credentials"
+        }), 401
 
     return jsonify({
         "ok": True,
-        "name": u["name"],
-        "balance": u["balance"]
+        "name": u.get("name", ""),
+        "username": u.get("name", ""),
+        "balance": safe_float(u.get("balance", 0))
     })
 
 
@@ -289,8 +293,8 @@ def users():
     safe = []
     for u in users:
         safe.append({
-            "name": u["name"],
-            "balance": u["balance"]
+            "name": u.get("name", ""),
+            "balance": safe_float(u.get("balance", 0))
         })
 
     return jsonify({"ok": True, "users": safe})
@@ -304,11 +308,14 @@ def balance(username):
     u = find_user(users, username)
 
     if not u:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({
+            "ok": False,
+            "balance": 0
+        }), 404
 
     return jsonify({
         "ok": True,
-        "balance": u["balance"]
+        "balance": safe_float(u.get("balance", 0))
     })
 
 
@@ -319,8 +326,8 @@ def balance(username):
 def send():
     data = request.get_json(force=True) or {}
 
-    sender = (data.get("sender") or "").strip()
-    receiver = (data.get("receiver") or "").strip()
+    sender = (data.get("sender") or data.get("from") or data.get("user") or "").strip()
+    receiver = (data.get("receiver") or data.get("to") or "").strip()
     amount = safe_float(data.get("amount") or 0)
 
     users = read_json(USERS_FILE, [])
@@ -329,28 +336,28 @@ def send():
     r = find_user(users, receiver)
 
     if not sender:
-        return jsonify({"error": "Sender is required"}), 400
+        return jsonify({"ok": False, "error": "Sender is required"}), 400
 
     if not receiver:
-        return jsonify({"error": "Receiver is required"}), 400
+        return jsonify({"ok": False, "error": "Receiver is required"}), 400
 
     if amount <= 0:
-        return jsonify({"error": "Amount must be greater than 0"}), 400
+        return jsonify({"ok": False, "error": "Amount must be greater than 0"}), 400
 
     if sender.lower() == receiver.lower():
-        return jsonify({"error": "Sender and receiver cannot be same"}), 400
+        return jsonify({"ok": False, "error": "Sender and receiver cannot be same"}), 400
 
     if not s:
-        return jsonify({"error": "Sender not found"}), 404
+        return jsonify({"ok": False, "error": "Sender not found"}), 404
 
     if not r:
-        return jsonify({"error": "Receiver not found"}), 404
+        return jsonify({"ok": False, "error": "Receiver not found"}), 404
 
-    if safe_float(s["balance"]) < amount:
-        return jsonify({"error": "Insufficient balance"}), 400
+    if safe_float(s.get("balance", 0)) < amount:
+        return jsonify({"ok": False, "error": "Insufficient balance"}), 400
 
-    s["balance"] = safe_float(s["balance"]) - amount
-    r["balance"] = safe_float(r["balance"]) + amount
+    s["balance"] = safe_float(s.get("balance", 0)) - amount
+    r["balance"] = safe_float(r.get("balance", 0)) + amount
 
     write_json(USERS_FILE, users)
 
@@ -362,18 +369,18 @@ def send():
         "id": txn_id,
         "reference": make_reference(txn_id),
         "hash": make_hash(txn_id),
-        "sender": s["name"],
-        "receiver": r["name"],
-        "from": s["name"],
-        "to": r["name"],
-        "user": s["name"],
+        "sender": s.get("name", ""),
+        "receiver": r.get("name", ""),
+        "from": s.get("name", ""),
+        "to": r.get("name", ""),
+        "user": s.get("name", ""),
         "amount": amount,
         "status": "success",
         "date": now_str,
         "time": now_str,
-        "balance_after": s["balance"],
+        "balance_after": safe_float(s.get("balance", 0)),
         "block_no": get_next_block_no(),
-        "title": f"Sent to {r['name']}"
+        "title": f"Sent to {r.get('name', 'User')}"
     }
 
     append_history(txn)
@@ -382,8 +389,9 @@ def send():
         "ok": True,
         "id": txn["id"],
         "reference": txn["reference"],
-        "sender_balance": s["balance"],
-        "receiver_balance": r["balance"]
+        "balance": safe_float(s.get("balance", 0)),
+        "sender_balance": safe_float(s.get("balance", 0)),
+        "receiver_balance": safe_float(r.get("balance", 0))
     })
 
 
@@ -448,25 +456,26 @@ def history_query_user():
 # ---------------- ADD MONEY ----------------
 
 @app.post("/api/addmoney")
+@app.post("/api/add-money")
 def addmoney():
     data = request.get_json(force=True) or {}
 
-    username = (data.get("username") or "").strip()
+    username = (data.get("username") or data.get("user") or data.get("name") or "").strip()
     amount = safe_float(data.get("amount") or 0)
 
     users = read_json(USERS_FILE, [])
     u = find_user(users, username)
 
     if not username:
-        return jsonify({"error": "Username is required"}), 400
+        return jsonify({"ok": False, "error": "Username is required"}), 400
 
     if amount <= 0:
-        return jsonify({"error": "Amount must be greater than 0"}), 400
+        return jsonify({"ok": False, "error": "Amount must be greater than 0"}), 400
 
     if not u:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({"ok": False, "error": "User not found"}), 404
 
-    u["balance"] = safe_float(u["balance"]) + amount
+    u["balance"] = safe_float(u.get("balance", 0)) + amount
     write_json(USERS_FILE, users)
 
     txn_id = make_txn_id()
@@ -478,15 +487,15 @@ def addmoney():
         "reference": make_reference(txn_id),
         "hash": make_hash(txn_id),
         "sender": "Self / Bank",
-        "receiver": u["name"],
+        "receiver": u.get("name", ""),
         "from": "Self / Bank",
-        "to": u["name"],
-        "user": u["name"],
+        "to": u.get("name", ""),
+        "user": u.get("name", ""),
         "amount": amount,
         "status": "success",
         "date": now_str,
         "time": now_str,
-        "balance_after": u["balance"],
+        "balance_after": safe_float(u.get("balance", 0)),
         "block_no": get_next_block_no(),
         "title": "Money added"
     }
@@ -495,7 +504,7 @@ def addmoney():
 
     return jsonify({
         "ok": True,
-        "balance": u["balance"],
+        "balance": safe_float(u.get("balance", 0)),
         "id": txn["id"],
         "reference": txn["reference"]
     })

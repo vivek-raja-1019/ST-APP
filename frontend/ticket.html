@@ -2,355 +2,1663 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
   <title>ST PAY - Tickets</title>
 
   <style>
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
     :root{
       --bg:#f6f8fc;
+      --bg2:#eef4ff;
       --card:#ffffff;
-      --text:#111827;
-      --muted:#6b7280;
-      --line:#e5e7eb;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#e2e8f0;
       --black:#111827;
-      --shadow:0 14px 35px rgba(15,23,42,0.08);
+      --blue:#2563eb;
+      --blueSoft:#dbeafe;
       --green:#16a34a;
       --greenSoft:#dcfce7;
-      --blue:#2563eb;
+      --red:#dc2626;
+      --redSoft:#fee2e2;
+      --amber:#d97706;
+      --amberSoft:#fef3c7;
+      --shadow:0 18px 40px rgba(15,23,42,0.08);
+      --radius:24px;
     }
+
     body{
       margin:0;
       font-family:'Segoe UI',sans-serif;
       background:linear-gradient(180deg,#f8fbff 0%,#f3f7ff 100%);
       color:var(--text);
+      min-height:100vh;
       display:flex;
       justify-content:center;
       padding:14px;
     }
-    .app{width:420px;max-width:100%;}
+
+    .app{
+      width:420px;
+      max-width:100%;
+      position:relative;
+    }
+
+    .view{
+      display:none;
+      animation:fadeIn .25s ease;
+    }
+
+    .view.active{
+      display:block;
+    }
+
+    @keyframes fadeIn{
+      from{opacity:0;transform:translateY(8px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+
     .topbar{
       display:flex;
       align-items:center;
       justify-content:space-between;
+      gap:10px;
       margin-bottom:14px;
+      position:relative;
     }
-    .backBtn,.homeBtn{
+
+    .topLeft,.topRight{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .iconBtn{
+      border:none;
+      background:#fff;
+      border-radius:16px;
+      min-width:46px;
+      height:46px;
+      padding:0 14px;
+      box-shadow:var(--shadow);
+      font-weight:900;
+      font-size:15px;
+      color:var(--black);
+      cursor:pointer;
+    }
+
+    .dotsBtn{
+      width:46px;
+      height:46px;
+      border:none;
+      border-radius:16px;
+      background:#fff;
+      box-shadow:var(--shadow);
+      font-size:22px;
+      font-weight:900;
+      color:#111827;
+      cursor:pointer;
+      line-height:1;
+    }
+
+    .pageTitle{
+      font-size:20px;
+      font-weight:900;
+      letter-spacing:.2px;
+      flex:1;
+      text-align:center;
+    }
+
+    .menu{
+      position:absolute;
+      right:0;
+      top:56px;
+      width:190px;
+      background:#fff;
+      border-radius:20px;
+      box-shadow:0 24px 50px rgba(15,23,42,0.14);
+      border:1px solid #eef2f7;
+      padding:8px;
+      display:none;
+      z-index:50;
+    }
+
+    .menu.show{
+      display:block;
+    }
+
+    .menuItem{
+      width:100%;
       border:none;
       background:#fff;
       border-radius:14px;
-      padding:10px 12px;
-      box-shadow:var(--shadow);
+      padding:13px 14px;
+      text-align:left;
+      font-size:14px;
       font-weight:800;
+      color:#111827;
       cursor:pointer;
+      display:flex;
+      align-items:center;
+      gap:10px;
     }
-    .title{
-      font-size:20px;
-      font-weight:900;
+
+    .menuItem:hover{
+      background:#f8fbff;
     }
+
     .hero{
-      background:linear-gradient(135deg,#111827,#2563eb);
+      background:linear-gradient(135deg,#111827 0%,#2563eb 100%);
       color:#fff;
-      border-radius:26px;
-      padding:18px;
+      border-radius:28px;
+      padding:20px;
       box-shadow:var(--shadow);
+      position:relative;
+      overflow:hidden;
     }
-    .heroTitle{font-size:24px;font-weight:900;margin-bottom:6px;}
-    .heroSub{font-size:13px;opacity:0.92;line-height:1.5;}
-    .grid{
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      width:150px;
+      height:150px;
+      right:-30px;
+      top:-30px;
+      border-radius:50%;
+      background:rgba(255,255,255,0.08);
+    }
+
+    .heroTitle{
+      font-size:25px;
+      font-weight:900;
+      margin-bottom:6px;
+      position:relative;
+      z-index:2;
+    }
+
+    .heroSub{
+      font-size:13px;
+      line-height:1.55;
+      opacity:.94;
+      max-width:280px;
+      position:relative;
+      z-index:2;
+    }
+
+    .walletBar{
       margin-top:14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      background:rgba(255,255,255,0.12);
+      border:1px solid rgba(255,255,255,0.16);
+      border-radius:18px;
+      padding:12px 14px;
+      position:relative;
+      z-index:2;
+    }
+
+    .walletLabel{
+      font-size:12px;
+      opacity:.9;
+      margin-bottom:4px;
+    }
+
+    .walletValue{
+      font-size:22px;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+
+    .walletUser{
+      font-size:11px;
+      line-height:1.5;
+      text-align:right;
+      opacity:.95;
+    }
+
+    .section{
+      margin-top:16px;
+    }
+
+    .sectionTitle{
+      font-size:15px;
+      font-weight:900;
+      margin-bottom:10px;
+      padding-left:2px;
+    }
+
+    .grid{
       display:grid;
       grid-template-columns:repeat(3,1fr);
       gap:10px;
     }
-    .ticketType{
+
+    .typeCard{
       background:#fff;
       border:1px solid #edf2f7;
-      border-radius:18px;
+      border-radius:22px;
       padding:14px 10px;
       text-align:center;
-      cursor:pointer;
       box-shadow:var(--shadow);
+      cursor:pointer;
+      transition:.18s ease;
     }
-    .ticketType.active{
-      border:2px solid #111827;
-      background:#f8fbff;
+
+    .typeCard:hover{
+      transform:translateY(-2px);
     }
-    .ticketIcon{
-      width:46px;height:46px;border-radius:14px;
-      background:#111827;color:#fff;
-      display:flex;align-items:center;justify-content:center;
-      margin:0 auto 8px auto;font-size:22px;
+
+    .typeIcon{
+      width:52px;
+      height:52px;
+      border-radius:16px;
+      background:#111827;
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:24px;
+      margin:0 auto 10px auto;
     }
-    .ticketLabel{font-size:12px;font-weight:800;}
+
+    .typeName{
+      font-size:12px;
+      font-weight:800;
+    }
+
     .card{
-      margin-top:14px;
       background:#fff;
-      border-radius:24px;
+      border-radius:26px;
       padding:16px;
       box-shadow:var(--shadow);
     }
-    .cardTitle{
-      font-size:16px;
-      font-weight:900;
-      margin-bottom:12px;
-    }
-    .input,.select,.btn{
-      width:100%;
-      padding:13px 14px;
-      border-radius:14px;
-      border:1px solid #e5e7eb;
-      outline:none;
-      font-size:14px;
-      margin-bottom:12px;
+
+    .routeCard{
+      margin-top:14px;
       background:#fff;
+      border-radius:26px;
+      padding:16px;
+      box-shadow:var(--shadow);
     }
+
+    .miniLabel{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:8px;
+      font-weight:700;
+    }
+
+    .input,.select{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      font-size:14px;
+      outline:none;
+      background:#fff;
+      color:var(--text);
+    }
+
     .split{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:10px;
-    }
-    .btn{
-      border:none;
-      background:#111827;
-      color:#fff;
-      font-weight:800;
-      cursor:pointer;
-      margin-bottom:0;
-    }
-    .error{
-      color:#dc2626;
-      font-size:12px;
-      margin-top:-4px;
-      margin-bottom:10px;
-      display:none;
-    }
-    .success{
-      display:none;
-      margin-top:14px;
-      background:#f0fdf4;
-      border:1px solid #bbf7d0;
-      border-radius:22px;
-      padding:16px;
-    }
-    .successTick{
-      width:72px;height:72px;border-radius:50%;
-      background:var(--greenSoft);
-      color:var(--green);
-      display:flex;align-items:center;justify-content:center;
-      font-size:36px;font-weight:900;margin:0 auto 12px auto;
-    }
-    .successTitle{
-      text-align:center;
-      font-weight:900;
-      font-size:22px;
-      color:var(--green);
-      margin-bottom:8px;
-    }
-    .successSub{
-      text-align:center;
-      font-size:13px;
-      color:#4b5563;
       margin-bottom:12px;
     }
+
+    .field{
+      margin-bottom:12px;
+    }
+
+    .classGrid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:6px;
+    }
+
+    .classCard{
+      border:1.5px solid #e5e7eb;
+      border-radius:20px;
+      padding:14px;
+      cursor:pointer;
+      background:#fff;
+      transition:.18s ease;
+    }
+
+    .classCard.active{
+      border-color:#111827;
+      background:#f8fbff;
+      box-shadow:0 10px 22px rgba(37,99,235,0.08);
+    }
+
+    .classTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:8px;
+    }
+
+    .className{
+      font-size:14px;
+      font-weight:900;
+    }
+
+    .badge{
+      padding:6px 10px;
+      border-radius:999px;
+      background:#eff6ff;
+      color:#1d4ed8;
+      font-size:11px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .classDesc{
+      font-size:12px;
+      color:#64748b;
+      line-height:1.45;
+      margin-bottom:8px;
+      min-height:34px;
+    }
+
+    .classFare{
+      font-weight:900;
+      font-size:15px;
+    }
+
+    .summary{
+      margin-top:14px;
+      border-radius:22px;
+      background:linear-gradient(180deg,#f8fbff,#f1f6ff);
+      padding:14px;
+      border:1px solid #e5edf8;
+    }
+
+    .summaryRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:7px 0;
+      font-size:13px;
+      border-bottom:1px dashed #dbe4ee;
+    }
+
+    .summaryRow:last-child{
+      border-bottom:none;
+      padding-top:11px;
+    }
+
+    .summaryLabel{
+      color:#64748b;
+      font-weight:700;
+    }
+
+    .summaryValue{
+      font-weight:900;
+      text-align:right;
+      word-break:break-word;
+    }
+
+    .bigAmount{
+      font-size:22px;
+      color:#111827;
+    }
+
+    .payBtn{
+      width:100%;
+      border:none;
+      border-radius:18px;
+      background:#111827;
+      color:#fff;
+      padding:16px;
+      font-size:15px;
+      font-weight:900;
+      cursor:pointer;
+      margin-top:14px;
+      box-shadow:0 16px 35px rgba(17,24,39,0.18);
+    }
+
+    .payBtn:active{
+      transform:scale(.99);
+    }
+
+    .payBtn[disabled]{
+      opacity:.7;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .secondaryBtn{
+      width:100%;
+      border:none;
+      border-radius:16px;
+      background:#edf2ff;
+      color:#1d4ed8;
+      padding:14px;
+      font-size:14px;
+      font-weight:900;
+      cursor:pointer;
+      margin-top:10px;
+    }
+
+    .dangerBtn{
+      width:100%;
+      border:none;
+      border-radius:16px;
+      background:#fff1f2;
+      color:#dc2626;
+      padding:14px;
+      font-size:14px;
+      font-weight:900;
+      cursor:pointer;
+      margin-top:10px;
+      border:1px solid #fecdd3;
+    }
+
+    .error{
+      display:none;
+      margin-top:10px;
+      color:var(--red);
+      font-size:12px;
+      font-weight:700;
+      padding:10px 12px;
+      background:#fff1f2;
+      border:1px solid #fecdd3;
+      border-radius:14px;
+    }
+
+    .processingScreen{
+      position:fixed;
+      inset:0;
+      background:#ffffff;
+      z-index:9999;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      padding:24px;
+    }
+
+    .processingScreen.show{
+      display:flex;
+    }
+
+    .processingCircle{
+      width:74px;
+      height:74px;
+      border-radius:50%;
+      border:4px solid #e5e7eb;
+      border-top-color:#111827;
+      animation:spin 1s linear infinite;
+      margin-bottom:18px;
+    }
+
+    @keyframes spin{
+      to{transform:rotate(360deg);}
+    }
+
+    .processingText{
+      font-size:16px;
+      font-weight:900;
+      color:#111827;
+      margin-bottom:8px;
+    }
+
+    .processingSub{
+      font-size:13px;
+      color:#64748b;
+      text-align:center;
+      line-height:1.5;
+      max-width:260px;
+    }
+
+    .successWrap{
+      text-align:center;
+      padding-top:30px;
+    }
+
+    .successCircle{
+      width:96px;
+      height:96px;
+      border-radius:50%;
+      background:var(--greenSoft);
+      color:var(--green);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:46px;
+      font-weight:900;
+      margin:0 auto 16px auto;
+      animation:pop .3s ease;
+    }
+
+    @keyframes pop{
+      from{transform:scale(.75);opacity:0;}
+      to{transform:scale(1);opacity:1;}
+    }
+
+    .successTitle{
+      font-size:24px;
+      font-weight:900;
+      color:var(--green);
+      margin-bottom:6px;
+    }
+
+    .successSub{
+      font-size:13px;
+      color:#64748b;
+      margin-bottom:18px;
+      line-height:1.5;
+    }
+
+    .receipt{
+      background:#fff;
+      border-radius:28px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      text-align:left;
+      margin-top:12px;
+    }
+
+    .receiptHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+
+    .receiptBrand{
+      font-size:18px;
+      font-weight:900;
+      color:#111827;
+    }
+
+    .receiptTag{
+      background:#ecfdf3;
+      color:#15803d;
+      font-size:11px;
+      font-weight:900;
+      padding:7px 10px;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+
     .receiptRow{
       display:flex;
       justify-content:space-between;
       gap:12px;
-      padding:9px 0;
+      padding:10px 0;
       border-bottom:1px dashed #dbe4ee;
       font-size:13px;
     }
-    .receiptRow:last-child{border-bottom:none;}
-    .muted{color:#64748b;}
-    .value{font-weight:800;text-align:right;word-break:break-word;}
+
+    .receiptRow:last-child{
+      border-bottom:none;
+    }
+
+    .muted{
+      color:#64748b;
+    }
+
+    .value{
+      font-weight:900;
+      text-align:right;
+      word-break:break-word;
+    }
+
+    .homeActions{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .chipRow{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:8px;
+    }
+
+    .chip{
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid #dbe4ee;
+      background:#fff;
+      font-size:12px;
+      font-weight:800;
+      color:#334155;
+    }
+
+    .historyList{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .historyCard{
+      background:#fff;
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:16px;
+      border:1px solid #eef2f7;
+    }
+
+    .historyTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+
+    .historyRoute{
+      font-size:15px;
+      font-weight:900;
+      color:#111827;
+      line-height:1.4;
+    }
+
+    .historyMeta{
+      font-size:12px;
+      color:#64748b;
+      margin-top:4px;
+      font-weight:700;
+    }
+
+    .historyAmount{
+      font-size:18px;
+      font-weight:900;
+      color:#111827;
+      white-space:nowrap;
+    }
+
+    .historyPills{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:8px;
+    }
+
+    .pill{
+      background:#f8fafc;
+      border:1px solid #e2e8f0;
+      color:#334155;
+      border-radius:999px;
+      padding:7px 10px;
+      font-size:11px;
+      font-weight:800;
+    }
+
+    .historyActions{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .smallBtn{
+      flex:1;
+      border:none;
+      border-radius:14px;
+      padding:12px;
+      font-size:13px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .deleteBtn{
+      background:#fff1f2;
+      color:#dc2626;
+      border:1px solid #fecdd3;
+    }
+
+    .emptyState{
+      background:#fff;
+      border-radius:24px;
+      padding:28px 18px;
+      text-align:center;
+      box-shadow:var(--shadow);
+      color:#64748b;
+      font-size:14px;
+      line-height:1.6;
+      margin-top:14px;
+    }
+
+    .helpList{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .helpItem{
+      background:#fff;
+      border-radius:22px;
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+
+    .helpQ{
+      font-size:14px;
+      font-weight:900;
+      margin-bottom:7px;
+      color:#111827;
+    }
+
+    .helpA{
+      font-size:13px;
+      color:#64748b;
+      line-height:1.6;
+    }
   </style>
 </head>
 <body>
 
 <div class="app">
-  <div class="topbar">
-    <button class="backBtn" onclick="history.back()">← Back</button>
-    <div class="title">Tickets</div>
-    <button class="homeBtn" onclick="goHome()">Home</button>
-  </div>
 
-  <div class="hero">
-    <div class="heroTitle">Travel Ticket Booking</div>
-    <div class="heroSub">
-      Train, bus, airplane, metro, cab and more. From city, to city, date, passengers, class and amount fill pannitu book pannalaam.
+  <!-- HOME VIEW -->
+  <div class="view active" id="homeView">
+    <div class="topbar">
+      <div class="topLeft">
+        <button class="iconBtn" onclick="goBack()">←</button>
+      </div>
+
+      <div class="pageTitle">Tickets</div>
+
+      <div class="topRight">
+        <button class="dotsBtn" onclick="toggleMenu(event)">⋮</button>
+        <div class="menu" id="topMenu">
+          <button class="menuItem" onclick="openHistory()">🧾 Ticket History</button>
+          <button class="menuItem" onclick="openHelp()">❓ Help</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div class="heroTitle">Book Travel Tickets</div>
+      <div class="heroSub">
+        Fast and secure booking like GPay style. Choose your service, enter route, select class, and pay instantly.
+      </div>
+
+      <div class="walletBar">
+        <div>
+          <div class="walletLabel">Available Wallet Balance</div>
+          <div class="walletValue" id="walletBalance">₹ 0.00</div>
+        </div>
+        <div class="walletUser">
+          Current User:<br>
+          <b id="walletUserName">-</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sectionTitle">Choose service</div>
+      <div class="grid">
+        <div class="typeCard" onclick="openBooking('Train','🚆')">
+          <div class="typeIcon">🚆</div>
+          <div class="typeName">Train</div>
+        </div>
+
+        <div class="typeCard" onclick="openBooking('Bus','🚌')">
+          <div class="typeIcon">🚌</div>
+          <div class="typeName">Bus</div>
+        </div>
+
+        <div class="typeCard" onclick="openBooking('Airplane','✈️')">
+          <div class="typeIcon">✈️</div>
+          <div class="typeName">Airplane</div>
+        </div>
+
+        <div class="typeCard" onclick="openBooking('Metro','🚇')">
+          <div class="typeIcon">🚇</div>
+          <div class="typeName">Metro</div>
+        </div>
+
+        <div class="typeCard" onclick="openBooking('Cab','🚕')">
+          <div class="typeIcon">🚕</div>
+          <div class="typeName">Cab</div>
+        </div>
+
+        <div class="typeCard" onclick="openBooking('Other','➕')">
+          <div class="typeIcon">➕</div>
+          <div class="typeName">Other</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card section">
+      <div class="sectionTitle" style="margin-bottom:8px;">Popular features</div>
+      <div class="chipRow">
+        <div class="chip">Instant Pay</div>
+        <div class="chip">Smart Receipt</div>
+        <div class="chip">Train Classes</div>
+        <div class="chip">Secure PIN</div>
+        <div class="chip">Fast Confirmation</div>
+      </div>
     </div>
   </div>
 
-  <div class="grid">
-    <div class="ticketType active" onclick="selectTicketType(this,'Train')">
-      <div class="ticketIcon">🚆</div>
-      <div class="ticketLabel">Train</div>
+  <!-- BOOKING VIEW -->
+  <div class="view" id="bookingView">
+    <div class="topbar">
+      <div class="topLeft">
+        <button class="iconBtn" onclick="showView('homeView')">←</button>
+      </div>
+
+      <div class="pageTitle" id="bookingTitle">Train Booking</div>
+
+      <div class="topRight">
+        <button class="dotsBtn" onclick="toggleMenu(event)">⋮</button>
+      </div>
     </div>
-    <div class="ticketType" onclick="selectTicketType(this,'Bus')">
-      <div class="ticketIcon">🚌</div>
-      <div class="ticketLabel">Bus</div>
+
+    <div class="routeCard">
+      <div class="sectionTitle" style="margin-top:0;">Journey details</div>
+
+      <div class="split">
+        <div class="field">
+          <div class="miniLabel">From</div>
+          <input id="fromCity" class="input" type="text" placeholder="Departure city">
+        </div>
+
+        <div class="field">
+          <div class="miniLabel">To</div>
+          <input id="toCity" class="input" type="text" placeholder="Destination city">
+        </div>
+      </div>
+
+      <div class="split">
+        <div class="field">
+          <div class="miniLabel">Travel date</div>
+          <input id="travelDate" class="input" type="date">
+        </div>
+
+        <div class="field">
+          <div class="miniLabel">Passengers</div>
+          <input id="passengers" class="input" type="number" min="1" value="1" oninput="updateFare()">
+        </div>
+      </div>
     </div>
-    <div class="ticketType" onclick="selectTicketType(this,'Airplane')">
-      <div class="ticketIcon">✈️</div>
-      <div class="ticketLabel">Airplane</div>
+
+    <div class="card" style="margin-top:14px;">
+      <div class="sectionTitle" style="margin-top:0;">Select class</div>
+
+      <div class="classGrid">
+        <div class="classCard active" data-class="General" data-fare="120" onclick="selectClass(this)">
+          <div class="classTop">
+            <div class="className">General</div>
+            <div class="badge">Budget</div>
+          </div>
+          <div class="classDesc">Basic seat with affordable travel fare.</div>
+          <div class="classFare">₹ 120 / passenger</div>
+        </div>
+
+        <div class="classCard" data-class="Sleeper" data-fare="280" onclick="selectClass(this)">
+          <div class="classTop">
+            <div class="className">Sleeper</div>
+            <div class="badge">Popular</div>
+          </div>
+          <div class="classDesc">Comfortable sleeper berth for long travel.</div>
+          <div class="classFare">₹ 280 / passenger</div>
+        </div>
+
+        <div class="classCard" data-class="AC Chair Car" data-fare="450" onclick="selectClass(this)">
+          <div class="classTop">
+            <div class="className">AC Chair Car</div>
+            <div class="badge">Fast</div>
+          </div>
+          <div class="classDesc">Air conditioned seat with better comfort.</div>
+          <div class="classFare">₹ 450 / passenger</div>
+        </div>
+
+        <div class="classCard" data-class="First Class" data-fare="900" onclick="selectClass(this)">
+          <div class="classTop">
+            <div class="className">First Class</div>
+            <div class="badge">Premium</div>
+          </div>
+          <div class="classDesc">Premium cabin experience with more privacy.</div>
+          <div class="classFare">₹ 900 / passenger</div>
+        </div>
+      </div>
+
+      <div class="summary">
+        <div class="summaryRow">
+          <div class="summaryLabel">Ticket type</div>
+          <div class="summaryValue" id="sumType">Train</div>
+        </div>
+
+        <div class="summaryRow">
+          <div class="summaryLabel">Selected class</div>
+          <div class="summaryValue" id="sumClass">General</div>
+        </div>
+
+        <div class="summaryRow">
+          <div class="summaryLabel">Passengers</div>
+          <div class="summaryValue" id="sumPassengers">1</div>
+        </div>
+
+        <div class="summaryRow">
+          <div class="summaryLabel">Price / passenger</div>
+          <div class="summaryValue" id="sumFare">₹ 120</div>
+        </div>
+
+        <div class="summaryRow">
+          <div class="summaryLabel">Total payable</div>
+          <div class="summaryValue bigAmount" id="sumTotal">₹ 120.00</div>
+        </div>
+      </div>
     </div>
-    <div class="ticketType" onclick="selectTicketType(this,'Metro')">
-      <div class="ticketIcon">🚇</div>
-      <div class="ticketLabel">Metro</div>
-    </div>
-    <div class="ticketType" onclick="selectTicketType(this,'Cab')">
-      <div class="ticketIcon">🚕</div>
-      <div class="ticketLabel">Cab</div>
-    </div>
-    <div class="ticketType" onclick="selectTicketType(this,'More')">
-      <div class="ticketIcon">➕</div>
-      <div class="ticketLabel">More</div>
+
+    <div class="card" style="margin-top:14px;">
+      <div class="sectionTitle" style="margin-top:0;">Payment details</div>
+
+      <div class="field">
+        <div class="miniLabel">Payment method</div>
+        <select id="payMethod" class="select">
+          <option value="">Select method</option>
+          <option>Wallet</option>
+          <option>UPI</option>
+          <option>Debit Card</option>
+          <option>Credit Card</option>
+          <option>Net Banking</option>
+        </select>
+      </div>
+
+      <div class="field" style="margin-bottom:0;">
+        <div class="miniLabel">Enter password / PIN</div>
+        <input id="ticketPin" class="input" type="password" placeholder="Enter secure PIN">
+      </div>
+
+      <div class="error" id="ticketError">Please fill all fields properly.</div>
+
+      <button class="payBtn" id="payBtn" onclick="payTicket()">Pay & Book Ticket</button>
+      <button class="secondaryBtn" onclick="showView('homeView')">Choose another service</button>
     </div>
   </div>
 
-  <div class="card">
-    <div class="cardTitle">Ticket Details</div>
+  <!-- SUCCESS VIEW -->
+  <div class="view" id="successView">
+    <div class="topbar">
+      <div class="topLeft">
+        <button class="iconBtn" onclick="showView('homeView')">←</button>
+      </div>
 
-    <input id="ticketType" class="input" type="text" value="Train" readonly>
-    <div class="split">
-      <input id="fromCity" class="input" type="text" placeholder="From city">
-      <input id="toCity" class="input" type="text" placeholder="To city">
+      <div class="pageTitle">Receipt</div>
+
+      <div class="topRight">
+        <button class="dotsBtn" onclick="toggleMenu(event)">⋮</button>
+      </div>
     </div>
 
-    <div class="split">
-      <input id="travelDate" class="input" type="date">
-      <input id="passengers" class="input" type="number" min="1" value="1" placeholder="Passengers">
+    <div class="successWrap">
+      <div class="successCircle">✓</div>
+      <div class="successTitle">Payment Successful</div>
+      <div class="successSub" id="successMessage">
+        Your ticket has been booked successfully.
+      </div>
     </div>
 
-    <div class="split">
-      <select id="travelClass" class="select">
-        <option value="">Select class</option>
-        <option>Economy</option>
-        <option>Business</option>
-        <option>First Class</option>
-        <option>Sleeper</option>
-        <option>AC Chair Car</option>
-        <option>General</option>
-      </select>
+    <div class="receipt">
+      <div class="receiptHead">
+        <div class="receiptBrand">ST PAY Receipt</div>
+        <div class="receiptTag">Confirmed</div>
+      </div>
 
-      <input id="ticketAmount" class="input" type="number" min="1" step="0.01" placeholder="Total amount">
+      <div class="receiptRow">
+        <div class="muted">Travel Type</div>
+        <div class="value" id="rType">-</div>
+      </div>
+
+      <div class="receiptRow">
+        <div class="muted">Route</div>
+        <div class="value" id="rRoute">-</div>
+      </div>
+
+      <div class="receiptRow">
+        <div class="muted">Travel Date</div>
+        <div class="value" id="rDate">-</div>
+      </div>
+
+      <div class="receiptRow">
+        <div class="muted">Passengers</div>
+        <div class="value" id="rPassengers">-</div>
+      </div>
+
+      <div class="receiptRow">
+        <div class="muted">Class</div>
+        <div class="value" id="rClass">-</div>
+      </div>
+
+      <div class="receiptRow">
+        <div class="muted">Payment Method</div>
+        <div class="value" id="rMethod">-</div>
+      </div>
+
+      <div class="receiptRow">
+        <div class="muted">Amount Paid</div>
+        <div class="value" id="rAmount">-</div>
+      </div>
+
+      <div class="receiptRow">
+        <div class="muted">Booking ID</div>
+        <div class="value" id="rTxn">-</div>
+      </div>
+
+      <div class="receiptRow">
+        <div class="muted">Booked Time</div>
+        <div class="value" id="rTime">-</div>
+      </div>
+
+      <div class="receiptRow">
+        <div class="muted">Balance After Payment</div>
+        <div class="value" id="rBalance">-</div>
+      </div>
     </div>
 
-    <select id="ticketMethod" class="select">
-      <option value="">Payment method</option>
-      <option>Wallet</option>
-      <option>UPI</option>
-      <option>Debit Card</option>
-      <option>Credit Card</option>
-      <option>Net Banking</option>
-    </select>
-
-    <input id="ticketPass" class="input" type="password" placeholder="Enter password / PIN">
-    <div class="error" id="ticketError">Please fill all details correctly.</div>
-    <button class="btn" onclick="bookTicket()">Book Ticket</button>
+    <div class="homeActions">
+      <button class="payBtn" style="margin-top:14px;" onclick="showView('homeView')">Book Another Ticket</button>
+      <button class="secondaryBtn" style="margin-top:14px;" onclick="openHistory()">View History</button>
+    </div>
   </div>
 
-  <div class="success" id="ticketSuccess">
-    <div class="successTick">✓</div>
-    <div class="successTitle">Ticket Booked Successfully</div>
-    <div class="successSub" id="ticketSuccessText">Your ticket booking is confirmed.</div>
+  <!-- HISTORY VIEW -->
+  <div class="view" id="historyView">
+    <div class="topbar">
+      <div class="topLeft">
+        <button class="iconBtn" onclick="showView('homeView')">←</button>
+      </div>
 
-    <div class="receiptRow"><div class="muted">Travel Type</div><div class="value" id="tType">-</div></div>
-    <div class="receiptRow"><div class="muted">Route</div><div class="value" id="tRoute">-</div></div>
-    <div class="receiptRow"><div class="muted">Travel Date</div><div class="value" id="tDate">-</div></div>
-    <div class="receiptRow"><div class="muted">Passengers</div><div class="value" id="tPassengers">-</div></div>
-    <div class="receiptRow"><div class="muted">Class</div><div class="value" id="tClass">-</div></div>
-    <div class="receiptRow"><div class="muted">Amount</div><div class="value" id="tAmount">-</div></div>
-    <div class="receiptRow"><div class="muted">Payment</div><div class="value" id="tMethod">-</div></div>
-    <div class="receiptRow"><div class="muted">Booking ID</div><div class="value" id="tTxn">-</div></div>
-    <div class="receiptRow"><div class="muted">Time</div><div class="value" id="tTime">-</div></div>
+      <div class="pageTitle">Ticket History</div>
+
+      <div class="topRight">
+        <button class="dotsBtn" onclick="toggleMenu(event)">⋮</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sectionTitle" style="margin:0;">Saved receipts</div>
+      <div class="miniLabel" style="margin-top:8px;">
+        All booked tickets will stay here until you delete them.
+      </div>
+      <button class="dangerBtn" onclick="clearAllTicketHistory()">Delete All History</button>
+    </div>
+
+    <div id="historyList" class="historyList"></div>
   </div>
+
+  <!-- HELP VIEW -->
+  <div class="view" id="helpView">
+    <div class="topbar">
+      <div class="topLeft">
+        <button class="iconBtn" onclick="showView('homeView')">←</button>
+      </div>
+
+      <div class="pageTitle">Help</div>
+
+      <div class="topRight">
+        <button class="dotsBtn" onclick="toggleMenu(event)">⋮</button>
+      </div>
+    </div>
+
+    <div class="helpList">
+      <div class="helpItem">
+        <div class="helpQ">How to book a ticket?</div>
+        <div class="helpA">
+          Select a service like Train, Bus, Airplane, Metro, Cab or Other. Enter From city, To city, travel date, number of passengers, choose class, select payment method, enter PIN and tap Pay & Book Ticket.
+        </div>
+      </div>
+
+      <div class="helpItem">
+        <div class="helpQ">Why is payment not working?</div>
+        <div class="helpA">
+          Check whether all fields are filled, From and To are different, and your entered PIN matches your login password stored in session.
+        </div>
+      </div>
+
+      <div class="helpItem">
+        <div class="helpQ">Where are my booked tickets stored?</div>
+        <div class="helpA">
+          Every successful booking is saved in Ticket History using your browser local storage. It stays there even after refresh until you delete it manually.
+        </div>
+      </div>
+
+      <div class="helpItem">
+        <div class="helpQ">Can I delete a receipt?</div>
+        <div class="helpA">
+          Yes. Open Ticket History and tap Delete on any receipt. You can also remove everything using Delete All History.
+        </div>
+      </div>
+
+      <div class="helpItem">
+        <div class="helpQ">What details are saved in the receipt?</div>
+        <div class="helpA">
+          Travel type, route, date, passengers, class, payment method, amount paid, booking ID, booked time and booked user name.
+        </div>
+      </div>
+
+      <div class="helpItem">
+        <div class="helpQ">Security note</div>
+        <div class="helpA">
+          This demo page stores history only in browser local storage. If browser data is cleared manually, the saved receipts will also be removed.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FULL SCREEN PROCESSING -->
+<div class="processingScreen" id="processingScreen">
+  <div class="processingCircle" id="loader"></div>
+  <div class="processingText" id="processingText">Processing payment...</div>
+  <div class="processingSub" id="processingSub">Please wait while we securely confirm your ticket.</div>
 </div>
 
 <script>
-if (!sessionStorage.getItem("user")) {
-  window.location = "index.html";
-}
+  if (!sessionStorage.getItem("user")) {
+    window.location = "index.html";
+  }
 
-function goHome(){
-  window.location = "dashboard.html";
-}
+  let selectedType = "Train";
+  let selectedIcon = "🚆";
+  let selectedClass = "General";
+  let selectedFare = 120;
+  let isPaying = false;
 
-function selectTicketType(el,type){
-  document.querySelectorAll(".ticketType").forEach(item=>item.classList.remove("active"));
-  el.classList.add("active");
-  document.getElementById("ticketType").value = type;
-}
+  function goHome() {
+    window.location = "dashboard.html";
+  }
 
-function getPassword(){
-  return (sessionStorage.getItem("pass") || "123").trim();
-}
+  function goBack() {
+    if (window.history.length > 1) {
+      history.back();
+    } else {
+      showView("homeView");
+    }
+  }
 
-function makeTxnId(){
-  return "TKT" + Date.now() + Math.floor(Math.random()*900+100);
-}
+  function getLoggedUser() {
+    return (sessionStorage.getItem("user") || "").trim();
+  }
 
-function formatNow(){
-  return new Date().toLocaleString("en-IN",{
-    day:"2-digit",
-    month:"short",
-    year:"numeric",
-    hour:"2-digit",
-    minute:"2-digit",
-    second:"2-digit"
+  function sanitizeAmount(value) {
+    if (value === undefined || value === null) return 0;
+    const txt = String(value).replace(/[₹,\s]/g, "").trim();
+    const num = Number(txt);
+    return isNaN(num) ? 0 : Number(num.toFixed(2));
+  }
+
+  function getUserBalanceKey(user) {
+    return "balance_" + String(user || "").trim().toLowerCase();
+  }
+
+  function getTicketHistoryKey() {
+    const user = getLoggedUser() || "guest";
+    return "ticketHistory_" + user.toLowerCase();
+  }
+
+  function getTransactionHistoryKey() {
+    const user = getLoggedUser() || "guest";
+    return "history_" + user.toLowerCase();
+  }
+
+  function getBalanceAmount() {
+    const user = getLoggedUser();
+    let amount = 0;
+
+    try {
+      if (typeof window.getBalanceAmount === "function" && window.getBalanceAmount !== getBalanceAmount) {
+        amount = sanitizeAmount(window.getBalanceAmount());
+        return amount;
+      }
+    } catch (e) {}
+
+    try {
+      if (typeof window.getStoredBalance === "function") {
+        amount = sanitizeAmount(window.getStoredBalance());
+        return amount;
+      }
+    } catch (e) {}
+
+    const possibleValues = [
+      localStorage.getItem(getUserBalanceKey(user)),
+      sessionStorage.getItem("balance"),
+      localStorage.getItem("balance"),
+      sessionStorage.getItem("walletBalance"),
+      localStorage.getItem("walletBalance")
+    ];
+
+    for (let i = 0; i < possibleValues.length; i++) {
+      const raw = possibleValues[i];
+      const num = sanitizeAmount(raw);
+      if (String(raw || "").trim() !== "") {
+        amount = num;
+        break;
+      }
+      amount = num;
+    }
+
+    return Number(amount.toFixed(2));
+  }
+
+  function saveBalanceAmount(value) {
+    const user = getLoggedUser();
+    const finalAmount = Number(sanitizeAmount(value).toFixed(2));
+
+    try {
+      if (typeof window.saveBalanceAmount === "function" && window.saveBalanceAmount !== saveBalanceAmount) {
+        window.saveBalanceAmount(finalAmount);
+      }
+    } catch (e) {}
+
+    try {
+      if (typeof window.setStoredBalance === "function") {
+        window.setStoredBalance(finalAmount);
+      }
+    } catch (e) {}
+
+    localStorage.setItem(getUserBalanceKey(user), String(finalAmount.toFixed(2)));
+    localStorage.setItem("balance", String(finalAmount.toFixed(2)));
+    localStorage.setItem("walletBalance", String(finalAmount.toFixed(2)));
+    sessionStorage.setItem("balance", String(finalAmount.toFixed(2)));
+    sessionStorage.setItem("walletBalance", String(finalAmount.toFixed(2)));
+  }
+
+  function renderBalance() {
+    const balance = getBalanceAmount();
+    const balanceEl = document.getElementById("walletBalance");
+    const userEl = document.getElementById("walletUserName");
+
+    if (balanceEl) balanceEl.textContent = "₹ " + balance.toFixed(2);
+    if (userEl) userEl.textContent = getLoggedUser() || "-";
+  }
+
+  function setPayingState(state) {
+    isPaying = !!state;
+    const btn = document.getElementById("payBtn");
+    if (!btn) return;
+    btn.disabled = isPaying;
+    btn.textContent = isPaying ? "Processing..." : "Pay & Book Ticket";
+  }
+
+  function showView(id) {
+    closeMenu();
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    if (id === "historyView") {
+      renderTicketHistory();
+    }
+
+    if (id === "homeView" || id === "bookingView" || id === "successView") {
+      renderBalance();
+    }
+  }
+
+  function toggleMenu(e) {
+    if (e) e.stopPropagation();
+    const menu = document.getElementById("topMenu");
+    menu.classList.toggle("show");
+  }
+
+  function closeMenu() {
+    document.getElementById("topMenu").classList.remove("show");
+  }
+
+  function openHistory() {
+    closeMenu();
+    renderTicketHistory();
+    showView("historyView");
+  }
+
+  function openHelp() {
+    closeMenu();
+    showView("helpView");
+  }
+
+  document.addEventListener("click", function(e) {
+    const menu = document.getElementById("topMenu");
+    const dots = document.querySelectorAll(".dotsBtn");
+
+    let clickedDots = false;
+    dots.forEach(btn => {
+      if (btn.contains(e.target)) clickedDots = true;
+    });
+
+    if (!menu.contains(e.target) && !clickedDots) {
+      closeMenu();
+    }
   });
-}
 
-function bookTicket(){
-  const type = (document.getElementById("ticketType").value || "").trim();
-  const from = (document.getElementById("fromCity").value || "").trim();
-  const to = (document.getElementById("toCity").value || "").trim();
-  const date = (document.getElementById("travelDate").value || "").trim();
-  const passengers = parseInt(document.getElementById("passengers").value || "0");
-  const travelClass = (document.getElementById("travelClass").value || "").trim();
-  const amount = parseFloat(document.getElementById("ticketAmount").value || "0");
-  const method = (document.getElementById("ticketMethod").value || "").trim();
-  const pass = (document.getElementById("ticketPass").value || "").trim();
-  const error = document.getElementById("ticketError");
+  function openBooking(type, icon) {
+    selectedType = type;
+    selectedIcon = icon;
+    document.getElementById("bookingTitle").textContent = `${type} Booking`;
+    document.getElementById("sumType").textContent = type;
 
-  error.style.display = "none";
-
-  if (!type || !from || !to || !date || !passengers || passengers <= 0 || !travelClass || !amount || amount <= 0 || !method || !pass) {
-    error.textContent = "Please fill all details correctly.";
-    error.style.display = "block";
-    return;
+    resetBookingForm();
+    showView("bookingView");
   }
 
-  if (from.toLowerCase() === to.toLowerCase()) {
-    error.textContent = "From and To city same ah irukka koodadhu.";
-    error.style.display = "block";
-    return;
+  function resetBookingForm() {
+    document.getElementById("fromCity").value = "";
+    document.getElementById("toCity").value = "";
+    document.getElementById("travelDate").value = "";
+    document.getElementById("passengers").value = 1;
+    document.getElementById("payMethod").value = "";
+    document.getElementById("ticketPin").value = "";
+    document.getElementById("ticketError").style.display = "none";
+
+    const cards = document.querySelectorAll(".classCard");
+    cards.forEach(c => c.classList.remove("active"));
+    cards[0].classList.add("active");
+
+    selectedClass = cards[0].dataset.class;
+    selectedFare = Number(cards[0].dataset.fare);
+
+    updateFare();
   }
 
-  if (pass !== getPassword()) {
-    error.textContent = "Wrong password / PIN.";
-    error.style.display = "block";
-    return;
+  function selectClass(el) {
+    document.querySelectorAll(".classCard").forEach(card => card.classList.remove("active"));
+    el.classList.add("active");
+
+    selectedClass = el.dataset.class;
+    selectedFare = Number(el.dataset.fare);
+    updateFare();
   }
 
-  const txn = makeTxnId();
-  const time = formatNow();
+  function updateFare() {
+    const passengers = Math.max(1, parseInt(document.getElementById("passengers").value || "1"));
+    const total = passengers * selectedFare;
 
-  document.getElementById("ticketSuccess").style.display = "block";
-  document.getElementById("ticketSuccessText").textContent = `${type} ticket booked from ${from} to ${to}`;
-  document.getElementById("tType").textContent = type;
-  document.getElementById("tRoute").textContent = from + " → " + to;
-  document.getElementById("tDate").textContent = date;
-  document.getElementById("tPassengers").textContent = passengers;
-  document.getElementById("tClass").textContent = travelClass;
-  document.getElementById("tAmount").textContent = "₹ " + amount.toFixed(2);
-  document.getElementById("tMethod").textContent = method;
-  document.getElementById("tTxn").textContent = txn;
-  document.getElementById("tTime").textContent = time;
+    document.getElementById("sumClass").textContent = selectedClass;
+    document.getElementById("sumPassengers").textContent = passengers;
+    document.getElementById("sumFare").textContent = `₹ ${selectedFare}`;
+    document.getElementById("sumTotal").textContent = `₹ ${total.toFixed(2)}`;
+  }
 
-  window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
-}
+  function getPassword() {
+    return (sessionStorage.getItem("pass") || "123").trim();
+  }
+
+  function makeBookingId() {
+    return "TKT" + Date.now() + Math.floor(Math.random() * 900 + 100);
+  }
+
+  function formatDateOnly(dateStr) {
+    if (!dateStr) return "-";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    });
+  }
+
+  function formatNow() {
+    return new Date().toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    });
+  }
+
+  function getTicketHistory() {
+    try {
+      const data = JSON.parse(localStorage.getItem(getTicketHistoryKey()) || "[]");
+      return Array.isArray(data) ? data : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveTicketToHistory(ticket) {
+    const oldHistory = getTicketHistory();
+    oldHistory.unshift(ticket);
+    localStorage.setItem(getTicketHistoryKey(), JSON.stringify(oldHistory));
+  }
+
+  function deleteTicketHistory(index) {
+    const list = getTicketHistory();
+    list.splice(index, 1);
+    localStorage.setItem(getTicketHistoryKey(), JSON.stringify(list));
+    renderTicketHistory();
+  }
+
+  function clearAllTicketHistory() {
+    const ok = confirm("Delete all saved ticket history?");
+    if (!ok) return;
+    localStorage.removeItem(getTicketHistoryKey());
+    renderTicketHistory();
+  }
+
+  function addToMainHistory(item) {
+    try {
+      const raw = localStorage.getItem(getTransactionHistoryKey());
+      const history = JSON.parse(raw || "[]");
+      const safeHistory = Array.isArray(history) ? history : [];
+
+      safeHistory.unshift({
+        type: "Ticket Booking",
+        title: item.type + " Ticket",
+        subtitle: item.from + " → " + item.to,
+        amount: Number(item.amount || 0).toFixed(2),
+        sign: "-",
+        color: "red",
+        method: item.method,
+        txn: item.bookingId,
+        time: item.time,
+        user: item.user,
+        category: "ticket"
+      });
+
+      localStorage.setItem(getTransactionHistoryKey(), JSON.stringify(safeHistory));
+    } catch (e) {
+      console.error("Main history save error:", e);
+    }
+  }
+
+  function renderTicketHistory() {
+    const wrap = document.getElementById("historyList");
+    const history = getTicketHistory();
+
+    if (!history.length) {
+      wrap.innerHTML = `
+        <div class="emptyState">
+          No ticket receipts saved yet.<br>
+          Book a ticket and it will appear here.
+        </div>
+      `;
+      return;
+    }
+
+    wrap.innerHTML = history.map((item, index) => `
+      <div class="historyCard">
+        <div class="historyTop">
+          <div>
+            <div class="historyRoute">${item.icon || "🎫"} ${item.from} → ${item.to}</div>
+            <div class="historyMeta">${item.type} • ${item.travelDate} • ${item.time}</div>
+          </div>
+          <div class="historyAmount">₹ ${Number(item.amount || 0).toFixed(2)}</div>
+        </div>
+
+        <div class="historyPills">
+          <div class="pill">${item.travelClass}</div>
+          <div class="pill">${item.passengers} Passenger(s)</div>
+          <div class="pill">${item.method}</div>
+          <div class="pill">${item.bookingId}</div>
+          <div class="pill">${item.user || "User"}</div>
+          <div class="pill">Bal: ₹ ${Number(item.balanceAfter || 0).toFixed(2)}</div>
+        </div>
+
+        <div class="historyActions">
+          <button class="smallBtn deleteBtn" onclick="deleteTicketHistory(${index})">Delete</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function payTicket() {
+    if (isPaying) return;
+
+    const from = (document.getElementById("fromCity").value || "").trim();
+    const to = (document.getElementById("toCity").value || "").trim();
+    const date = (document.getElementById("travelDate").value || "").trim();
+    const passengers = Math.max(1, parseInt(document.getElementById("passengers").value || "1"));
+    const method = (document.getElementById("payMethod").value || "").trim();
+    const pin = (document.getElementById("ticketPin").value || "").trim();
+    const error = document.getElementById("ticketError");
+
+    error.style.display = "none";
+
+    if (!from || !to || !date || !method || !pin) {
+      error.textContent = "Please fill all fields properly.";
+      error.style.display = "block";
+      return;
+    }
+
+    if (from.toLowerCase() === to.toLowerCase()) {
+      error.textContent = "From and To city cannot be the same.";
+      error.style.display = "block";
+      return;
+    }
+
+    if (pin !== getPassword()) {
+      error.textContent = "Incorrect password / PIN.";
+      error.style.display = "block";
+      return;
+    }
+
+    const total = Number((passengers * selectedFare).toFixed(2));
+    const currentBalance = getBalanceAmount();
+
+    if (total > currentBalance) {
+      error.textContent = "Insufficient wallet balance.";
+      error.style.display = "block";
+      return;
+    }
+
+    const bookingId = makeBookingId();
+    const bookingTime = formatNow();
+    const newBalance = Number((currentBalance - total).toFixed(2));
+
+    const ticketData = {
+      user: sessionStorage.getItem("user") || "User",
+      type: selectedType,
+      icon: selectedIcon,
+      from,
+      to,
+      travelDate: formatDateOnly(date),
+      passengers,
+      travelClass: selectedClass,
+      method,
+      amount: total.toFixed(2),
+      bookingId,
+      time: bookingTime,
+      balanceAfter: newBalance
+    };
+
+    setPayingState(true);
+    saveBalanceAmount(newBalance);
+    saveTicketToHistory(ticketData);
+    addToMainHistory(ticketData);
+    renderBalance();
+
+    const processing = document.getElementById("processingScreen");
+    const loader = document.getElementById("loader");
+    const pText = document.getElementById("processingText");
+    const pSub = document.getElementById("processingSub");
+
+    processing.classList.add("show");
+    loader.style.display = "block";
+    loader.style.animation = "spin 1s linear infinite";
+    loader.style.border = "";
+    loader.style.borderTopColor = "";
+    loader.style.width = "";
+    loader.style.height = "";
+    loader.style.borderRadius = "";
+    loader.style.background = "";
+    loader.style.color = "";
+    loader.style.fontSize = "";
+    loader.style.fontWeight = "";
+    loader.style.alignItems = "";
+    loader.style.justifyContent = "";
+    loader.innerHTML = "";
+
+    pText.textContent = "Processing payment...";
+    pSub.textContent = "Please wait while we securely confirm your ticket.";
+
+    setTimeout(() => {
+      loader.style.display = "flex";
+      loader.style.animation = "none";
+      loader.style.border = "none";
+      loader.style.width = "88px";
+      loader.style.height = "88px";
+      loader.style.borderRadius = "50%";
+      loader.style.background = "#dcfce7";
+      loader.style.color = "#16a34a";
+      loader.style.fontSize = "42px";
+      loader.style.fontWeight = "900";
+      loader.style.alignItems = "center";
+      loader.style.justifyContent = "center";
+      loader.innerHTML = "✓";
+      pText.textContent = "Payment successful";
+      pSub.textContent = "Your ticket booking is confirmed.";
+    }, 1300);
+
+    setTimeout(() => {
+      processing.classList.remove("show");
+
+      loader.removeAttribute("style");
+      loader.innerHTML = "";
+      loader.className = "processingCircle";
+
+      document.getElementById("successMessage").textContent =
+        `${selectedType} ticket booked successfully from ${from} to ${to}. Wallet updated successfully.`;
+
+      document.getElementById("rType").textContent = selectedType;
+      document.getElementById("rRoute").textContent = `${from} → ${to}`;
+      document.getElementById("rDate").textContent = formatDateOnly(date);
+      document.getElementById("rPassengers").textContent = passengers;
+      document.getElementById("rClass").textContent = selectedClass;
+      document.getElementById("rMethod").textContent = method;
+      document.getElementById("rAmount").textContent = `₹ ${total.toFixed(2)}`;
+      document.getElementById("rTxn").textContent = bookingId;
+      document.getElementById("rTime").textContent = bookingTime;
+      document.getElementById("rBalance").textContent = `₹ ${newBalance.toFixed(2)}`;
+
+      renderTicketHistory();
+      renderBalance();
+      setPayingState(false);
+      showView("successView");
+    }, 2000);
+  }
+
+  document.getElementById("travelDate").min = new Date().toISOString().split("T")[0];
+  updateFare();
+  renderBalance();
+  renderTicketHistory();
 </script>
 
 </body>

@@ -51,35 +51,103 @@ function sanitizeAmount(value) {
   return num.toFixed(2);
 }
 
+function amountToNumber(value) {
+  var txt = sanitizeAmount(value);
+  var num = Number(txt);
+  return isNaN(num) ? 0 : num;
+}
+
 function getUserBalanceKey(user) {
   return "stpay_balance_" + String(user || "").toLowerCase();
+}
+
+function getAltUserBalanceKey(user) {
+  return "balance_" + String(user || "").toLowerCase();
 }
 
 function getUserHistoryKey(user) {
   return "stpay_history_" + String(user || "").toLowerCase();
 }
 
+function getAltUserHistoryKey(user) {
+  return "history_" + String(user || "").toLowerCase();
+}
+
 function getUserRechargeHistoryKey(user) {
   return "stpay_recharge_history_" + String(user || "").toLowerCase();
+}
+
+function getAltUserRechargeHistoryKey(user) {
+  return "recharge_history_" + String(user || "").toLowerCase();
+}
+
+function markBalanceUpdatedNow() {
+  var now = String(Date.now());
+  sessionStorage.setItem("stpay_balance_last_updated", now);
+  localStorage.setItem("stpay_balance_last_updated", now);
+
+  var user = getLoggedUser();
+  if (user) {
+    localStorage.setItem("stpay_balance_last_updated_" + String(user).toLowerCase(), now);
+  }
+
+  return now;
+}
+
+function getBalanceUpdatedAt() {
+  var user = getLoggedUser();
+  return Number(
+    sessionStorage.getItem("stpay_balance_last_updated") ||
+    (user ? localStorage.getItem("stpay_balance_last_updated_" + String(user).toLowerCase()) : "") ||
+    localStorage.getItem("stpay_balance_last_updated") ||
+    0
+  );
+}
+
+function hasStrongLocalBalance() {
+  var user = getLoggedUser();
+  var userKey = user ? getUserBalanceKey(user) : "";
+  var userAltKey = user ? getAltUserBalanceKey(user) : "";
+
+  return !!(
+    sessionStorage.getItem("balance_amount") ||
+    sessionStorage.getItem("current_balance") ||
+    sessionStorage.getItem("wallet_balance") ||
+    sessionStorage.getItem("walletBalance") ||
+    sessionStorage.getItem("balance") ||
+    (userKey && localStorage.getItem(userKey)) ||
+    (userAltKey && localStorage.getItem(userAltKey)) ||
+    localStorage.getItem("stpay_balance") ||
+    localStorage.getItem("stpay_wallet_balance") ||
+    localStorage.getItem("balance") ||
+    localStorage.getItem("walletBalance")
+  );
 }
 
 function saveBalanceAmount(value) {
   var user = getLoggedUser();
   var finalAmount = sanitizeAmount(value);
 
+  // session
   sessionStorage.setItem("balance_amount", finalAmount);
   sessionStorage.setItem("current_balance", finalAmount);
   sessionStorage.setItem("wallet_balance", finalAmount);
+  sessionStorage.setItem("walletBalance", finalAmount);
   sessionStorage.setItem("balance", finalAmount);
 
+  // global local
   localStorage.setItem("stpay_balance", finalAmount);
   localStorage.setItem("stpay_wallet_balance", finalAmount);
-  localStorage.setItem("stpay_balance_last_updated", String(Date.now()));
+  localStorage.setItem("balance", finalAmount);
+  localStorage.setItem("walletBalance", finalAmount);
 
+  // user local
   if (user) {
     localStorage.setItem(getUserBalanceKey(user), finalAmount);
+    localStorage.setItem(getAltUserBalanceKey(user), finalAmount);
   }
 
+  markBalanceUpdatedNow();
   return finalAmount;
 }
 
@@ -90,10 +158,14 @@ function getSavedBalanceAmount() {
     sessionStorage.getItem("balance_amount") ||
     sessionStorage.getItem("current_balance") ||
     sessionStorage.getItem("wallet_balance") ||
+    sessionStorage.getItem("walletBalance") ||
     sessionStorage.getItem("balance") ||
     (user ? localStorage.getItem(getUserBalanceKey(user)) : "") ||
+    (user ? localStorage.getItem(getAltUserBalanceKey(user)) : "") ||
     localStorage.getItem("stpay_balance") ||
     localStorage.getItem("stpay_wallet_balance") ||
+    localStorage.getItem("balance") ||
+    localStorage.getItem("walletBalance") ||
     "0"
   );
 }
@@ -101,28 +173,22 @@ function getSavedBalanceAmount() {
 function updateBalanceElements(value) {
   var finalAmount = saveBalanceAmount(value);
 
-  var balanceEl = document.getElementById("balance");
-  if (balanceEl) {
-    balanceEl.innerText = finalAmount;
-    balanceEl.textContent = finalAmount;
-  }
+  var ids = [
+    "balance",
+    "secureBalanceValue",
+    "statementBalance",
+    "profileBalance",
+    "availableBalance",
+    "walletBalance",
+    "balanceAmount"
+  ];
 
-  var secureBalanceEl = document.getElementById("secureBalanceValue");
-  if (secureBalanceEl) {
-    secureBalanceEl.innerText = finalAmount;
-    secureBalanceEl.textContent = finalAmount;
-  }
-
-  var statementBalanceEl = document.getElementById("statementBalance");
-  if (statementBalanceEl) {
-    statementBalanceEl.innerText = finalAmount;
-    statementBalanceEl.textContent = finalAmount;
-  }
-
-  var profileBalanceEl = document.getElementById("profileBalance");
-  if (profileBalanceEl) {
-    profileBalanceEl.innerText = finalAmount;
-    profileBalanceEl.textContent = finalAmount;
+  for (var i = 0; i < ids.length; i++) {
+    var el = document.getElementById(ids[i]);
+    if (el) {
+      el.innerText = finalAmount;
+      el.textContent = finalAmount;
+    }
   }
 
   return finalAmount;
@@ -165,37 +231,6 @@ function writeArrayStorage(key, arr, limit) {
   localStorage.setItem(key, JSON.stringify(list.slice(0, limit || 100)));
 }
 
-function pushUserHistory(item) {
-  try {
-    var user = getLoggedUser();
-    if (!user || !item) return;
-
-    var commonHistory = readArrayStorage("stpay_history");
-    commonHistory.unshift(item);
-    writeArrayStorage("stpay_history", commonHistory, 150);
-
-    var userHistoryKey = getUserHistoryKey(user);
-    var userHistory = readArrayStorage(userHistoryKey);
-    userHistory.unshift(item);
-    writeArrayStorage(userHistoryKey, userHistory, 150);
-
-    if (item.type === "recharge") {
-      var commonRecharge = readArrayStorage("stpay_recharge_history");
-      commonRecharge.unshift(item);
-      writeArrayStorage("stpay_recharge_history", commonRecharge, 100);
-
-      var userRechargeKey = getUserRechargeHistoryKey(user);
-      var userRecharge = readArrayStorage(userRechargeKey);
-      userRecharge.unshift(item);
-      writeArrayStorage(userRechargeKey, userRecharge, 100);
-    }
-
-    localStorage.setItem("stpay_last_history_update", String(Date.now()));
-  } catch (e) {
-    console.log("pushUserHistory error:", e);
-  }
-}
-
 function dispatchBalanceUpdateEvent(value) {
   try {
     window.dispatchEvent(new CustomEvent("stpay-balance-updated", {
@@ -207,6 +242,312 @@ function dispatchBalanceUpdateEvent(value) {
   } catch (e) {
     console.log("dispatchBalanceUpdateEvent error:", e);
   }
+}
+
+function normalizeHistoryItem(item) {
+  var obj = item || {};
+  var type = String(obj.type || "").toLowerCase();
+
+  return {
+    type: obj.type || "transaction",
+    title: obj.title || obj.name || "Transaction",
+    subtitle: obj.subtitle || obj.to || obj.billName || obj.ticketName || obj.provider || "",
+    user: obj.user || getLoggedUser(),
+    to: obj.to || "",
+    number: obj.number || "",
+    provider: obj.provider || "",
+    billName: obj.billName || "",
+    ticketName: obj.ticketName || "",
+    plan: obj.plan || "",
+    amount: amountToNumber(obj.amount),
+    sign: obj.sign || (type === "credit" ? "+" : "-"),
+    color: obj.color || (type === "credit" ? "green" : "red"),
+    time: obj.time || new Date().toLocaleString("en-IN"),
+    status: obj.status || "success",
+    balanceAfter: sanitizeAmount(obj.balanceAfter || getSavedBalanceAmount()),
+    txn: obj.txn || obj.txId || obj.txnId || "",
+    txnId: obj.txnId || obj.txn || "",
+    icon: obj.icon || "💳",
+    method: obj.method || "",
+    category: obj.category || type || "transaction"
+  };
+}
+
+function pushUserHistory(item) {
+  try {
+    var user = getLoggedUser();
+    if (!user || !item) return;
+
+    var normalized = normalizeHistoryItem(item);
+
+    // common modern + legacy
+    var commonHistory = readArrayStorage("stpay_history");
+    commonHistory.unshift(normalized);
+    writeArrayStorage("stpay_history", commonHistory, 150);
+
+    var commonHistoryAlt = readArrayStorage("history");
+    commonHistoryAlt.unshift(normalized);
+    writeArrayStorage("history", commonHistoryAlt, 150);
+
+    // user modern + legacy
+    var userHistoryKey = getUserHistoryKey(user);
+    var userHistory = readArrayStorage(userHistoryKey);
+    userHistory.unshift(normalized);
+    writeArrayStorage(userHistoryKey, userHistory, 150);
+
+    var altUserHistoryKey = getAltUserHistoryKey(user);
+    var altUserHistory = readArrayStorage(altUserHistoryKey);
+    altUserHistory.unshift(normalized);
+    writeArrayStorage(altUserHistoryKey, altUserHistory, 150);
+
+    if (String(normalized.type).toLowerCase() === "recharge") {
+      var commonRecharge = readArrayStorage("stpay_recharge_history");
+      commonRecharge.unshift(normalized);
+      writeArrayStorage("stpay_recharge_history", commonRecharge, 100);
+
+      var commonRechargeAlt = readArrayStorage("recharge_history");
+      commonRechargeAlt.unshift(normalized);
+      writeArrayStorage("recharge_history", commonRechargeAlt, 100);
+
+      var userRechargeKey = getUserRechargeHistoryKey(user);
+      var userRecharge = readArrayStorage(userRechargeKey);
+      userRecharge.unshift(normalized);
+      writeArrayStorage(userRechargeKey, userRecharge, 100);
+
+      var altUserRechargeKey = getAltUserRechargeHistoryKey(user);
+      var altUserRecharge = readArrayStorage(altUserRechargeKey);
+      altUserRecharge.unshift(normalized);
+      writeArrayStorage(altUserRechargeKey, altUserRecharge, 100);
+    }
+
+    localStorage.setItem("stpay_last_history_update", String(Date.now()));
+  } catch (e) {
+    console.log("pushUserHistory error:", e);
+  }
+}
+
+
+/* ------------------------------
+   BALANCE CALCULATION HELPERS
+------------------------------ */
+
+function applyBalanceDelta(delta) {
+  var current = amountToNumber(getSavedBalanceAmount());
+  var finalAmount = current + Number(delta || 0);
+
+  if (isNaN(finalAmount)) {
+    finalAmount = current;
+  }
+
+  if (finalAmount < 0) {
+    finalAmount = 0;
+  }
+
+  var saved = updateBalanceElements(finalAmount);
+  dispatchBalanceUpdateEvent(saved);
+  return saved;
+}
+
+function deductBalanceAmount(amount) {
+  var amt = amountToNumber(amount);
+  if (amt <= 0) return getSavedBalanceAmount();
+  return applyBalanceDelta(-amt);
+}
+
+function creditBalanceAmount(amount) {
+  var amt = amountToNumber(amount);
+  if (amt <= 0) return getSavedBalanceAmount();
+  return applyBalanceDelta(amt);
+}
+
+function syncBalanceFromResponse(data, fallbackAmount, mode) {
+  try {
+    if (
+      data &&
+      data.balance !== undefined &&
+      data.balance !== null &&
+      !isNaN(Number(data.balance))
+    ) {
+      var saved = updateBalanceElements(Number(data.balance));
+      dispatchBalanceUpdateEvent(saved);
+      return saved;
+    }
+
+    if (mode === "credit") {
+      return creditBalanceAmount(fallbackAmount);
+    }
+
+    if (mode === "debit") {
+      return deductBalanceAmount(fallbackAmount);
+    }
+
+    return updateBalanceElements(getSavedBalanceAmount());
+  } catch (e) {
+    console.log("syncBalanceFromResponse error:", e);
+    return updateBalanceElements(getSavedBalanceAmount());
+  }
+}
+
+function extractAmountFromPayload(payload) {
+  try {
+    if (!payload) return 0;
+
+    if (payload.amount !== undefined && payload.amount !== null) {
+      return amountToNumber(payload.amount);
+    }
+
+    if (payload.rechargeAmount !== undefined && payload.rechargeAmount !== null) {
+      return amountToNumber(payload.rechargeAmount);
+    }
+
+    if (payload.billAmount !== undefined && payload.billAmount !== null) {
+      return amountToNumber(payload.billAmount);
+    }
+
+    if (payload.ticketAmount !== undefined && payload.ticketAmount !== null) {
+      return amountToNumber(payload.ticketAmount);
+    }
+
+    if (payload.total !== undefined && payload.total !== null) {
+      return amountToNumber(payload.total);
+    }
+
+    if (payload.price !== undefined && payload.price !== null) {
+      return amountToNumber(payload.price);
+    }
+
+    if (payload.value !== undefined && payload.value !== null) {
+      return amountToNumber(payload.value);
+    }
+
+    return 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
+function readJsonBodySafely(init) {
+  try {
+    if (!init || !init.body) return null;
+
+    if (typeof init.body === "string") {
+      return JSON.parse(init.body);
+    }
+
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function isDebitUrl(url) {
+  var txt = String(url || "").toLowerCase();
+
+  return (
+    txt.indexOf("/api/send") !== -1 ||
+    txt.indexOf("/api/pay") !== -1 ||
+    txt.indexOf("/api/payment") !== -1 ||
+    txt.indexOf("/api/transaction") !== -1 ||
+    txt.indexOf("/api/bill") !== -1 ||
+    txt.indexOf("/api/recharge") !== -1 ||
+    txt.indexOf("/api/ticket") !== -1 ||
+    txt.indexOf("/api/book") !== -1 ||
+    txt.indexOf("/api/people") !== -1 ||
+    txt.indexOf("/api/transfer") !== -1 ||
+    txt.indexOf("/api/debit") !== -1 ||
+    txt.indexOf("/api/deduct") !== -1
+  );
+}
+
+function isCreditUrl(url) {
+  var txt = String(url || "").toLowerCase();
+
+  return (
+    txt.indexOf("/api/add-money") !== -1 ||
+    txt.indexOf("/api/addmoney") !== -1 ||
+    txt.indexOf("/api/topup") !== -1 ||
+    txt.indexOf("/api/credit") !== -1
+  );
+}
+
+function shouldAutoSyncForMethod(method) {
+  var m = String(method || "GET").toUpperCase();
+  return m === "POST" || m === "PUT" || m === "PATCH";
+}
+
+
+/* ------------------------------
+   AUTO FETCH BALANCE SYNC FIX
+------------------------------ */
+
+if (!window.__stpayFetchWrapped) {
+  window.__stpayFetchWrapped = true;
+
+  var __nativeFetch = window.fetch.bind(window);
+
+  window.fetch = function (input, init) {
+    var reqUrl = "";
+    var reqMethod = "GET";
+    var reqPayload = null;
+
+    try {
+      reqUrl = typeof input === "string"
+        ? input
+        : (input && input.url) || "";
+
+      reqMethod =
+        (init && init.method) ||
+        (input && input.method) ||
+        "GET";
+
+      reqPayload = readJsonBodySafely(init);
+    } catch (e) {
+      console.log("fetch wrapper pre-read error:", e);
+    }
+
+    return __nativeFetch(input, init).then(function (res) {
+      try {
+        var shouldCheck =
+          getLoggedUser() &&
+          shouldAutoSyncForMethod(reqMethod) &&
+          (isDebitUrl(reqUrl) || isCreditUrl(reqUrl));
+
+        if (!shouldCheck) {
+          return res;
+        }
+
+        res.clone().json().then(function (data) {
+          try {
+            if (!res.ok) return;
+
+            var okState = true;
+            if (data && data.ok === false) okState = false;
+            if (!okState) return;
+
+            var amount = extractAmountFromPayload(reqPayload);
+
+            if (isCreditUrl(reqUrl)) {
+              syncBalanceFromResponse(data, amount, "credit");
+              return;
+            }
+
+            if (isDebitUrl(reqUrl)) {
+              syncBalanceFromResponse(data, amount, "debit");
+              return;
+            }
+          } catch (innerErr) {
+            console.log("fetch wrapper sync error:", innerErr);
+          }
+        }).catch(function () {
+          /* ignore non-json */
+        });
+      } catch (e) {
+        console.log("fetch wrapper error:", e);
+      }
+
+      return res;
+    });
+  };
 }
 
 
@@ -238,6 +579,9 @@ function initUserDisplay() {
   setTextIfExists("profileName", u);
   setTextIfExists("welcomeUser", u);
   setTextIfExists("displayUser", u);
+  setTextIfExists("userDisplay", u);
+  setTextIfExists("walletUserName", u);
+  setTextIfExists("currentUser", u);
 }
 
 
@@ -250,7 +594,12 @@ function loadBalance() {
     try {
       var user = getLoggedUser();
       var saved = getSavedBalanceAmount();
+      var savedNum = amountToNumber(saved);
+      var hasLocal = hasStrongLocalBalance();
+      var lastUpdatedAt = getBalanceUpdatedAt();
+      var isRecentLocalUpdate = lastUpdatedAt && (Date.now() - lastUpdatedAt < 30 * 60 * 1000);
 
+      // always show local immediately
       updateBalanceElements(saved);
 
       if (!user) {
@@ -268,7 +617,7 @@ function loadBalance() {
 
           console.log("Balance API response:", data);
 
-          var amount = null;
+          var serverAmount = null;
 
           if (
             res.ok &&
@@ -277,22 +626,40 @@ function loadBalance() {
             data.balance !== null &&
             !isNaN(Number(data.balance))
           ) {
-            amount = Number(data.balance);
+            serverAmount = Number(data.balance);
           }
 
-          if (amount === null) {
-            amount = Number(saved);
+          // If local balance already exists and was recently updated
+          // don't let old server value overwrite it.
+          if (hasLocal && isRecentLocalUpdate) {
+            var keepLocal = sanitizeAmount(saved);
+            updateBalanceElements(keepLocal);
+            dispatchBalanceUpdateEvent(keepLocal);
+            resolve(keepLocal);
+            return;
           }
 
-          if (isNaN(amount)) {
-            amount = 0;
+          // If strong local data already exists, prefer it unless local is zero and server is valid
+          if (hasLocal && savedNum > 0) {
+            var keepSaved = sanitizeAmount(saved);
+            updateBalanceElements(keepSaved);
+            dispatchBalanceUpdateEvent(keepSaved);
+            resolve(keepSaved);
+            return;
           }
 
-          var finalAmount = amount.toFixed(2);
+          if (serverAmount !== null) {
+            var finalFromServer = sanitizeAmount(serverAmount);
+            updateBalanceElements(finalFromServer);
+            dispatchBalanceUpdateEvent(finalFromServer);
+            resolve(finalFromServer);
+            return;
+          }
 
-          updateBalanceElements(finalAmount);
-          dispatchBalanceUpdateEvent(finalAmount);
-          resolve(finalAmount);
+          var fallback = sanitizeAmount(saved);
+          updateBalanceElements(fallback);
+          dispatchBalanceUpdateEvent(fallback);
+          resolve(fallback);
         })
         .catch(function (e) {
           console.log("Balance load error", e);
@@ -311,6 +678,7 @@ function loadBalance() {
     }
   });
 }
+
 
 /* ------------------------------
    BALANCE LOCK SYSTEM
@@ -546,10 +914,11 @@ function addMoney(amount) {
             var balanceValue = 0;
             if (data.balance !== undefined && data.balance !== null) {
               balanceValue = data.balance;
+              updateBalanceElements(balanceValue);
+              dispatchBalanceUpdateEvent(balanceValue);
+            } else {
+              creditBalanceAmount(finalAmount);
             }
-
-            updateBalanceElements(balanceValue);
-            dispatchBalanceUpdateEvent(balanceValue);
 
             pushUserHistory({
               type: "credit",
@@ -628,13 +997,14 @@ function sendMoney(toUser, amount) {
           console.log("Send money response:", data);
 
           if (res.ok && data.ok) {
-            var balanceValue = 0;
-            if (data.balance !== undefined && data.balance !== null) {
-              balanceValue = data.balance;
-            }
+            var finalBal = "0.00";
 
-            var finalBal = updateBalanceElements(balanceValue);
-            dispatchBalanceUpdateEvent(finalBal);
+            if (data.balance !== undefined && data.balance !== null) {
+              finalBal = updateBalanceElements(data.balance);
+              dispatchBalanceUpdateEvent(finalBal);
+            } else {
+              finalBal = deductBalanceAmount(finalAmount);
+            }
 
             pushUserHistory({
               type: "debit",
@@ -671,6 +1041,105 @@ function sendMoney(toUser, amount) {
 
 
 /* ------------------------------
+   UNIVERSAL PAYMENT HELPERS
+   bills / tickets / recharge / custom pages
+------------------------------ */
+
+function completeDebitPayment(amount, historyItem) {
+  var finalBal = deductBalanceAmount(amount);
+
+  if (historyItem) {
+    var item = historyItem || {};
+    if (!item.time) item.time = new Date().toLocaleString("en-IN");
+    if (!item.status) item.status = "success";
+    if (!item.balanceAfter) item.balanceAfter = finalBal;
+    pushUserHistory(item);
+  }
+
+  return finalBal;
+}
+
+function completeCreditPayment(amount, historyItem) {
+  var finalBal = creditBalanceAmount(amount);
+
+  if (historyItem) {
+    var item = historyItem || {};
+    if (!item.time) item.time = new Date().toLocaleString("en-IN");
+    if (!item.status) item.status = "success";
+    if (!item.balanceAfter) item.balanceAfter = finalBal;
+    pushUserHistory(item);
+  }
+
+  return finalBal;
+}
+
+function completeBillPayment(amount, billName) {
+  return completeDebitPayment(amount, {
+    type: "bill",
+    title: "Bill Paid",
+    user: getLoggedUser(),
+    amount: amountToNumber(amount),
+    billName: billName || "Bill",
+    icon: "🧾"
+  });
+}
+
+function completeTicketPayment(amount, ticketName) {
+  return completeDebitPayment(amount, {
+    type: "ticket",
+    title: "Ticket Booked",
+    user: getLoggedUser(),
+    amount: amountToNumber(amount),
+    ticketName: ticketName || "Ticket",
+    icon: "🎫"
+  });
+}
+
+function completeRechargePayment(amount, providerName) {
+  return completeDebitPayment(amount, {
+    type: "recharge",
+    title: "Recharge Done",
+    user: getLoggedUser(),
+    amount: amountToNumber(amount),
+    provider: providerName || "Recharge",
+    icon: "📱"
+  });
+}
+
+function completeTransactionPayment(amount, titleText) {
+  return completeDebitPayment(amount, {
+    type: "transaction",
+    title: titleText || "Transaction Paid",
+    user: getLoggedUser(),
+    amount: amountToNumber(amount),
+    icon: "💳"
+  });
+}
+
+function completePeoplePayment(amount, personName) {
+  return completeDebitPayment(amount, {
+    type: "people",
+    title: "Paid to Contact",
+    user: getLoggedUser(),
+    to: personName || "",
+    amount: amountToNumber(amount),
+    icon: "👤"
+  });
+}
+
+function completePayPayment(amount, receiverName) {
+  return completeDebitPayment(amount, {
+    type: "pay",
+    title: "Payment Done",
+    user: getLoggedUser(),
+    to: receiverName || "",
+    amount: amountToNumber(amount),
+    icon: "💸"
+  });
+}
+
+
+/* ------------------------------
    HISTORY
 ------------------------------ */
 
@@ -702,7 +1171,9 @@ function loadHistory() {
           if (res.ok && Object.prototype.toString.call(list) === "[object Array]") {
             try {
               writeArrayStorage("stpay_history", list, 150);
+              writeArrayStorage("history", list, 150);
               writeArrayStorage(getUserHistoryKey(user), list, 150);
+              writeArrayStorage(getAltUserHistoryKey(user), list, 150);
             } catch (e) {
               console.log("History cache write error:", e);
             }
@@ -713,7 +1184,11 @@ function loadHistory() {
           var fallback =
             readArrayStorage(getUserHistoryKey(user)).length
               ? readArrayStorage(getUserHistoryKey(user))
-              : readArrayStorage("stpay_history");
+              : readArrayStorage(getAltUserHistoryKey(user)).length
+                ? readArrayStorage(getAltUserHistoryKey(user))
+                : readArrayStorage("stpay_history").length
+                  ? readArrayStorage("stpay_history")
+                  : readArrayStorage("history");
 
           resolve(fallback);
         })
@@ -723,7 +1198,11 @@ function loadHistory() {
           var fallback =
             readArrayStorage(getUserHistoryKey(user)).length
               ? readArrayStorage(getUserHistoryKey(user))
-              : readArrayStorage("stpay_history");
+              : readArrayStorage(getAltUserHistoryKey(user)).length
+                ? readArrayStorage(getAltUserHistoryKey(user))
+                : readArrayStorage("stpay_history").length
+                  ? readArrayStorage("stpay_history")
+                  : readArrayStorage("history");
 
           resolve(fallback);
         });
@@ -735,7 +1214,11 @@ function loadHistory() {
       var fallback2 =
         readArrayStorage(getUserHistoryKey(user2)).length
           ? readArrayStorage(getUserHistoryKey(user2))
-          : readArrayStorage("stpay_history");
+          : readArrayStorage(getAltUserHistoryKey(user2)).length
+            ? readArrayStorage(getAltUserHistoryKey(user2))
+            : readArrayStorage("stpay_history").length
+              ? readArrayStorage("stpay_history")
+              : readArrayStorage("history");
 
       resolve(fallback2);
     }
@@ -811,12 +1294,14 @@ window.addEventListener("click", function (e) {
 
 window.addEventListener("focus", function () {
   if (getLoggedUser()) {
+    updateBalanceElements(getSavedBalanceAmount());
     loadBalance();
   }
 });
 
 window.addEventListener("pageshow", function () {
   if (getLoggedUser()) {
+    updateBalanceElements(getSavedBalanceAmount());
     loadBalance();
   }
 });
@@ -829,9 +1314,15 @@ window.addEventListener("storage", function (e) {
     (
       e.key === "stpay_balance" ||
       e.key === "stpay_wallet_balance" ||
+      e.key === "balance" ||
+      e.key === "walletBalance" ||
       e.key === "stpay_history" ||
+      e.key === "history" ||
+      e.key === "stpay_balance_last_updated" ||
       e.key === getUserBalanceKey(user) ||
-      e.key === getUserHistoryKey(user)
+      e.key === getAltUserBalanceKey(user) ||
+      e.key === getUserHistoryKey(user) ||
+      e.key === getAltUserHistoryKey(user)
     )
   ) {
     updateBalanceElements(getSavedBalanceAmount());

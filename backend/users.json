@@ -2,12 +2,12 @@
   {
     "name": "Aravind",
     "password": "123",
-    "balance": 3800.0
+    "balance": 4150.0
   },
   {
     "name": "gojo",
     "password": "123",
-    "balance": 5100.0
+    "balance": 5200.0
   },
   {
     "name": "rosyy",
@@ -17,11 +17,26 @@
   {
     "name": "Vivek",
     "password": "123",
-    "balance": 5000.0
+    "balance": 4450.0
   },
   {
     "name": "advika",
     "password": "123",
     "balance": 2000
+  },
+  {
+    "name": "siva",
+    "password": "123",
+    "balance": 3600.0
+  },
+  {
+    "name": "mani",
+    "password": "123",
+    "balance": 4200
+  },
+  {
+    "name": "vetri",
+    "password": "123",
+    "balance": 3000
   }
 ]
