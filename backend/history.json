@@ -88,5 +88,31 @@
     "balance_after": 4450.0,
     "block_no": 5,
     "title": "Sent to Aravind"
+  },
+  {
+    "type": "recharge",
+    "id": "RCH1773562449214685",
+    "reference": "REF-49214685",
+    "hash": "0xrch1773562449214685",
+    "sender": "Vivek",
+    "receiver": "Airtel",
+    "from": "Vivek",
+    "to": "Airtel",
+    "user": "Vivek",
+    "amount": 219.0,
+    "status": "success",
+    "date": "15-Mar-2026, 01:44:09 PM",
+    "time": "15-Mar-2026, 01:44:09 PM",
+    "balance_after": 4231.0,
+    "block_no": 6,
+    "title": "Mobile Recharge",
+    "provider": "Airtel",
+    "number": "1234554432",
+    "mobile": "1234554432",
+    "plan": "28 days • 3GB total • Unlimited Calls • 300 SMS",
+    "subtitle": "Airtel • 1234554432",
+    "desc": "Airtel • 1234554432",
+    "category": "recharge",
+    "icon": "📱"
   }
 ]

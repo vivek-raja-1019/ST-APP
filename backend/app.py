@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-import os, json
+import os
+import json
 from datetime import datetime
 
 # ---------------- PATHS ----------------
@@ -18,7 +19,7 @@ HISTORY_FILE = os.path.join(BASE_DIR, "history.json")
 # ---------------- APP ----------------
 
 app = Flask(__name__, static_folder=None)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # ---------------- JSON HELPERS ----------------
 
@@ -33,13 +34,27 @@ def read_json(path, default):
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    except:
+    except Exception as e:
+        print(f"[READ_JSON_ERROR] {path} -> {e}")
         return default
 
 
 def write_json(path, data):
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
+    try:
+        folder = os.path.dirname(path)
+        if folder and not os.path.exists(folder):
+            os.makedirs(folder, exist_ok=True)
+
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+            f.flush()
+            os.fsync(f.fileno())
+
+        print(f"[WRITE_JSON_OK] {path}")
+
+    except Exception as e:
+        print(f"[WRITE_JSON_ERROR] {path} -> {e}")
+        raise
 
 
 # ---------------- CREATE FILES ----------------
@@ -86,6 +101,10 @@ def make_txn_id():
     return "TXN" + datetime.now().strftime("%Y%m%d%H%M%S%f")
 
 
+def make_recharge_txn_id():
+    return "RCH" + datetime.now().strftime("%Y%m%d%H%M%S%f")
+
+
 def make_reference(txn_id):
     return "REF-" + txn_id[-8:]
 
@@ -115,6 +134,10 @@ def parse_time_for_sort(value):
         "%d-%m-%Y",
         "%d/%m/%Y %H:%M:%S",
         "%d/%m/%Y",
+        "%d %b %Y, %H:%M:%S",
+        "%d %b %Y, %I:%M:%S %p",
+        "%d %b %Y %H:%M:%S",
+        "%d %b %Y"
     ]
 
     for fmt in formats:
@@ -149,6 +172,9 @@ def normalize_history_item(tx, current_user=None):
     time_value = tx.get("time") or tx.get("date") or tx.get("timestamp") or ""
     status = tx.get("status") or "success"
     user_value = tx.get("user") or tx.get("username") or ""
+    provider = tx.get("provider") or ""
+    number = tx.get("number") or tx.get("mobile") or ""
+    plan = tx.get("plan") or ""
 
     if raw_type in ["pay", "paid", "send", "sent", "transfer_sent", "debit"]:
         tx_type = "transfer_sent"
@@ -156,8 +182,12 @@ def normalize_history_item(tx, current_user=None):
         tx_type = "transfer_received"
     elif raw_type in ["deposit", "addmoney", "add_money", "topup", "money_added"]:
         tx_type = "deposit"
+    elif raw_type in ["recharge", "mobile_recharge"]:
+        tx_type = "recharge"
     else:
-        if sender and receiver:
+        if provider or number or plan:
+            tx_type = "recharge"
+        elif sender and receiver:
             tx_type = "transfer_sent"
         elif receiver and not sender:
             tx_type = "transfer_received"
@@ -171,6 +201,8 @@ def normalize_history_item(tx, current_user=None):
             title = f"Sent to {receiver or 'User'}"
         elif tx_type == "transfer_received":
             title = f"Received from {sender or 'User'}"
+        elif tx_type == "recharge":
+            title = "Mobile Recharge"
         else:
             title = "Money added"
 
@@ -190,7 +222,15 @@ def normalize_history_item(tx, current_user=None):
         "date": time_value,
         "user": user_value,
         "balance_after": tx.get("balance_after"),
-        "block_no": tx.get("block_no") if tx.get("block_no") is not None else tx.get("block")
+        "balanceAfter": tx.get("balanceAfter") or tx.get("balance_after"),
+        "block_no": tx.get("block_no") if tx.get("block_no") is not None else tx.get("block"),
+        "provider": provider,
+        "number": number,
+        "mobile": number,
+        "plan": plan,
+        "subtitle": tx.get("subtitle") or tx.get("desc") or "",
+        "desc": tx.get("desc") or tx.get("subtitle") or "",
+        "icon": tx.get("icon") or ("📱" if tx_type == "recharge" else "")
     }
 
     if current_user:
@@ -241,16 +281,24 @@ def get_user_history(username):
     return sort_history_desc(result)
 
 
+def get_request_json():
+    try:
+        return request.get_json(silent=True) or {}
+    except Exception as e:
+        print("[JSON_PARSE_ERROR]", e)
+        return {}
+
+
 # ---------------- FRONTEND ROUTES ----------------
 
-@app.get("/")
+@app.route("/", methods=["GET"])
 def index():
     return send_from_directory(FRONTEND_DIR, "index.html")
 
 
 # ---------------- HEALTH ----------------
 
-@app.get("/api/health")
+@app.route("/api/health", methods=["GET"])
 def health():
     return jsonify({
         "ok": True,
@@ -258,11 +306,36 @@ def health():
     })
 
 
+# ---------------- DEBUG FILES ----------------
+
+@app.route("/api/debug/files", methods=["GET"])
+def debug_files():
+    users_data = read_json(USERS_FILE, [])
+    history_data = read_json(HISTORY_FILE, [])
+
+    return jsonify({
+        "ok": True,
+        "base_dir": BASE_DIR,
+        "project_dir": PROJECT_DIR,
+        "frontend_dir": FRONTEND_DIR,
+        "users_file": USERS_FILE,
+        "history_file": HISTORY_FILE,
+        "users_file_exists": os.path.exists(USERS_FILE),
+        "history_file_exists": os.path.exists(HISTORY_FILE),
+        "users_count": len(users_data) if isinstance(users_data, list) else 0,
+        "history_count": len(history_data) if isinstance(history_data, list) else 0,
+        "cwd": os.getcwd()
+    })
+
+
 # ---------------- LOGIN ----------------
 
-@app.post("/api/login")
+@app.route("/api/login", methods=["POST", "OPTIONS"])
 def login():
-    data = request.get_json(force=True) or {}
+    if request.method == "OPTIONS":
+        return jsonify({"ok": True}), 200
+
+    data = get_request_json()
 
     name = (data.get("name") or data.get("username") or "").strip()
     password = (data.get("password") or "").strip()
@@ -286,12 +359,12 @@ def login():
 
 # ---------------- USERS ----------------
 
-@app.get("/api/users")
+@app.route("/api/users", methods=["GET"])
 def users():
-    users = read_json(USERS_FILE, [])
+    all_users = read_json(USERS_FILE, [])
 
     safe = []
-    for u in users:
+    for u in all_users:
         safe.append({
             "name": u.get("name", ""),
             "balance": safe_float(u.get("balance", 0))
@@ -302,7 +375,7 @@ def users():
 
 # ---------------- BALANCE ----------------
 
-@app.get("/api/balance/<username>")
+@app.route("/api/balance/<username>", methods=["GET"])
 def balance(username):
     users = read_json(USERS_FILE, [])
     u = find_user(users, username)
@@ -321,10 +394,13 @@ def balance(username):
 
 # ---------------- SEND MONEY ----------------
 
-@app.post("/send")
-@app.post("/api/send")
+@app.route("/send", methods=["POST", "OPTIONS"])
+@app.route("/api/send", methods=["POST", "OPTIONS"])
 def send():
-    data = request.get_json(force=True) or {}
+    if request.method == "OPTIONS":
+        return jsonify({"ok": True}), 200
+
+    data = get_request_json()
 
     sender = (data.get("sender") or data.get("from") or data.get("user") or "").strip()
     receiver = (data.get("receiver") or data.get("to") or "").strip()
@@ -395,12 +471,112 @@ def send():
     })
 
 
+# ---------------- RECHARGE ----------------
+
+@app.route("/recharge", methods=["POST", "OPTIONS"])
+@app.route("/api/recharge", methods=["POST", "OPTIONS"])
+def recharge():
+    if request.method == "OPTIONS":
+        return jsonify({"ok": True}), 200
+
+    data = get_request_json()
+    print("[RECHARGE_REQUEST]", data)
+
+    username = (data.get("user") or data.get("username") or data.get("name") or "").strip()
+    number = str(data.get("mobile") or data.get("number") or "").strip()
+    provider = (data.get("provider") or "").strip()
+    plan = (data.get("plan") or "").strip()
+    amount = safe_float(data.get("amount") or 0)
+    incoming_txn_id = (data.get("txnId") or data.get("txn") or "").strip()
+    incoming_time = (data.get("time") or data.get("date") or "").strip()
+
+    users = read_json(USERS_FILE, [])
+    u = find_user(users, username)
+
+    if not username:
+        return jsonify({"ok": False, "error": "Username is required"}), 400
+
+    if not number:
+        return jsonify({"ok": False, "error": "Mobile number is required"}), 400
+
+    if len(number) != 10 or not number.isdigit():
+        return jsonify({"ok": False, "error": "Enter valid 10 digit mobile number"}), 400
+
+    if not provider:
+        return jsonify({"ok": False, "error": "Provider is required"}), 400
+
+    if amount <= 0:
+        return jsonify({"ok": False, "error": "Amount must be greater than 0"}), 400
+
+    if not u:
+        return jsonify({"ok": False, "error": "User not found"}), 404
+
+    current_balance = safe_float(u.get("balance", 0))
+
+    if current_balance < amount:
+        return jsonify({"ok": False, "error": "Insufficient balance"}), 400
+
+    new_balance = current_balance - amount
+    u["balance"] = new_balance
+    write_json(USERS_FILE, users)
+
+    txn_id = incoming_txn_id if incoming_txn_id else make_recharge_txn_id()
+    now_str = incoming_time if incoming_time else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    txn = {
+        "type": "recharge",
+        "id": txn_id,
+        "reference": make_reference(txn_id),
+        "hash": make_hash(txn_id),
+        "sender": u.get("name", ""),
+        "receiver": provider,
+        "from": u.get("name", ""),
+        "to": provider,
+        "user": u.get("name", ""),
+        "amount": amount,
+        "status": "success",
+        "date": now_str,
+        "time": now_str,
+        "balance_after": safe_float(new_balance),
+        "block_no": get_next_block_no(),
+        "title": "Mobile Recharge",
+        "provider": provider,
+        "number": number,
+        "mobile": number,
+        "plan": plan,
+        "subtitle": f"{provider} • {number}",
+        "desc": f"{provider} • {number}",
+        "category": "recharge",
+        "icon": "📱"
+    }
+
+    append_history(txn)
+
+    print("[RECHARGE_OK]", {
+        "user": username,
+        "balance_after": new_balance,
+        "txn_id": txn_id
+    })
+
+    return jsonify({
+        "ok": True,
+        "message": "Recharge successful",
+        "id": txn["id"],
+        "txnId": txn["id"],
+        "reference": txn["reference"],
+        "balance": safe_float(new_balance),
+        "new_balance": safe_float(new_balance),
+        "balanceAfter": safe_float(new_balance),
+        "history_item": normalize_history_item(txn, username)
+    })
+
+
 # ---------------- HISTORY ----------------
 
-@app.get("/api/history")
+@app.route("/api/history", methods=["GET"])
 def history():
-    history = read_json(HISTORY_FILE, [])
-    normalized = [normalize_history_item(tx) for tx in history]
+    history_items = read_json(HISTORY_FILE, [])
+    normalized = [normalize_history_item(tx) for tx in history_items]
     normalized = sort_history_desc(normalized)
 
     return jsonify({
@@ -409,7 +585,7 @@ def history():
     })
 
 
-@app.get("/api/history/<username>")
+@app.route("/api/history/<username>", methods=["GET"])
 def history_by_user(username):
     user_history = get_user_history(username)
 
@@ -419,7 +595,7 @@ def history_by_user(username):
     })
 
 
-@app.get("/history/<username>")
+@app.route("/history/<username>", methods=["GET"])
 def history_by_user_plain(username):
     user_history = get_user_history(username)
 
@@ -429,8 +605,8 @@ def history_by_user_plain(username):
     })
 
 
-@app.get("/api/statement")
-@app.get("/api/history-by-user")
+@app.route("/api/statement", methods=["GET"])
+@app.route("/api/history-by-user", methods=["GET"])
 def history_query_user():
     username = (
         (request.args.get("user") or "").strip() or
@@ -455,10 +631,13 @@ def history_query_user():
 
 # ---------------- ADD MONEY ----------------
 
-@app.post("/api/addmoney")
-@app.post("/api/add-money")
+@app.route("/api/addmoney", methods=["POST", "OPTIONS"])
+@app.route("/api/add-money", methods=["POST", "OPTIONS"])
 def addmoney():
-    data = request.get_json(force=True) or {}
+    if request.method == "OPTIONS":
+        return jsonify({"ok": True}), 200
+
+    data = get_request_json()
 
     username = (data.get("username") or data.get("user") or data.get("name") or "").strip()
     amount = safe_float(data.get("amount") or 0)
@@ -512,7 +691,7 @@ def addmoney():
 
 # ---------------- DEBUG ----------------
 
-@app.get("/api/debug/routes")
+@app.route("/api/debug/routes", methods=["GET"])
 def debug_routes():
     routes = []
     for rule in app.url_map.iter_rules():
@@ -529,7 +708,7 @@ def debug_routes():
 
 # ---------------- FRONTEND FILE ROUTE ----------------
 
-@app.get("/<path:path>")
+@app.route("/<path:path>", methods=["GET"])
 def serve_file(path):
     if path.startswith("api/"):
         return jsonify({
@@ -550,7 +729,17 @@ def serve_file(path):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
 
+    print("===================================")
+    print("ST PAY BACKEND STARTING...")
+    print("BASE_DIR:", BASE_DIR)
+    print("FRONTEND_DIR:", FRONTEND_DIR)
+    print("USERS_FILE:", USERS_FILE)
+    print("HISTORY_FILE:", HISTORY_FILE)
+    print("PORT:", port)
+    print("===================================")
+
     app.run(
         host="0.0.0.0",
-        port=port
+        port=port,
+        debug=True
     )
