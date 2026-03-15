@@ -293,7 +293,25 @@ def get_request_json():
 
 @app.route("/", methods=["GET"])
 def index():
-    return send_from_directory(FRONTEND_DIR, "index.html")
+    try:
+        index_path = os.path.join(FRONTEND_DIR, "index.html")
+        if os.path.exists(index_path):
+            return send_from_directory(FRONTEND_DIR, "index.html")
+
+        return jsonify({
+            "ok": True,
+            "message": "ST PAY backend is running",
+            "frontend_dir": FRONTEND_DIR,
+            "index_found": False
+        })
+    except Exception as e:
+        print("[INDEX_ROUTE_ERROR]", e)
+        return jsonify({
+            "ok": False,
+            "message": "Failed to load index.html",
+            "error": str(e),
+            "frontend_dir": FRONTEND_DIR
+        }), 500
 
 
 # ---------------- HEALTH ----------------
@@ -302,7 +320,11 @@ def index():
 def health():
     return jsonify({
         "ok": True,
-        "frontend_dir": FRONTEND_DIR
+        "frontend_dir": FRONTEND_DIR,
+        "frontend_exists": os.path.exists(FRONTEND_DIR),
+        "index_exists": os.path.exists(os.path.join(FRONTEND_DIR, "index.html")),
+        "users_file_exists": os.path.exists(USERS_FILE),
+        "history_file_exists": os.path.exists(HISTORY_FILE)
     })
 
 
@@ -322,6 +344,8 @@ def debug_files():
         "history_file": HISTORY_FILE,
         "users_file_exists": os.path.exists(USERS_FILE),
         "history_file_exists": os.path.exists(HISTORY_FILE),
+        "frontend_exists": os.path.exists(FRONTEND_DIR),
+        "index_exists": os.path.exists(os.path.join(FRONTEND_DIR, "index.html")),
         "users_count": len(users_data) if isinstance(users_data, list) else 0,
         "history_count": len(history_data) if isinstance(history_data, list) else 0,
         "cwd": os.getcwd()
@@ -721,7 +745,16 @@ def serve_file(path):
     if os.path.exists(file_path) and os.path.isfile(file_path):
         return send_from_directory(FRONTEND_DIR, path)
 
-    return send_from_directory(FRONTEND_DIR, "index.html")
+    index_path = os.path.join(FRONTEND_DIR, "index.html")
+    if os.path.exists(index_path):
+        return send_from_directory(FRONTEND_DIR, "index.html")
+
+    return jsonify({
+        "ok": False,
+        "message": "Frontend file not found",
+        "frontend_dir": FRONTEND_DIR,
+        "requested_path": path
+    }), 404
 
 
 # ---------------- RUN ----------------
@@ -732,9 +765,14 @@ if __name__ == "__main__":
     print("===================================")
     print("ST PAY BACKEND STARTING...")
     print("BASE_DIR:", BASE_DIR)
+    print("PROJECT_DIR:", PROJECT_DIR)
     print("FRONTEND_DIR:", FRONTEND_DIR)
+    print("FRONTEND_EXISTS:", os.path.exists(FRONTEND_DIR))
+    print("INDEX_EXISTS:", os.path.exists(os.path.join(FRONTEND_DIR, "index.html")))
     print("USERS_FILE:", USERS_FILE)
+    print("USERS_EXISTS:", os.path.exists(USERS_FILE))
     print("HISTORY_FILE:", HISTORY_FILE)
+    print("HISTORY_EXISTS:", os.path.exists(HISTORY_FILE))
     print("PORT:", port)
     print("===================================")
 
