@@ -158,7 +158,7 @@
       background:linear-gradient(135deg,#111827 0%,#2563eb 100%);
       color:#fff;
       border-radius:28px;
-      padding:20px;
+      padding:22px 20px;
       box-shadow:var(--shadow);
       position:relative;
       overflow:hidden;
@@ -185,44 +185,26 @@
 
     .heroSub{
       font-size:13px;
-      line-height:1.55;
+      line-height:1.65;
       opacity:.94;
-      max-width:280px;
+      max-width:300px;
       position:relative;
       z-index:2;
     }
 
-    .walletBar{
+    .heroMini{
       margin-top:14px;
-      display:flex;
+      display:inline-flex;
       align-items:center;
-      justify-content:space-between;
-      gap:12px;
+      gap:8px;
+      padding:10px 14px;
+      border-radius:999px;
       background:rgba(255,255,255,0.12);
       border:1px solid rgba(255,255,255,0.16);
-      border-radius:18px;
-      padding:12px 14px;
+      font-size:12px;
+      font-weight:800;
       position:relative;
       z-index:2;
-    }
-
-    .walletLabel{
-      font-size:12px;
-      opacity:.9;
-      margin-bottom:4px;
-    }
-
-    .walletValue{
-      font-size:22px;
-      font-weight:900;
-      letter-spacing:.2px;
-    }
-
-    .walletUser{
-      font-size:11px;
-      line-height:1.5;
-      text-align:right;
-      opacity:.95;
     }
 
     .section{
@@ -791,19 +773,9 @@
     <div class="hero">
       <div class="heroTitle">Book Travel Tickets</div>
       <div class="heroSub">
-        Fast and secure booking like GPay style. Choose your service, enter route, select class, and pay instantly.
+        Fast, simple and secure booking experience. Choose your service, enter route, select class and confirm payment instantly.
       </div>
-
-      <div class="walletBar">
-        <div>
-          <div class="walletLabel">Available Wallet Balance</div>
-          <div class="walletValue" id="walletBalance">₹ 0.00</div>
-        </div>
-        <div class="walletUser">
-          Current User:<br>
-          <b id="walletUserName">-</b>
-        </div>
-      </div>
+      <div class="heroMini">⚡ Quick Booking • Smart Receipt • Secure Pay</div>
     </div>
 
     <div class="section">
@@ -1280,12 +1252,7 @@
   }
 
   function renderBalance() {
-    const balance = getBalanceAmount();
-    const balanceEl = document.getElementById("walletBalance");
-    const userEl = document.getElementById("walletUserName");
-
-    if (balanceEl) balanceEl.textContent = "₹ " + balance.toFixed(2);
-    if (userEl) userEl.textContent = getLoggedUser() || "-";
+    return;
   }
 
   function setPayingState(state) {
@@ -1305,20 +1272,21 @@
     if (id === "historyView") {
       renderTicketHistory();
     }
-
-    if (id === "homeView" || id === "bookingView" || id === "successView") {
-      renderBalance();
-    }
   }
 
   function toggleMenu(e) {
     if (e) e.stopPropagation();
     const menu = document.getElementById("topMenu");
-    menu.classList.toggle("show");
+    if (menu) {
+      menu.classList.toggle("show");
+    }
   }
 
   function closeMenu() {
-    document.getElementById("topMenu").classList.remove("show");
+    const menu = document.getElementById("topMenu");
+    if (menu) {
+      menu.classList.remove("show");
+    }
   }
 
   function openHistory() {
@@ -1341,7 +1309,7 @@
       if (btn.contains(e.target)) clickedDots = true;
     });
 
-    if (!menu.contains(e.target) && !clickedDots) {
+    if (menu && !menu.contains(e.target) && !clickedDots) {
       closeMenu();
     }
   });
@@ -1583,7 +1551,6 @@
     saveBalanceAmount(newBalance);
     saveTicketToHistory(ticketData);
     addToMainHistory(ticketData);
-    renderBalance();
 
     const processing = document.getElementById("processingScreen");
     const loader = document.getElementById("loader");
@@ -1635,7 +1602,7 @@
       loader.className = "processingCircle";
 
       document.getElementById("successMessage").textContent =
-        `${selectedType} ticket booked successfully from ${from} to ${to}. Wallet updated successfully.`;
+        `${selectedType} ticket booked successfully from ${from} to ${to}.`;
 
       document.getElementById("rType").textContent = selectedType;
       document.getElementById("rRoute").textContent = `${from} → ${to}`;
@@ -1649,7 +1616,6 @@
       document.getElementById("rBalance").textContent = `₹ ${newBalance.toFixed(2)}`;
 
       renderTicketHistory();
-      renderBalance();
       setPayingState(false);
       showView("successView");
     }, 2000);
@@ -1657,7 +1623,6 @@
 
   document.getElementById("travelDate").min = new Date().toISOString().split("T")[0];
   updateFare();
-  renderBalance();
   renderTicketHistory();
 </script>
 

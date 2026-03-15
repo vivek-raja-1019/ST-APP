@@ -88,7 +88,10 @@ function markBalanceUpdatedNow() {
 
   var user = getLoggedUser();
   if (user) {
-    localStorage.setItem("stpay_balance_last_updated_" + String(user).toLowerCase(), now);
+    localStorage.setItem(
+      "stpay_balance_last_updated_" + String(user).toLowerCase(),
+      now
+    );
   }
 
   return now;
@@ -98,7 +101,11 @@ function getBalanceUpdatedAt() {
   var user = getLoggedUser();
   return Number(
     sessionStorage.getItem("stpay_balance_last_updated") ||
-    (user ? localStorage.getItem("stpay_balance_last_updated_" + String(user).toLowerCase()) : "") ||
+    (user
+      ? localStorage.getItem(
+          "stpay_balance_last_updated_" + String(user).toLowerCase()
+        )
+      : "") ||
     localStorage.getItem("stpay_balance_last_updated") ||
     0
   );
@@ -109,19 +116,23 @@ function hasStrongLocalBalance() {
   var userKey = user ? getUserBalanceKey(user) : "";
   var userAltKey = user ? getAltUserBalanceKey(user) : "";
 
-  return !!(
+  var possible =
     sessionStorage.getItem("balance_amount") ||
     sessionStorage.getItem("current_balance") ||
     sessionStorage.getItem("wallet_balance") ||
     sessionStorage.getItem("walletBalance") ||
     sessionStorage.getItem("balance") ||
-    (userKey && localStorage.getItem(userKey)) ||
-    (userAltKey && localStorage.getItem(userAltKey)) ||
+    (userKey ? localStorage.getItem(userKey) : "") ||
+    (userAltKey ? localStorage.getItem(userAltKey) : "") ||
     localStorage.getItem("stpay_balance") ||
     localStorage.getItem("stpay_wallet_balance") ||
     localStorage.getItem("balance") ||
-    localStorage.getItem("walletBalance")
-  );
+    localStorage.getItem("walletBalance") ||
+    "";
+
+  var num = amountToNumber(possible);
+
+  return num > 0;
 }
 
 function saveBalanceAmount(value) {
@@ -186,8 +197,9 @@ function updateBalanceElements(value) {
   for (var i = 0; i < ids.length; i++) {
     var el = document.getElementById(ids[i]);
     if (el) {
-      el.innerText = finalAmount;
-      el.textContent = finalAmount;
+      var displayValue = "₹" + finalAmount;
+      el.innerText = displayValue;
+      el.textContent = displayValue;
     }
   }
 
@@ -597,7 +609,8 @@ function loadBalance() {
       var savedNum = amountToNumber(saved);
       var hasLocal = hasStrongLocalBalance();
       var lastUpdatedAt = getBalanceUpdatedAt();
-      var isRecentLocalUpdate = lastUpdatedAt && (Date.now() - lastUpdatedAt < 30 * 60 * 1000);
+      var isRecentLocalUpdate =
+        lastUpdatedAt && (Date.now() - lastUpdatedAt < 30 * 60 * 1000);
 
       // always show local immediately
       updateBalanceElements(saved);
@@ -629,9 +642,17 @@ function loadBalance() {
             serverAmount = Number(data.balance);
           }
 
-          // If local balance already exists and was recently updated
-          // don't let old server value overwrite it.
-          if (hasLocal && isRecentLocalUpdate) {
+          // server positive and local zero => always use server
+          if (serverAmount !== null && serverAmount > 0 && savedNum <= 0) {
+            var finalFromServerFirst = sanitizeAmount(serverAmount);
+            updateBalanceElements(finalFromServerFirst);
+            dispatchBalanceUpdateEvent(finalFromServerFirst);
+            resolve(finalFromServerFirst);
+            return;
+          }
+
+          // recent valid local positive balance
+          if (hasLocal && savedNum > 0 && isRecentLocalUpdate) {
             var keepLocal = sanitizeAmount(saved);
             updateBalanceElements(keepLocal);
             dispatchBalanceUpdateEvent(keepLocal);
@@ -639,15 +660,7 @@ function loadBalance() {
             return;
           }
 
-          // If strong local data already exists, prefer it unless local is zero and server is valid
-          if (hasLocal && savedNum > 0) {
-            var keepSaved = sanitizeAmount(saved);
-            updateBalanceElements(keepSaved);
-            dispatchBalanceUpdateEvent(keepSaved);
-            resolve(keepSaved);
-            return;
-          }
-
+          // server valid balance
           if (serverAmount !== null) {
             var finalFromServer = sanitizeAmount(serverAmount);
             updateBalanceElements(finalFromServer);
@@ -656,6 +669,7 @@ function loadBalance() {
             return;
           }
 
+          // fallback local
           var fallback = sanitizeAmount(saved);
           updateBalanceElements(fallback);
           dispatchBalanceUpdateEvent(fallback);
@@ -766,8 +780,8 @@ function openBalanceFeature() {
   if (input) input.value = "";
   if (val) {
     var amt = getSavedBalanceAmount();
-    val.innerText = amt;
-    val.textContent = amt;
+    val.innerText = "₹" + sanitizeAmount(amt);
+    val.textContent = "₹" + sanitizeAmount(amt);
   }
 
   if (modal) {
@@ -802,7 +816,7 @@ function verifyBalancePassword() {
 
   loadBalance().then(function (latestBalance) {
     if (val) {
-      var finalValue = sanitizeAmount(latestBalance);
+      var finalValue = "₹" + sanitizeAmount(latestBalance);
       val.innerText = finalValue;
       val.textContent = finalValue;
     }

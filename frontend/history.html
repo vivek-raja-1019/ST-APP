@@ -952,19 +952,19 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    let API = "";
+    var API = "";
     if (
       location.hostname === "127.0.0.1" ||
       location.hostname === "localhost"
     ) {
       API = "http://127.0.0.1:5000";
     } else {
-      API = location.origin;
+      API = "https://st-app-29gb.onrender.com";
     }
 
-    let allHistory = [];
-    let currentFilterPanel = "";
-    let selectedFilters = {
+    var allHistory = [];
+    var currentFilterPanel = "";
+    var selectedFilters = {
       status: "all",
       method: "all",
       date: "latest",
@@ -984,14 +984,19 @@
       return (sessionStorage.getItem("user") || "").trim();
     }
 
+    function getSafeLower(v){
+      return String(v || "").trim().toLowerCase();
+    }
+
     function formatAmount(v){
-      const num = Number(v || 0);
+      var num = Number(v || 0);
+      if (isNaN(num)) num = 0;
       return "₹" + num.toLocaleString("en-IN");
     }
 
     function formatDateTime(dateStr){
       if(!dateStr) return "No date";
-      const d = new Date(dateStr);
+      var d = new Date(dateStr);
       if(isNaN(d)) return dateStr;
       return d.toLocaleString("en-IN", {
         day:"2-digit",
@@ -1004,7 +1009,7 @@
 
     function formatShortDate(dateStr){
       if(!dateStr) return "No date";
-      const d = new Date(dateStr);
+      var d = new Date(dateStr);
       if(isNaN(d)) return dateStr;
       return d.toLocaleDateString("en-IN", {
         day:"2-digit",
@@ -1014,73 +1019,244 @@
     }
 
     function getInitial(name){
-      return (name || "?").trim().charAt(0).toUpperCase();
+      return (String(name || "?").trim().charAt(0) || "?").toUpperCase();
+    }
+
+    function escapeHtml(text){
+      return String(text == null ? "" : text)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+    }
+
+    function readArrayStorage(key){
+      try{
+        var raw = localStorage.getItem(key) || "[]";
+        var parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      }catch(e){
+        return [];
+      }
+    }
+
+    function readObjectStorage(key){
+      try{
+        var raw = localStorage.getItem(key);
+        if(!raw) return null;
+        return JSON.parse(raw);
+      }catch(e){
+        return null;
+      }
+    }
+
+    function getUnifiedHistoryKey(user){
+      return "history_" + String(user || "").trim().toLowerCase();
+    }
+
+    function getLegacyUnifiedHistoryKey(user){
+      return "stpay_history_" + String(user || "").trim().toLowerCase();
+    }
+
+    function getRechargeHistoryKey(user){
+      return "recharge_history_" + String(user || "").trim().toLowerCase();
+    }
+
+    function getLegacyRechargeHistoryKey(user){
+      return "stpay_recharge_history_" + String(user || "").trim().toLowerCase();
     }
 
     function normalizeItem(item, currentUser){
-      const from = item.from || item.sender || item.sentBy || item.user || "";
-      const to = item.to || item.receiver || item.receivedBy || item.name || "";
-      const amount = Number(item.amount || item.value || 0);
-      const status = (item.status || "Success").toString();
-      const method = item.method || item.paymentMethod || "Bank";
-      const type = item.type || (
-        from.toLowerCase() === currentUser.toLowerCase() ? "Sent" :
-        to.toLowerCase() === currentUser.toLowerCase() ? "Received" :
-        "Payment"
-      );
-      const date = item.date || item.time || item.createdAt || item.timestamp || "";
-      const note = item.note || item.remark || item.description || "";
-      const txnId = item.txnId || item.transactionId || item.id || ("TXN" + Math.random().toString(36).slice(2,10).toUpperCase());
+      item = item || {};
 
-      let person = "";
-      if(type.toLowerCase() === "sent"){
+      var from = item.from || item.sender || item.sentBy || item.user || "";
+      var to = item.to || item.receiver || item.receivedBy || item.name || item.number || "";
+      var rawAmount = item.amount || item.value || 0;
+      var amount = Number(String(rawAmount).replace(/[₹,\s]/g, "")) || 0;
+      var status = String(item.status || "Success");
+      var method = item.method || item.paymentMethod || item.category || item.title || "Bank";
+      var date = item.date || item.time || item.createdAt || item.timestamp || "";
+      var note = item.note || item.remark || item.description || item.desc || item.plan || "";
+      var txnId = item.txnId || item.transactionId || item.txn || item.id || ("TXN" + Math.random().toString(36).slice(2,10).toUpperCase());
+      var incomingType = String(item.type || "").trim();
+      var lowerIncomingType = incomingType.toLowerCase();
+      var type = "";
+      var person = "";
+
+      if (
+        lowerIncomingType === "sent" ||
+        lowerIncomingType === "send" ||
+        lowerIncomingType === "debit"
+      ) {
+        type = "Sent";
+      } else if (
+        lowerIncomingType === "received" ||
+        lowerIncomingType === "receive" ||
+        lowerIncomingType === "credit"
+      ) {
+        type = "Received";
+      } else if (
+        lowerIncomingType === "recharge" ||
+        lowerIncomingType === "mobile recharge"
+      ) {
+        type = "Recharge";
+      } else if (
+        lowerIncomingType === "bill" ||
+        lowerIncomingType === "bills"
+      ) {
+        type = "Bill";
+      } else if (
+        lowerIncomingType === "ticket" ||
+        lowerIncomingType === "tickets"
+      ) {
+        type = "Ticket";
+      } else if (getSafeLower(from) === getSafeLower(currentUser) && to) {
+        type = "Sent";
+      } else if (getSafeLower(to) === getSafeLower(currentUser) && from) {
+        type = "Received";
+      } else {
+        type = incomingType || "Payment";
+      }
+
+      if (type === "Sent") {
         person = to || "Unknown";
-      }else if(type.toLowerCase() === "received"){
+      } else if (type === "Received") {
         person = from || "Unknown";
-      }else{
-        person = to || from || "Unknown";
+      } else if (type === "Recharge") {
+        person = (item.provider ? item.provider + " • " : "") + (item.number || item.mobile || "Mobile Recharge");
+      } else if (type === "Bill") {
+        person = item.title || item.name || item.provider || "Bill Payment";
+      } else if (type === "Ticket") {
+        person = item.title || item.name || "Ticket Booking";
+      } else {
+        person = item.title || item.name || to || from || "Unknown";
       }
 
       return {
-        from,
-        to,
-        amount,
-        status,
-        method,
-        type,
-        date,
-        note,
-        txnId,
-        person
+        from: from,
+        to: to,
+        amount: amount,
+        status: status,
+        method: method,
+        type: type,
+        date: date,
+        note: note,
+        txnId: String(txnId),
+        person: person,
+        number: item.number || item.mobile || "",
+        provider: item.provider || "",
+        raw: item
       };
     }
 
+    function mergeUniqueHistory(items, currentUser){
+      var map = {};
+      var result = [];
+      var i, normalized, key;
+
+      for(i = 0; i < items.length; i++){
+        normalized = normalizeItem(items[i], currentUser);
+        key = String(normalized.txnId || "") + "|" + String(normalized.date || "") + "|" + String(normalized.amount || "") + "|" + String(normalized.type || "");
+
+        if(!map[key]){
+          map[key] = true;
+          result.push(normalized);
+        }
+      }
+
+      return result;
+    }
+
+    function getLocalHistory(currentUser){
+      var merged = [];
+      var keys = [
+        "history",
+        "stpay_history",
+        "recharge_history",
+        "stpay_recharge_history",
+        getUnifiedHistoryKey(currentUser),
+        getLegacyUnifiedHistoryKey(currentUser),
+        getRechargeHistoryKey(currentUser),
+        getLegacyRechargeHistoryKey(currentUser)
+      ];
+
+      var i, arr, j, obj;
+
+      for(i = 0; i < keys.length; i++){
+        arr = readArrayStorage(keys[i]);
+        for(j = 0; j < arr.length; j++){
+          merged.push(arr[j]);
+        }
+      }
+
+      obj = readObjectStorage("last_history_item");
+      if(obj){
+        merged.push(obj);
+      }
+
+      obj = readObjectStorage("stpay_last_recharge_receipt");
+      if(obj){
+        merged.push(obj);
+      }
+
+      obj = readObjectStorage("last_recharge_receipt");
+      if(obj){
+        merged.push(obj);
+      }
+
+      return merged;
+    }
+
+   async function fetchBackendHistory(currentUser){
+  var merged = [];
+  var urls = [
+    API + "/api/history/" + encodeURIComponent(currentUser),
+    API + "/history/" + encodeURIComponent(currentUser)
+  ];
+
+  var i, res, data;
+
+  for(i = 0; i < urls.length; i++){
+    try{
+      res = await fetch(urls[i]);
+      if(!res.ok) continue;
+      data = await res.json();
+
+      if(Array.isArray(data)){
+        merged = merged.concat(data);
+      }else if(data && Array.isArray(data.history)){
+        merged = merged.concat(data.history);
+      }
+    }catch(err){
+      console.log("History load error:", err);
+    }
+  }
+
+  return merged;
+}
+
     async function loadHistory(){
-      const currentUser = getCurrentUser();
-      const list = document.getElementById("historyList");
+      var currentUser = getCurrentUser();
+      var list = document.getElementById("historyList");
+      var backendHistory = [];
+      var localHistory = [];
+      var combined = [];
 
       if(!currentUser){
-        list.innerHTML = `<div class="empty">User login illa da. First login pannitu va.</div>`;
+        list.innerHTML = '<div class="empty">User login illa da. First login pannitu va.</div>';
         return;
       }
 
-      try{
-        const res = await fetch(`${API}/api/history/${encodeURIComponent(currentUser)}`);
-        const data = await res.json();
+      backendHistory = await fetchBackendHistory(currentUser);
+      localHistory = getLocalHistory(currentUser);
+      combined = backendHistory.concat(localHistory);
 
-        if(Array.isArray(data)){
-          allHistory = data.map(item => normalizeItem(item, currentUser));
-        } else if (Array.isArray(data.history)) {
-          allHistory = data.history.map(item => normalizeItem(item, currentUser));
-        } else {
-          allHistory = [];
-        }
-      }catch(err){
-        console.log("History load error:", err);
-        allHistory = [];
-      }
+      allHistory = mergeUniqueHistory(combined, currentUser);
 
-      allHistory.sort((a,b) => new Date(b.date) - new Date(a.date));
+      allHistory.sort(function(a,b){
+        return new Date(b.date) - new Date(a.date);
+      });
 
       document.getElementById("totalCount").textContent = allHistory.length;
       document.getElementById("updatedTime").textContent =
@@ -1090,114 +1266,133 @@
     }
 
     function getFilteredHistory(){
-      const q = document.getElementById("searchInput").value.trim().toLowerCase();
-      let result = [...allHistory];
+      var q = document.getElementById("searchInput").value.trim().toLowerCase();
+      var result = allHistory.slice();
 
       if(q){
-        result = result.filter(item =>
-          (item.person || "").toLowerCase().includes(q) ||
-          (item.status || "").toLowerCase().includes(q) ||
-          (item.method || "").toLowerCase().includes(q) ||
-          (item.type || "").toLowerCase().includes(q) ||
-          (item.date || "").toLowerCase().includes(q) ||
-          (item.txnId || "").toLowerCase().includes(q)
-        );
+        result = result.filter(function(item){
+          return (
+            String(item.person || "").toLowerCase().indexOf(q) !== -1 ||
+            String(item.status || "").toLowerCase().indexOf(q) !== -1 ||
+            String(item.method || "").toLowerCase().indexOf(q) !== -1 ||
+            String(item.type || "").toLowerCase().indexOf(q) !== -1 ||
+            String(item.date || "").toLowerCase().indexOf(q) !== -1 ||
+            String(item.txnId || "").toLowerCase().indexOf(q) !== -1 ||
+            String(item.note || "").toLowerCase().indexOf(q) !== -1 ||
+            String(item.provider || "").toLowerCase().indexOf(q) !== -1 ||
+            String(item.number || "").toLowerCase().indexOf(q) !== -1
+          );
+        });
       }
 
       if(selectedFilters.status !== "all"){
-        result = result.filter(item => (item.status || "").toLowerCase() === selectedFilters.status);
+        result = result.filter(function(item){
+          return String(item.status || "").toLowerCase() === selectedFilters.status;
+        });
       }
 
       if(selectedFilters.method !== "all"){
-        result = result.filter(item => (item.method || "").toLowerCase().includes(selectedFilters.method));
+        result = result.filter(function(item){
+          return String(item.method || "").toLowerCase().indexOf(selectedFilters.method) !== -1;
+        });
       }
 
       if(selectedFilters.type !== "all"){
-        result = result.filter(item => (item.type || "").toLowerCase() === selectedFilters.type);
+        result = result.filter(function(item){
+          return String(item.type || "").toLowerCase() === selectedFilters.type;
+        });
       }
 
       if(selectedFilters.date === "latest"){
-        result.sort((a,b) => new Date(b.date) - new Date(a.date));
+        result.sort(function(a,b){ return new Date(b.date) - new Date(a.date); });
       }else if(selectedFilters.date === "oldest"){
-        result.sort((a,b) => new Date(a.date) - new Date(b.date));
+        result.sort(function(a,b){ return new Date(a.date) - new Date(b.date); });
       }
 
       if(selectedFilters.amount === "high"){
-        result.sort((a,b) => Number(b.amount) - Number(a.amount));
+        result.sort(function(a,b){ return Number(b.amount) - Number(a.amount); });
       }else if(selectedFilters.amount === "low"){
-        result.sort((a,b) => Number(a.amount) - Number(b.amount));
+        result.sort(function(a,b){ return Number(a.amount) - Number(b.amount); });
       }
 
       return result;
     }
 
     function getStatusClass(status){
-      const s = (status || "").toLowerCase();
+      var s = String(status || "").toLowerCase();
       if(s === "success") return "status-success";
       if(s === "failed") return "status-failed";
       return "status-pending";
     }
 
     function getStatusBgClass(status){
-      const s = (status || "").toLowerCase();
+      var s = String(status || "").toLowerCase();
       if(s === "success") return "success-bg";
       if(s === "failed") return "failed-bg";
       return "pending-bg";
     }
 
     function renderHistory(){
-      const list = document.getElementById("historyList");
-      const filtered = getFilteredHistory();
+      var list = document.getElementById("historyList");
+      var filtered = getFilteredHistory();
+      var html = "";
+      var i, item, isCredit, safeTxnId;
 
       document.getElementById("totalCount").textContent = filtered.length;
 
       if(!filtered.length){
-        list.innerHTML = `
-          <div class="empty">
-            No transactions found da.<br>
-            Search or filter change panni paru.
-          </div>
-        `;
+        list.innerHTML =
+          '<div class="empty">' +
+            'No transactions found da.<br>' +
+            'Search or filter change panni paru.' +
+          '</div>';
         return;
       }
 
-      list.innerHTML = filtered.map((item, index) => {
-        const isCredit = (item.type || "").toLowerCase() === "received";
-        return `
-          <div class="history-card" onclick="openDetailsByTxnId('${item.txnId}')">
-            <div class="row1">
-              <div class="user-wrap">
-                <div class="avatar">${getInitial(item.person)}</div>
-                <div class="info">
-                  <div class="name">${item.person}</div>
-                  <div class="meta">${item.type} • ${item.method}</div>
-                </div>
-              </div>
+      for(i = 0; i < filtered.length; i++){
+        item = filtered[i];
+        isCredit = (String(item.type || "").toLowerCase() === "received");
+        safeTxnId = encodeURIComponent(item.txnId);
 
-              <div class="amount-wrap">
-                <div class="amount ${isCredit ? "credit" : "debit"}">
-                  ${isCredit ? "+" : "-"}${formatAmount(item.amount)}
-                </div>
-                <div class="mini-date">${formatShortDate(item.date)}</div>
-              </div>
-            </div>
+        html +=
+          '<div class="history-card" onclick="openDetailsByTxnId(\'' + safeTxnId + '\')">' +
+            '<div class="row1">' +
+              '<div class="user-wrap">' +
+                '<div class="avatar">' + escapeHtml(getInitial(item.person)) + '</div>' +
+                '<div class="info">' +
+                  '<div class="name">' + escapeHtml(item.person) + '</div>' +
+                  '<div class="meta">' + escapeHtml(item.type) + ' • ' + escapeHtml(item.method) + '</div>' +
+                '</div>' +
+              '</div>' +
 
-            <div class="row2">
-              <div class="tag ${getStatusClass(item.status)}">${item.status}</div>
-              <div class="tag method">${item.method}</div>
-              <div class="tag type">${item.type}</div>
-            </div>
-          </div>
-        `;
-      }).join("");
+              '<div class="amount-wrap">' +
+                '<div class="amount ' + (isCredit ? 'credit' : 'debit') + '">' +
+                  (isCredit ? '+' : '-') + escapeHtml(formatAmount(item.amount)) +
+                '</div>' +
+                '<div class="mini-date">' + escapeHtml(formatShortDate(item.date)) + '</div>' +
+              '</div>' +
+            '</div>' +
 
+            '<div class="row2">' +
+              '<div class="tag ' + getStatusClass(item.status) + '">' + escapeHtml(item.status) + '</div>' +
+              '<div class="tag method">' + escapeHtml(item.method) + '</div>' +
+              '<div class="tag type">' + escapeHtml(item.type) + '</div>' +
+            '</div>' +
+          '</div>';
+      }
+
+      list.innerHTML = html;
       updateChipState();
     }
 
     function updateChipState(){
-      document.querySelectorAll(".chip").forEach(ch => ch.classList.remove("active"));
+      var chips = document.querySelectorAll(".chip");
+      var i;
+      for(i = 0; i < chips.length; i++){
+        chips[i].classList.remove("active");
+      }
 
-      const isDefault =
+      var isDefault =
         selectedFilters.status === "all" &&
         selectedFilters.method === "all" &&
         selectedFilters.date === "latest" &&
@@ -1227,92 +1422,105 @@
     }
 
     function openDetailsByTxnId(txnId){
-      const item = allHistory.find(x => String(x.txnId) === String(txnId));
+      var decodedTxnId = decodeURIComponent(txnId);
+      var item = null;
+      var i;
+
+      for(i = 0; i < allHistory.length; i++){
+        if(String(allHistory[i].txnId) === String(decodedTxnId)){
+          item = allHistory[i];
+          break;
+        }
+      }
+
       if(!item) return;
 
-      const isCredit = (item.type || "").toLowerCase() === "received";
-      const amountColor = isCredit ? "#16a34a" : "#dc2626";
+      var isCredit = (String(item.type || "").toLowerCase() === "received");
+      var amountColor = isCredit ? "#16a34a" : "#dc2626";
+      var statusText = String(item.status || "").toLowerCase();
+      var statusEmoji = "⏳";
 
-      document.getElementById("detailContent").innerHTML = `
-        <div class="big-status ${getStatusBgClass(item.status)}">
-          ${item.status.toLowerCase() === "success" ? "✅" : item.status.toLowerCase() === "failed" ? "❌" : "⏳"}
-          ${item.status}
-        </div>
+      if(statusText === "success") statusEmoji = "✅";
+      else if(statusText === "failed") statusEmoji = "❌";
 
-        <div class="detail-amount" style="color:${amountColor}">
-          ${isCredit ? "+" : "-"}${formatAmount(item.amount)}
-        </div>
+      document.getElementById("detailContent").innerHTML =
+        '<div class="big-status ' + getStatusBgClass(item.status) + '">' +
+          statusEmoji + ' ' + escapeHtml(item.status) +
+        '</div>' +
 
-        <div class="detail-grid">
-          <div class="detail-box">
-            <div class="label">Person</div>
-            <div class="value">${item.person}</div>
-          </div>
-          <div class="detail-box">
-            <div class="label">Type</div>
-            <div class="value">${item.type}</div>
-          </div>
-          <div class="detail-box">
-            <div class="label">Method</div>
-            <div class="value">${item.method}</div>
-          </div>
-          <div class="detail-box">
-            <div class="label">Date</div>
-            <div class="value">${formatShortDate(item.date)}</div>
-          </div>
-        </div>
+        '<div class="detail-amount" style="color:' + amountColor + '">' +
+          (isCredit ? '+' : '-') + escapeHtml(formatAmount(item.amount)) +
+        '</div>' +
 
-        <div class="detail-full">
-          <div class="detail-row">
-            <div class="left">Transaction ID</div>
-            <div class="right">${item.txnId}</div>
-          </div>
-          <div class="detail-row">
-            <div class="left">Status</div>
-            <div class="right">${item.status}</div>
-          </div>
-          <div class="detail-row">
-            <div class="left">From</div>
-            <div class="right">${item.from || "-"}</div>
-          </div>
-          <div class="detail-row">
-            <div class="left">To</div>
-            <div class="right">${item.to || "-"}</div>
-          </div>
-          <div class="detail-row">
-            <div class="left">Payment Method</div>
-            <div class="right">${item.method}</div>
-          </div>
-          <div class="detail-row">
-            <div class="left">Payment Type</div>
-            <div class="right">${item.type}</div>
-          </div>
-          <div class="detail-row">
-            <div class="left">Date & Time</div>
-            <div class="right">${formatDateTime(item.date)}</div>
-          </div>
-          <div class="detail-row">
-            <div class="left">Amount</div>
-            <div class="right">${formatAmount(item.amount)}</div>
-          </div>
-          <div class="detail-row">
-            <div class="left">Note</div>
-            <div class="right">${item.note || "No note"}</div>
-          </div>
-        </div>
-      `;
+        '<div class="detail-grid">' +
+          '<div class="detail-box">' +
+            '<div class="label">Person</div>' +
+            '<div class="value">' + escapeHtml(item.person) + '</div>' +
+          '</div>' +
+          '<div class="detail-box">' +
+            '<div class="label">Type</div>' +
+            '<div class="value">' + escapeHtml(item.type) + '</div>' +
+          '</div>' +
+          '<div class="detail-box">' +
+            '<div class="label">Method</div>' +
+            '<div class="value">' + escapeHtml(item.method) + '</div>' +
+          '</div>' +
+          '<div class="detail-box">' +
+            '<div class="label">Date</div>' +
+            '<div class="value">' + escapeHtml(formatShortDate(item.date)) + '</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="detail-full">' +
+          '<div class="detail-row">' +
+            '<div class="left">Transaction ID</div>' +
+            '<div class="right">' + escapeHtml(item.txnId) + '</div>' +
+          '</div>' +
+          '<div class="detail-row">' +
+            '<div class="left">Status</div>' +
+            '<div class="right">' + escapeHtml(item.status) + '</div>' +
+          '</div>' +
+          '<div class="detail-row">' +
+            '<div class="left">From</div>' +
+            '<div class="right">' + escapeHtml(item.from || "-") + '</div>' +
+          '</div>' +
+          '<div class="detail-row">' +
+            '<div class="left">To</div>' +
+            '<div class="right">' + escapeHtml(item.to || "-") + '</div>' +
+          '</div>' +
+          '<div class="detail-row">' +
+            '<div class="left">Payment Method</div>' +
+            '<div class="right">' + escapeHtml(item.method) + '</div>' +
+          '</div>' +
+          '<div class="detail-row">' +
+            '<div class="left">Payment Type</div>' +
+            '<div class="right">' + escapeHtml(item.type) + '</div>' +
+          '</div>' +
+          '<div class="detail-row">' +
+            '<div class="left">Date & Time</div>' +
+            '<div class="right">' + escapeHtml(formatDateTime(item.date)) + '</div>' +
+          '</div>' +
+          '<div class="detail-row">' +
+            '<div class="left">Amount</div>' +
+            '<div class="right">' + escapeHtml(formatAmount(item.amount)) + '</div>' +
+          '</div>' +
+          '<div class="detail-row">' +
+            '<div class="left">Note</div>' +
+            '<div class="right">' + escapeHtml(item.note || "No note") + '</div>' +
+          '</div>' +
+        '</div>';
 
       openPanel("detailPanel");
     }
 
     function toggleTopMenu(event){
       event.stopPropagation();
-      const menu = document.getElementById("topMenu");
+      var menu = document.getElementById("topMenu");
       menu.classList.toggle("show");
     }
 
     document.addEventListener("click", function(e){
-      const menu = document.getElementById("topMenu");
+      var menu = document.getElementById("topMenu");
       if(!menu.contains(e.target) && !e.target.classList.contains("menu-btn")){
         menu.classList.remove("show");
       }
@@ -1326,7 +1534,7 @@
 
     function closeAllPanels(){
       document.getElementById("overlay").classList.remove("show");
-      document.querySelectorAll(".detail-panel, .statement-panel, .help-panel, .feedback-panel, .filter-panel").forEach(el=>{
+      document.querySelectorAll(".detail-panel, .statement-panel, .help-panel, .feedback-panel, .filter-panel").forEach(function(el){
         el.classList.remove("show");
       });
     }
@@ -1352,25 +1560,28 @@
 
     function openFeedbackFromHelp(){
       closeAllPanels();
-      setTimeout(() => {
+      setTimeout(function(){
         prefillFeedback();
         openPanel("feedbackPanel");
       }, 180);
     }
 
     function buildStatement(){
-      const currentUser = getCurrentUser() || "User";
-      const filtered = getFilteredHistory();
+      var currentUser = getCurrentUser() || "User";
+      var filtered = getFilteredHistory();
 
-      let sentTotal = 0;
-      let receivedTotal = 0;
-      let successCount = 0;
+      var sentTotal = 0;
+      var receivedTotal = 0;
+      var successCount = 0;
+      var rows = "";
+      var i, item;
 
-      filtered.forEach(item=>{
-        if((item.type || "").toLowerCase() === "sent") sentTotal += Number(item.amount || 0);
-        if((item.type || "").toLowerCase() === "received") receivedTotal += Number(item.amount || 0);
-        if((item.status || "").toLowerCase() === "success") successCount += 1;
-      });
+      for(i = 0; i < filtered.length; i++){
+        item = filtered[i];
+        if(String(item.type || "").toLowerCase() === "sent") sentTotal += Number(item.amount || 0);
+        if(String(item.type || "").toLowerCase() === "received") receivedTotal += Number(item.amount || 0);
+        if(String(item.status || "").toLowerCase() === "success") successCount += 1;
+      }
 
       document.getElementById("statementUserName").textContent = currentUser;
       document.getElementById("statementGeneratedAt").textContent =
@@ -1387,24 +1598,29 @@
       document.getElementById("stmtTotalReceived").textContent = formatAmount(receivedTotal);
       document.getElementById("stmtSuccessCount").textContent = successCount;
 
-      const rows = filtered.length ? filtered.map(item => `
-        <div class="detail-row">
-          <div class="left">
-            <div style="font-weight:800;color:#111827;margin-bottom:4px;">${item.person}</div>
-            <div>${item.type} • ${item.method}</div>
-            <div style="margin-top:4px;">${formatShortDate(item.date)}</div>
-          </div>
-          <div class="right">
-            <div style="font-size:15px;">${formatAmount(item.amount)}</div>
-            <div style="margin-top:5px;color:#6b7280;font-weight:700;">${item.status}</div>
-          </div>
-        </div>
-      `).join("") : `
-        <div class="detail-row">
-          <div class="left">No transactions</div>
-          <div class="right">-</div>
-        </div>
-      `;
+      if(filtered.length){
+        for(i = 0; i < filtered.length; i++){
+          item = filtered[i];
+          rows +=
+            '<div class="detail-row">' +
+              '<div class="left">' +
+                '<div style="font-weight:800;color:#111827;margin-bottom:4px;">' + escapeHtml(item.person) + '</div>' +
+                '<div>' + escapeHtml(item.type) + ' • ' + escapeHtml(item.method) + '</div>' +
+                '<div style="margin-top:4px;">' + escapeHtml(formatShortDate(item.date)) + '</div>' +
+              '</div>' +
+              '<div class="right">' +
+                '<div style="font-size:15px;">' + escapeHtml(formatAmount(item.amount)) + '</div>' +
+                '<div style="margin-top:5px;color:#6b7280;font-weight:700;">' + escapeHtml(item.status) + '</div>' +
+              '</div>' +
+            '</div>';
+        }
+      }else{
+        rows =
+          '<div class="detail-row">' +
+            '<div class="left">No transactions</div>' +
+            '<div class="right">-</div>' +
+          '</div>';
+      }
 
       document.getElementById("statementRows").innerHTML = rows;
     }
@@ -1416,27 +1632,27 @@
     }
 
     async function shareStatement(){
-      const currentUser = getCurrentUser() || "User";
-      const filtered = getFilteredHistory();
-      const sent = filtered
-        .filter(x => (x.type || "").toLowerCase() === "sent")
-        .reduce((sum, x) => sum + Number(x.amount || 0), 0);
-      const received = filtered
-        .filter(x => (x.type || "").toLowerCase() === "received")
-        .reduce((sum, x) => sum + Number(x.amount || 0), 0);
+      var currentUser = getCurrentUser() || "User";
+      var filtered = getFilteredHistory();
+      var sent = filtered
+        .filter(function(x){ return String(x.type || "").toLowerCase() === "sent"; })
+        .reduce(function(sum, x){ return sum + Number(x.amount || 0); }, 0);
+      var received = filtered
+        .filter(function(x){ return String(x.type || "").toLowerCase() === "received"; })
+        .reduce(function(sum, x){ return sum + Number(x.amount || 0); }, 0);
 
-      const text = `ST PAY Statement
-User: ${currentUser}
-Total Transactions: ${filtered.length}
-Total Sent: ${formatAmount(sent)}
-Total Received: ${formatAmount(received)}
-Generated: ${new Date().toLocaleString("en-IN")}`;
+      var text = "ST PAY Statement\n" +
+        "User: " + currentUser + "\n" +
+        "Total Transactions: " + filtered.length + "\n" +
+        "Total Sent: " + formatAmount(sent) + "\n" +
+        "Total Received: " + formatAmount(received) + "\n" +
+        "Generated: " + new Date().toLocaleString("en-IN");
 
       if(navigator.share){
         try{
           await navigator.share({
             title:"ST PAY Statement",
-            text
+            text:text
           });
           showToast("Statement shared successfully da");
         }catch(e){
@@ -1455,31 +1671,23 @@ Generated: ${new Date().toLocaleString("en-IN")}`;
     function prefillFeedback(){
       document.getElementById("feedbackSubject").value = "History / Statement Support";
       document.getElementById("feedbackMessage").value =
-`Hi ST PAY Support,
-
-I need help with my transaction history page.
-
-Issue:
-- Recent transaction details need review
-- Please verify statement and payment status
-- Kindly help me resolve this safely
-
-Thanks.`;
+"Hi ST PAY Support,\n\nI need help with my transaction history page.\n\nIssue:\n- Recent transaction details need review\n- Please verify statement and payment status\n- Kindly help me resolve this safely\n\nThanks.";
     }
 
     function submitFeedback(){
-      const subject = document.getElementById("feedbackSubject").value.trim();
-      const message = document.getElementById("feedbackMessage").value.trim();
+      var subject = document.getElementById("feedbackSubject").value.trim();
+      var message = document.getElementById("feedbackMessage").value.trim();
+      var feedbacks;
 
       if(!subject || !message){
         showToast("Subject and feedback fill pannu da");
         return;
       }
 
-      const feedbacks = JSON.parse(localStorage.getItem("stpay_feedbacks") || "[]");
+      feedbacks = JSON.parse(localStorage.getItem("stpay_feedbacks") || "[]");
       feedbacks.unshift({
-        subject,
-        message,
+        subject:subject,
+        message:message,
         user:getCurrentUser() || "Unknown",
         time:new Date().toISOString()
       });
@@ -1493,7 +1701,8 @@ Thanks.`;
 
     function openFilterPanel(type){
       currentFilterPanel = type;
-      const titleMap = {
+
+      var titleMap = {
         status: "Status Options",
         method: "Payment Method Options",
         date: "Date Options",
@@ -1501,7 +1710,7 @@ Thanks.`;
         type: "Payment Type Options"
       };
 
-      const optionsMap = {
+      var optionsMap = {
         status: [
           {label:"All Status", value:"all"},
           {label:"Success", value:"success"},
@@ -1513,7 +1722,10 @@ Thanks.`;
           {label:"Bank", value:"bank"},
           {label:"UPI", value:"upi"},
           {label:"Wallet", value:"wallet"},
-          {label:"Card", value:"card"}
+          {label:"Card", value:"card"},
+          {label:"Recharge", value:"recharge"},
+          {label:"Bill", value:"bill"},
+          {label:"Ticket", value:"ticket"}
         ],
         date: [
           {label:"Latest First", value:"latest"},
@@ -1528,26 +1740,29 @@ Thanks.`;
           {label:"All Types", value:"all"},
           {label:"Sent", value:"sent"},
           {label:"Received", value:"received"},
-          {label:"Payment", value:"payment"}
+          {label:"Payment", value:"payment"},
+          {label:"Recharge", value:"recharge"},
+          {label:"Bill", value:"bill"},
+          {label:"Ticket", value:"ticket"}
         ]
       };
 
+      var selectedValue = selectedFilters[type];
+      var html = '<h4 class="filter-title">' + titleMap[type] + '</h4>';
+      var i, opt;
+
       document.getElementById("filterPanelTitle").textContent = titleMap[type];
 
-      const selectedValue = selectedFilters[type];
-      document.getElementById("filterOptionsWrap").innerHTML = `
-        <h4 class="filter-title">${titleMap[type]}</h4>
-        ${optionsMap[type].map(opt => `
-          <button
-            class="filter-option ${selectedValue === opt.value ? "active-option" : ""}"
-            onclick="applyFilterOption('${type}','${opt.value}')"
-          >
-            <span>${opt.label}</span>
-            <span>${selectedValue === opt.value ? "✓" : ""}</span>
-          </button>
-        `).join("")}
-      `;
+      for(i = 0; i < optionsMap[type].length; i++){
+        opt = optionsMap[type][i];
+        html +=
+          '<button class="filter-option ' + (selectedValue === opt.value ? "active-option" : "") + '" onclick="applyFilterOption(\'' + type + '\',\'' + opt.value + '\')">' +
+            '<span>' + escapeHtml(opt.label) + '</span>' +
+            '<span>' + (selectedValue === opt.value ? "✓" : "") + '</span>' +
+          '</button>';
+      }
 
+      document.getElementById("filterOptionsWrap").innerHTML = html;
       openPanel("filterPanel");
     }
 
@@ -1558,16 +1773,24 @@ Thanks.`;
     }
 
     function showToast(msg){
-      const toast = document.getElementById("toast");
+      var toast = document.getElementById("toast");
       toast.textContent = msg;
       toast.classList.add("show");
       clearTimeout(window.__toastTimer);
-      window.__toastTimer = setTimeout(()=>{
+      window.__toastTimer = setTimeout(function(){
         toast.classList.remove("show");
       }, 2200);
     }
 
+    window.addEventListener("storage", function(){
+      loadHistory();
+    });
+
+    window.addEventListener("focus", function(){
+      loadHistory();
+    });
+
     loadHistory();
   </script>
 </body>
-</html>
+</ht

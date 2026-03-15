@@ -2,10 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ST PAY - Recharge</title>
 
   <style>
@@ -394,6 +391,7 @@
       font-size:13px;
       margin-bottom:12px;
       font-weight:700;
+      white-space:pre-wrap;
     }
 
     .success{
@@ -717,10 +715,22 @@
 
 <script>
   if (!sessionStorage.getItem("user")) {
-    window.location = "index.html";
+    window.location.href = "index.html";
   }
 
-  const providerPlans = {
+  var API = "";
+  var PROD_API = "https://st-app-29gb.onrender.com";
+
+  if (
+    location.hostname === "127.0.0.1" ||
+    location.hostname === "localhost"
+  ) {
+    API = "http://127.0.0.1:5000";
+  } else {
+    API = PROD_API;
+  }
+
+  var providerPlans = {
     Jio: {
       popular: [
         { price: 239, badge: "Popular", details: "28 days • 1.5GB/day • Unlimited Calls • 100 SMS/day", tags:["True 5G","OTT Ready"] },
@@ -814,11 +824,15 @@
     }
   };
 
-  let selectedProvider = "";
-  let selectedPlan = null;
-  let currentTab = "popular";
-  let generatedOtp = "";
-  let isProcessingRecharge = false;
+  var selectedProvider = "";
+  var selectedPlan = null;
+  var currentTab = "popular";
+  var generatedOtp = "";
+  var isProcessingRecharge = false;
+
+  function $(id) {
+    return document.getElementById(id);
+  }
 
   function getLoggedUser() {
     return (sessionStorage.getItem("user") || "").trim();
@@ -827,7 +841,7 @@
   function sanitizeBalanceValue(value) {
     if (value === undefined || value === null) return "0.00";
 
-    let txt = String(value).trim();
+    var txt = String(value).trim();
 
     if (!txt || txt === "undefined" || txt === "null" || txt === "NaN") {
       return "0.00";
@@ -835,14 +849,14 @@
 
     txt = txt.replace(/[₹,\s]/g, "");
 
-    const num = Number(txt);
+    var num = Number(txt);
     if (isNaN(num)) return "0.00";
 
     return num.toFixed(2);
   }
 
   function amountToNumber(value) {
-    const num = Number(sanitizeBalanceValue(value));
+    var num = Number(sanitizeBalanceValue(value));
     return isNaN(num) ? 0 : num;
   }
 
@@ -871,7 +885,7 @@
   }
 
   function getCurrentBalance() {
-    const user = getLoggedUser();
+    var user = getLoggedUser();
 
     return sanitizeBalanceValue(
       sessionStorage.getItem("balance_amount") ||
@@ -890,7 +904,7 @@
   }
 
   function setEverywhereBalance(user, value) {
-    const clean = sanitizeBalanceValue(value);
+    var clean = sanitizeBalanceValue(value);
 
     sessionStorage.setItem("balance_amount", clean);
     sessionStorage.setItem("current_balance", clean);
@@ -906,35 +920,29 @@
     if (user) {
       localStorage.setItem(getUserBalanceKey(user), clean);
       localStorage.setItem(getAltUserBalanceKey(user), clean);
-      localStorage.setItem("stpay_balance_last_updated_" + String(user).toLowerCase(), String(Date.now()));
+      localStorage.setItem("stpay_balance_last_updated_" + String(user).toLowerCase(), String(new Date().getTime()));
     }
 
-    localStorage.setItem("stpay_balance_last_updated", String(Date.now()));
-
-    try {
-      window.dispatchEvent(new CustomEvent("stpay-balance-updated", {
-        detail: { user, balance: clean }
-      }));
-    } catch (e) {}
-
+    localStorage.setItem("stpay_balance_last_updated", String(new Date().getTime()));
     updateSummary();
     return clean;
   }
 
   function goBack() {
-    if (!document.getElementById("plansSection").classList.contains("hidden")) {
+    var plansSection = $("plansSection");
+    if (plansSection && !plansSection.classList.contains("hidden")) {
       changeProvider();
       return;
     }
-    window.location = "dashboard.html?refresh=1";
+    window.location.href = "dashboard.html?refresh=1";
   }
 
   function goHome() {
-    window.location = "dashboard.html?refresh=1";
+    window.location.href = "dashboard.html?refresh=1";
   }
 
   function formatNow() {
-    const d = new Date();
+    var d = new Date();
     return d.toLocaleString("en-IN", {
       day: "2-digit",
       month: "short",
@@ -946,11 +954,11 @@
   }
 
   function makeTxnId() {
-    return "RCH" + Date.now() + Math.floor(Math.random() * 900 + 100);
+    return "RCH" + new Date().getTime() + Math.floor(Math.random() * 900 + 100);
   }
 
   function getProviderLogo(provider) {
-    const map = {
+    var map = {
       Jio: { text:"J", color:"#2563eb" },
       Airtel: { text:"A", color:"#ef4444" },
       VI: { text:"VI", color:"#7c3aed" },
@@ -960,140 +968,184 @@
   }
 
   function updateUserDisplay() {
-    const user = getLoggedUser() || "User";
-    document.getElementById("userDisplay").textContent = user;
+    var user = getLoggedUser() || "User";
+    if ($("userDisplay")) {
+      $("userDisplay").textContent = user;
+    }
   }
 
   function selectProvider(provider, el) {
     selectedProvider = provider;
     selectedPlan = null;
     generatedOtp = "";
-    document.getElementById("otpInput").value = "";
-    document.getElementById("otpBox").style.display = "none";
 
-    document.querySelectorAll(".simCard").forEach(card => {
-      card.classList.remove("active");
-    });
+    if ($("otpInput")) $("otpInput").value = "";
+    if ($("otpBox")) $("otpBox").style.display = "none";
+    if ($("otpPreview")) $("otpPreview").textContent = "000000";
+
+    var simCards = document.querySelectorAll(".simCard");
+    var i;
+    for (i = 0; i < simCards.length; i++) {
+      simCards[i].classList.remove("active");
+    }
 
     if (el) el.classList.add("active");
 
-    const logo = getProviderLogo(provider);
+    var logo = getProviderLogo(provider);
 
-    document.getElementById("providerSection").classList.add("hidden");
-    document.getElementById("plansSection").classList.remove("hidden");
-    document.getElementById("selectedProviderBox").style.display = "flex";
-    document.getElementById("selectedProviderName").textContent = provider;
-    document.getElementById("selectedProviderLogo").textContent = logo.text;
-    document.getElementById("selectedProviderLogo").style.background = logo.color;
-    document.getElementById("summaryProvider").textContent = provider;
+    if ($("providerSection")) $("providerSection").classList.add("hidden");
+    if ($("plansSection")) $("plansSection").classList.remove("hidden");
+    if ($("selectedProviderBox")) $("selectedProviderBox").style.display = "flex";
+    if ($("selectedProviderName")) $("selectedProviderName").textContent = provider;
+
+    if ($("selectedProviderLogo")) {
+      $("selectedProviderLogo").textContent = logo.text;
+      $("selectedProviderLogo").style.background = logo.color;
+    }
+
+    if ($("summaryProvider")) $("summaryProvider").textContent = provider;
 
     renderPlans("popular");
     updateSummary();
     hideError();
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    try {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (e) {
+      window.scrollTo(0, 0);
+    }
   }
 
   function changeProvider() {
+    var tabBtns;
+    var simCards;
+    var i;
+
     selectedProvider = "";
     selectedPlan = null;
     generatedOtp = "";
     currentTab = "popular";
 
-    document.getElementById("providerSection").classList.remove("hidden");
-    document.getElementById("plansSection").classList.add("hidden");
-    document.getElementById("selectedProviderBox").style.display = "none";
-    document.getElementById("summaryProvider").textContent = "Not selected";
-    document.getElementById("summaryNumber").textContent = "-";
-    document.getElementById("summaryPlan").textContent = "-";
-    document.getElementById("summaryAmount").textContent = "₹ 0";
-    document.getElementById("summaryBalanceAfter").textContent = "₹ " + getCurrentBalance();
-    document.getElementById("otpInput").value = "";
-    document.getElementById("otpPreview").textContent = "000000";
-    document.getElementById("otpBox").style.display = "none";
-    document.getElementById("plansGrid").innerHTML = "";
-    document.getElementById("rechargeType").value = "popular";
+    if ($("providerSection")) $("providerSection").classList.remove("hidden");
+    if ($("plansSection")) $("plansSection").classList.add("hidden");
+    if ($("selectedProviderBox")) $("selectedProviderBox").style.display = "none";
+    if ($("summaryProvider")) $("summaryProvider").textContent = "Not selected";
+    if ($("summaryNumber")) $("summaryNumber").textContent = "-";
+    if ($("summaryPlan")) $("summaryPlan").textContent = "-";
+    if ($("summaryAmount")) $("summaryAmount").textContent = "₹ 0";
+    if ($("summaryBalanceAfter")) $("summaryBalanceAfter").textContent = "₹ " + getCurrentBalance();
+    if ($("mobileNumber")) $("mobileNumber").value = "";
+    if ($("otpInput")) $("otpInput").value = "";
+    if ($("otpPreview")) $("otpPreview").textContent = "000000";
+    if ($("otpBox")) $("otpBox").style.display = "none";
+    if ($("plansGrid")) $("plansGrid").innerHTML = "";
+    if ($("rechargeType")) $("rechargeType").value = "popular";
 
-    document.querySelectorAll(".tabBtn").forEach(btn => btn.classList.remove("active"));
-    document.getElementById("tab-popular").classList.add("active");
+    tabBtns = document.querySelectorAll(".tabBtn");
+    for (i = 0; i < tabBtns.length; i++) {
+      tabBtns[i].classList.remove("active");
+    }
+    if ($("tab-popular")) $("tab-popular").classList.add("active");
 
-    document.querySelectorAll(".simCard").forEach(card => {
-      card.classList.remove("active");
-    });
+    simCards = document.querySelectorAll(".simCard");
+    for (i = 0; i < simCards.length; i++) {
+      simCards[i].classList.remove("active");
+    }
 
     hideError();
     setProcessingState(false);
   }
 
   function renderPlans(tab) {
+    var grid = $("plansGrid");
+    var plans;
+    var i;
+
     currentTab = tab;
-    const grid = document.getElementById("plansGrid");
+    if (!grid) return;
+
     grid.innerHTML = "";
 
-    document.querySelectorAll(".tabBtn").forEach(btn => btn.classList.remove("active"));
-    document.getElementById("tab-" + tab).classList.add("active");
-    document.getElementById("rechargeType").value = tab;
+    var tabBtns = document.querySelectorAll(".tabBtn");
+    for (i = 0; i < tabBtns.length; i++) {
+      tabBtns[i].classList.remove("active");
+    }
 
-    const plans = (providerPlans[selectedProvider] && providerPlans[selectedProvider][tab]) || [];
+    if ($("tab-" + tab)) $("tab-" + tab).classList.add("active");
+    if ($("rechargeType")) $("rechargeType").value = tab;
 
-    plans.forEach((plan) => {
-      const card = document.createElement("div");
-      card.className = "planCard";
+    plans = (providerPlans[selectedProvider] && providerPlans[selectedProvider][tab]) || [];
 
-      card.innerHTML = `
-        <div class="planTop">
-          <div class="planPrice">₹ ${plan.price}</div>
-          <div class="planBadge">${plan.badge}</div>
-        </div>
-        <div class="planInfo">${plan.details}</div>
-        <div class="planExtra">
-          ${(plan.tags || []).map(tag => `<span class="miniTag">${tag}</span>`).join("")}
-        </div>
-      `;
+    for (i = 0; i < plans.length; i++) {
+      createPlanCard(plans[i], grid);
+    }
+  }
 
-      card.onclick = function() {
-        document.querySelectorAll(".planCard").forEach(c => c.classList.remove("active"));
-        card.classList.add("active");
-        selectedPlan = plan;
-        generatedOtp = "";
-        document.getElementById("otpInput").value = "";
-        document.getElementById("otpPreview").textContent = "000000";
-        document.getElementById("otpBox").style.display = "none";
-        updateSummary();
-        hideError();
-      };
+  function createPlanCard(plan, grid) {
+    var card = document.createElement("div");
+    var tagsHtml = "";
+    var i;
 
-      grid.appendChild(card);
-    });
+    card.className = "planCard";
+
+    for (i = 0; i < (plan.tags || []).length; i++) {
+      tagsHtml += '<span class="miniTag">' + plan.tags[i] + '</span>';
+    }
+
+    card.innerHTML =
+      '<div class="planTop">' +
+        '<div class="planPrice">₹ ' + plan.price + '</div>' +
+        '<div class="planBadge">' + plan.badge + '</div>' +
+      '</div>' +
+      '<div class="planInfo">' + plan.details + '</div>' +
+      '<div class="planExtra">' + tagsHtml + '</div>';
+
+    card.onclick = function() {
+      var cards = document.querySelectorAll(".planCard");
+      var j;
+      for (j = 0; j < cards.length; j++) {
+        cards[j].classList.remove("active");
+      }
+      card.classList.add("active");
+      selectedPlan = plan;
+      generatedOtp = "";
+      if ($("otpInput")) $("otpInput").value = "";
+      if ($("otpPreview")) $("otpPreview").textContent = "000000";
+      if ($("otpBox")) $("otpBox").style.display = "none";
+      updateSummary();
+      hideError();
+    };
+
+    grid.appendChild(card);
   }
 
   function changeTab(tab) {
     if (!selectedProvider) return;
     selectedPlan = null;
     generatedOtp = "";
-    document.getElementById("otpInput").value = "";
-    document.getElementById("otpPreview").textContent = "000000";
-    document.getElementById("otpBox").style.display = "none";
+    if ($("otpInput")) $("otpInput").value = "";
+    if ($("otpPreview")) $("otpPreview").textContent = "000000";
+    if ($("otpBox")) $("otpBox").style.display = "none";
     renderPlans(tab);
     updateSummary();
   }
 
   function updateSummary() {
-    const number = (document.getElementById("mobileNumber").value || "").trim();
-    const currentBalance = amountToNumber(getCurrentBalance());
-    const amount = selectedPlan ? Number(selectedPlan.price) : 0;
-    const afterBalance = currentBalance - amount;
+    var number = (($("mobileNumber") && $("mobileNumber").value) || "").trim();
+    var currentBalance = amountToNumber(getCurrentBalance());
+    var amount = selectedPlan ? Number(selectedPlan.price) : 0;
+    var afterBalance = currentBalance - amount;
 
-    document.getElementById("summaryNumber").textContent = number || "-";
-    document.getElementById("summaryPlan").textContent = selectedPlan ? selectedPlan.details : "-";
-    document.getElementById("summaryAmount").textContent = selectedPlan ? ("₹ " + selectedPlan.price) : "₹ 0";
-    document.getElementById("summaryBalanceAfter").textContent = "₹ " + Math.max(afterBalance, 0).toFixed(2);
+    if ($("summaryNumber")) $("summaryNumber").textContent = number || "-";
+    if ($("summaryPlan")) $("summaryPlan").textContent = selectedPlan ? selectedPlan.details : "-";
+    if ($("summaryAmount")) $("summaryAmount").textContent = selectedPlan ? ("₹ " + selectedPlan.price) : "₹ 0";
+    if ($("summaryBalanceAfter")) $("summaryBalanceAfter").textContent = "₹ " + Math.max(afterBalance, 0).toFixed(2);
   }
 
   function validateBeforeOtp() {
-    const number = (document.getElementById("mobileNumber").value || "").trim();
-    const currentBalance = amountToNumber(getCurrentBalance());
-    const amount = selectedPlan ? Number(selectedPlan.price) : 0;
+    var number = (($("mobileNumber") && $("mobileNumber").value) || "").trim();
+    var currentBalance = amountToNumber(getCurrentBalance());
+    var amount = selectedPlan ? Number(selectedPlan.price) : 0;
 
     if (!selectedProvider) return "Select SIM provider";
     if (!/^\d{10}$/.test(number)) return "Enter valid 10 digit mobile number";
@@ -1104,28 +1156,31 @@
   }
 
   function showError(msg) {
-    const box = document.getElementById("errorBox");
+    var box = $("errorBox");
+    if (!box) return;
     box.style.display = "block";
     box.textContent = msg;
   }
 
   function hideError() {
-    const box = document.getElementById("errorBox");
+    var box = $("errorBox");
+    if (!box) return;
     box.style.display = "none";
     box.textContent = "";
   }
 
   function showLoading(show, text) {
-    const el = document.getElementById("loadingText");
+    var el = $("loadingText");
+    if (!el) return;
     el.style.display = show ? "block" : "none";
     if (text) el.textContent = text;
   }
 
   function setProcessingState(state) {
-    isProcessingRecharge = !!state;
+    var otpBtn = $("otpBtn");
+    var rechargeBtn = $("rechargeBtn");
 
-    const otpBtn = document.getElementById("otpBtn");
-    const rechargeBtn = document.getElementById("rechargeBtn");
+    isProcessingRecharge = !!state;
 
     if (otpBtn) {
       otpBtn.disabled = isProcessingRecharge;
@@ -1139,26 +1194,28 @@
   }
 
   function generateOtp() {
+    var msg;
+
     if (isProcessingRecharge) return;
 
     hideError();
 
-    const msg = validateBeforeOtp();
+    msg = validateBeforeOtp();
     if (msg) {
       showError(msg);
       return;
     }
 
     generatedOtp = String(Math.floor(100000 + Math.random() * 900000));
-    document.getElementById("otpPreview").textContent = generatedOtp;
-    document.getElementById("otpBox").style.display = "block";
+    if ($("otpPreview")) $("otpPreview").textContent = generatedOtp;
+    if ($("otpBox")) $("otpBox").style.display = "block";
   }
 
   function readArrayStorage(key) {
     try {
-      const raw = localStorage.getItem(key) || "[]";
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
+      var raw = localStorage.getItem(key) || "[]";
+      var parsed = JSON.parse(raw);
+      return Object.prototype.toString.call(parsed) === "[object Array]" ? parsed : [];
     } catch (e) {
       return [];
     }
@@ -1169,29 +1226,30 @@
   }
 
   function saveRechargeHistory(receipt) {
-    const user = receipt.user || getLoggedUser();
+    var user = receipt.user || getLoggedUser();
+    var common1 = readArrayStorage("recharge_history");
+    var common2 = readArrayStorage("stpay_recharge_history");
 
-    const modernCommon = readArrayStorage("recharge_history");
-    modernCommon.unshift(receipt);
-    writeArrayStorage("recharge_history", modernCommon, 100);
+    common1.unshift(receipt);
+    writeArrayStorage("recharge_history", common1, 100);
 
-    const legacyCommon = readArrayStorage("stpay_recharge_history");
-    legacyCommon.unshift(receipt);
-    writeArrayStorage("stpay_recharge_history", legacyCommon, 100);
+    common2.unshift(receipt);
+    writeArrayStorage("stpay_recharge_history", common2, 100);
 
     if (user) {
-      const modernUser = readArrayStorage(getRechargeHistoryKey(user));
-      modernUser.unshift(receipt);
-      writeArrayStorage(getRechargeHistoryKey(user), modernUser, 100);
+      var user1 = readArrayStorage(getRechargeHistoryKey(user));
+      var user2 = readArrayStorage(getLegacyRechargeHistoryKey(user));
 
-      const legacyUser = readArrayStorage(getLegacyRechargeHistoryKey(user));
-      legacyUser.unshift(receipt);
-      writeArrayStorage(getLegacyRechargeHistoryKey(user), legacyUser, 100);
+      user1.unshift(receipt);
+      writeArrayStorage(getRechargeHistoryKey(user), user1, 100);
+
+      user2.unshift(receipt);
+      writeArrayStorage(getLegacyRechargeHistoryKey(user), user2, 100);
     }
   }
 
   function saveUnifiedHistory(receipt) {
-    const historyItem = {
+    var historyItem = {
       type: "Recharge",
       title: "Mobile Recharge",
       name: "Mobile Recharge",
@@ -1216,46 +1274,151 @@
       status: "success"
     };
 
-    const keysToSave = [
-      "history",
-      "stpay_history"
-    ];
+    var keysToSave = ["history", "stpay_history"];
+    var i;
 
     if (receipt.user) {
       keysToSave.push(getUnifiedHistoryKey(receipt.user));
       keysToSave.push(getLegacyUnifiedHistoryKey(receipt.user));
     }
 
-    keysToSave.forEach((key) => {
-      const arr = readArrayStorage(key);
+    for (i = 0; i < keysToSave.length; i++) {
+      var arr = readArrayStorage(keysToSave[i]);
       arr.unshift(historyItem);
-      writeArrayStorage(key, arr, 150);
-    });
+      writeArrayStorage(keysToSave[i], arr, 150);
+    }
 
     sessionStorage.setItem("last_history_item", JSON.stringify(historyItem));
     localStorage.setItem("last_history_item", JSON.stringify(historyItem));
-    localStorage.setItem("stpay_last_history_update", String(Date.now()));
-    localStorage.setItem("history_last_updated", String(Date.now()));
-
-    try {
-      window.dispatchEvent(new CustomEvent("stpay-history-updated", {
-        detail: historyItem
-      }));
-    } catch (e) {}
+    localStorage.setItem("stpay_last_history_update", String(new Date().getTime()));
+    localStorage.setItem("history_last_updated", String(new Date().getTime()));
   }
 
-  async function confirmRecharge() {
+  function tryRechargeEndpoint(url, payload, callback) {
+    var xhr = new XMLHttpRequest();
+
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+
+    xhr.onreadystatechange = function() {
+      var contentType;
+      var rawText;
+      var data;
+
+      if (xhr.readyState !== 4) return;
+
+      contentType = xhr.getResponseHeader("content-type") || "";
+      rawText = xhr.responseText || "";
+      data = {};
+
+      try {
+        if (rawText && contentType.indexOf("application/json") !== -1) {
+          data = JSON.parse(rawText);
+        } else if (rawText) {
+          try {
+            data = JSON.parse(rawText);
+          } catch (e) {
+            data = { message: rawText };
+          }
+        }
+      } catch (e2) {
+        data = {};
+      }
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        callback(null, data || {});
+      } else {
+        if (xhr.status === 405) {
+          callback(new Error("POST not allowed on " + url), null);
+          return;
+        }
+
+        callback(
+          new Error(
+            (data && (data.error || data.message)) ||
+            ("Recharge API failed (" + xhr.status + ")")
+          ),
+          null
+        );
+      }
+    };
+
+    xhr.onerror = function() {
+      callback(new Error("Network error / backend not reachable"), null);
+    };
+
+    try {
+      xhr.send(JSON.stringify(payload));
+    } catch (e) {
+      callback(new Error("Network error / backend not reachable"), null);
+    }
+  }
+
+  function saveRechargeToServer(payload, callback) {
+    var endpoints = [
+      API + "/api/recharge",
+      API + "/recharge",
+      API + "/api/mobile-recharge",
+      API + "/mobile-recharge"
+    ];
+
+    var index = 0;
+    var lastError = "Server error";
+
+    function tryNext() {
+      if (index >= endpoints.length) {
+        callback({
+          ok:false,
+          error:lastError
+        });
+        return;
+      }
+
+      tryRechargeEndpoint(endpoints[index], payload, function(err, data) {
+        if (!err) {
+          callback({
+            ok:true,
+            data:data,
+            endpoint:endpoints[index]
+          });
+          return;
+        }
+
+        try {
+          console.warn("Recharge endpoint failed:", endpoints[index], err);
+        } catch (e) {}
+
+        lastError = err.message || "Server error";
+        index += 1;
+        tryNext();
+      });
+    }
+
+    tryNext();
+  }
+
+  function confirmRecharge() {
+    var msg;
+    var enteredOtp;
+    var number;
+    var user;
+    var txnId;
+    var time;
+    var amount;
+    var balanceBefore;
+    var receipt;
+
     if (isProcessingRecharge) return;
 
     hideError();
 
-    const msg = validateBeforeOtp();
+    msg = validateBeforeOtp();
     if (msg) {
       showError(msg);
       return;
     }
 
-    const enteredOtp = (document.getElementById("otpInput").value || "").trim();
+    enteredOtp = (($("otpInput") && $("otpInput").value) || "").trim();
 
     if (!generatedOtp) {
       showError("First generate OTP");
@@ -1267,12 +1430,12 @@
       return;
     }
 
-    const number = (document.getElementById("mobileNumber").value || "").trim();
-    const user = getLoggedUser() || "User";
-    const txnId = makeTxnId();
-    const time = formatNow();
-    const amount = Number(selectedPlan.price);
-    const balanceBefore = amountToNumber(getCurrentBalance());
+    number = (($("mobileNumber") && $("mobileNumber").value) || "").trim();
+    user = getLoggedUser() || "User";
+    txnId = makeTxnId();
+    time = formatNow();
+    amount = Number(selectedPlan.price);
+    balanceBefore = amountToNumber(getCurrentBalance());
 
     if (amount > balanceBefore) {
       showError("Insufficient balance");
@@ -1282,12 +1445,7 @@
     setProcessingState(true);
     showLoading(true, "Processing recharge...");
 
-    await new Promise(resolve => setTimeout(resolve, 900));
-
-    const finalBalance = sanitizeBalanceValue((balanceBefore - amount).toFixed(2));
-    setEverywhereBalance(user, finalBalance);
-
-    const receipt = {
+    receipt = {
       type: "recharge",
       title: "Mobile Recharge",
       name: "Mobile Recharge",
@@ -1302,53 +1460,98 @@
       time: time,
       date: time,
       status: "success",
-      balanceAfter: finalBalance,
+      balanceBefore: sanitizeBalanceValue(balanceBefore),
+      balanceAfter: sanitizeBalanceValue((balanceBefore - amount).toFixed(2)),
       subtitle: selectedProvider + " • " + number,
       desc: selectedProvider + " • " + number,
-      icon: "📱"
+      icon: "📱",
+      category: "recharge"
     };
 
-    saveRechargeHistory(receipt);
-    saveUnifiedHistory(receipt);
-    sessionStorage.setItem("last_recharge_receipt", JSON.stringify(receipt));
-    localStorage.setItem("stpay_last_recharge_receipt", JSON.stringify(receipt));
+    saveRechargeToServer({
+      user: user,
+      mobile: number,
+      number: number,
+      provider: selectedProvider,
+      amount: amount,
+      plan: selectedPlan.details,
+      txnId: txnId,
+      time: time,
+      type: "recharge"
+    }, function(serverResult) {
+      var serverData;
+      var serverBalance;
 
-    showLoading(false);
-    setProcessingState(false);
+      if (!serverResult.ok) {
+        showLoading(false);
+        setProcessingState(false);
+        showError(
+          "Recharge API failed.\n" +
+          (serverResult.error || "Backend not reachable")
+        );
+        return;
+      }
 
-    document.getElementById("rechargeFormCard").style.display = "none";
-    document.getElementById("successCard").style.display = "block";
+      serverData = serverResult.data || {};
+      serverBalance = receipt.balanceAfter;
 
-    document.getElementById("successText").textContent =
-      `${selectedProvider} recharge for ${number} completed successfully.`;
+      if (serverData.balance !== undefined && serverData.balance !== null && serverData.balance !== "") {
+        serverBalance = serverData.balance;
+      } else if (serverData.new_balance !== undefined && serverData.new_balance !== null && serverData.new_balance !== "") {
+        serverBalance = serverData.new_balance;
+      } else if (serverData.balanceAfter !== undefined && serverData.balanceAfter !== null && serverData.balanceAfter !== "") {
+        serverBalance = serverData.balanceAfter;
+      }
 
-    document.getElementById("receiptMobile").textContent = number;
-    document.getElementById("receiptProvider").textContent = selectedProvider;
-    document.getElementById("receiptPlan").textContent = selectedPlan.details;
-    document.getElementById("receiptAmount").textContent = "₹ " + amount.toFixed(2);
-    document.getElementById("receiptBalanceAfter").textContent = "₹ " + finalBalance;
-    document.getElementById("receiptTxn").textContent = txnId;
-    document.getElementById("receiptTime").textContent = time;
+      receipt.balanceAfter = sanitizeBalanceValue(serverBalance);
+
+      setEverywhereBalance(user, serverBalance);
+      saveRechargeHistory(receipt);
+      saveUnifiedHistory(receipt);
+
+      sessionStorage.setItem("last_recharge_receipt", JSON.stringify(receipt));
+      localStorage.setItem("stpay_last_recharge_receipt", JSON.stringify(receipt));
+
+      showLoading(false);
+      setProcessingState(false);
+
+      if ($("rechargeFormCard")) $("rechargeFormCard").style.display = "none";
+      if ($("successCard")) $("successCard").style.display = "block";
+
+      if ($("successText")) {
+        $("successText").textContent =
+          selectedProvider + " recharge for " + number + " completed successfully.";
+      }
+
+      if ($("receiptMobile")) $("receiptMobile").textContent = number;
+      if ($("receiptProvider")) $("receiptProvider").textContent = selectedProvider;
+      if ($("receiptPlan")) $("receiptPlan").textContent = selectedPlan.details;
+      if ($("receiptAmount")) $("receiptAmount").textContent = "₹ " + amount.toFixed(2);
+      if ($("receiptBalanceAfter")) $("receiptBalanceAfter").textContent = "₹ " + receipt.balanceAfter;
+      if ($("receiptTxn")) $("receiptTxn").textContent = txnId;
+      if ($("receiptTime")) $("receiptTime").textContent = time;
+    });
   }
-
-  document.getElementById("mobileNumber").addEventListener("input", function(e) {
-    e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
-    updateSummary();
-  });
-
-  window.addEventListener("stpay-balance-updated", function() {
-    updateSummary();
-  });
 
   window.addEventListener("storage", function() {
     updateSummary();
   });
 
-  window.addEventListener("DOMContentLoaded", function() {
+  document.addEventListener("DOMContentLoaded", function() {
+    var mobileInput = $("mobileNumber");
+    var user = getLoggedUser();
+    var latestBalance;
+
     updateUserDisplay();
 
-    const user = getLoggedUser();
-    const latestBalance =
+    if (mobileInput) {
+      mobileInput.addEventListener("input", function(e) {
+        e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
+        updateSummary();
+      });
+    }
+
+    latestBalance =
       sessionStorage.getItem("balance_amount") ||
       sessionStorage.getItem("current_balance") ||
       sessionStorage.getItem("wallet_balance") ||
@@ -1368,4 +1571,4 @@
 </script>
 
 </body>
-</html>
+</html>s

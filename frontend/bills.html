@@ -45,16 +45,20 @@
       position:relative;
     }
 
+    .hidden{
+      display:none !important;
+    }
+
     .topbar{
       display:flex;
       align-items:center;
       justify-content:space-between;
       margin-bottom:14px;
       position:relative;
+      gap:10px;
     }
 
-    .leftTop,
-    .rightTop{
+    .leftTop,.rightTop{
       display:flex;
       align-items:center;
       gap:8px;
@@ -133,37 +137,6 @@
       line-height:1.5;
     }
 
-    .walletInfo{
-      margin-top:12px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      background:rgba(255,255,255,0.12);
-      border:1px solid rgba(255,255,255,0.18);
-      border-radius:18px;
-      padding:12px 14px;
-    }
-
-    .walletLabel{
-      font-size:12px;
-      opacity:0.85;
-      margin-bottom:4px;
-    }
-
-    .walletValue{
-      font-size:22px;
-      font-weight:900;
-      letter-spacing:.2px;
-    }
-
-    .walletMini{
-      font-size:11px;
-      opacity:0.85;
-      text-align:right;
-      line-height:1.5;
-    }
-
     .grid{
       margin-top:14px;
       display:grid;
@@ -182,10 +155,9 @@
       transition:.15s ease;
     }
 
-    .billType.active{
-      border:2px solid #111827;
+    .billType:hover{
+      transform:translateY(-2px);
       background:#f8fbff;
-      transform:translateY(-1px);
     }
 
     .billIcon{
@@ -313,6 +285,13 @@
       font-size:12px;
       color:#64748b;
       line-height:1.6;
+    }
+
+    .fieldLabel{
+      font-size:12px;
+      font-weight:800;
+      color:#374151;
+      margin:4px 0 6px 2px;
     }
 
     .input,.select,.btn{
@@ -541,146 +520,179 @@
 <body>
 
 <div class="app">
-  <div class="topbar">
-    <div class="leftTop">
-      <button class="backBtn" type="button" onclick="history.back()">← Back</button>
-    </div>
 
-    <div class="title">Bills</div>
-
-    <div class="rightTop">
-      <button class="homeBtn" type="button" onclick="goHome()">Home</button>
-      <button class="menuBtn" type="button" onclick="toggleMenu()">⋯</button>
-    </div>
-
-    <div class="menuBox" id="menuBox">
-      <button class="menuItem" type="button" onclick="openHistoryPanel()">📜 History</button>
-      <button class="menuItem" type="button" onclick="openHelpPanel()">❓ Help</button>
-    </div>
-  </div>
-
-  <div class="hero">
-    <div class="heroTitle">Pay Bills Instantly</div>
-    <div class="heroSub">
-      Electricity, water, gas, broadband, DTH, insurance, credit card and more.
-    </div>
-
-    <div class="walletInfo">
-      <div>
-        <div class="walletLabel">Available Wallet Balance</div>
-        <div class="walletValue" id="walletBalance">₹ 0.00</div>
+  <!-- PAGE 1 : BILL LIST -->
+  <div id="billListPage">
+    <div class="topbar">
+      <div class="leftTop">
+        <button class="backBtn" id="backBtnMain" type="button">← Back</button>
       </div>
-      <div class="walletMini">
-        Current User:<br>
-        <b id="currentUser">-</b>
+
+      <div class="title">Bills</div>
+
+      <div class="rightTop">
+        <button class="homeBtn" id="homeBtnMain" type="button">Home</button>
+        <button class="menuBtn" id="menuBtn" type="button">⋯</button>
+      </div>
+
+      <div class="menuBox" id="menuBox">
+        <button class="menuItem" id="historyMenuBtn" type="button">📜 History</button>
+        <button class="menuItem" id="helpMenuBtn" type="button">❓ Help</button>
       </div>
     </div>
+
+    <div class="hero">
+      <div class="heroTitle">Pay Bills Instantly</div>
+      <div class="heroSub">
+        Electricity, water, gas, broadband, DTH, insurance, credit card and more.
+        Card click pannina detail page open aagum.
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="billType" data-bill-type="Electricity">
+        <div class="billIcon">⚡</div>
+        <div class="billLabel">Electricity</div>
+      </div>
+
+      <div class="billType" data-bill-type="Water">
+        <div class="billIcon">💧</div>
+        <div class="billLabel">Water</div>
+      </div>
+
+      <div class="billType" data-bill-type="Gas">
+        <div class="billIcon">🔥</div>
+        <div class="billLabel">Gas</div>
+      </div>
+
+      <div class="billType" data-bill-type="Broadband">
+        <div class="billIcon">📶</div>
+        <div class="billLabel">Broadband</div>
+      </div>
+
+      <div class="billType" data-bill-type="DTH">
+        <div class="billIcon">📺</div>
+        <div class="billLabel">DTH</div>
+      </div>
+
+      <div class="billType" data-bill-type="Credit Card">
+        <div class="billIcon">💳</div>
+        <div class="billLabel">Credit Card</div>
+      </div>
+
+      <div class="billType" data-bill-type="Insurance">
+        <div class="billIcon">🛡️</div>
+        <div class="billLabel">Insurance</div>
+      </div>
+
+      <div class="billType" data-bill-type="Landline">
+        <div class="billIcon">☎️</div>
+        <div class="billLabel">Landline</div>
+      </div>
+
+      <div class="billType" data-bill-type="More Bills">
+        <div class="billIcon">➕</div>
+        <div class="billLabel">More</div>
+      </div>
+    </div>
   </div>
 
-  <div class="grid" id="billGrid">
-    <div class="billType active" onclick="selectBillType(this,'Electricity','⚡')">
-      <div class="billIcon">⚡</div>
-      <div class="billLabel">Electricity</div>
-    </div>
-    <div class="billType" onclick="selectBillType(this,'Water','💧')">
-      <div class="billIcon">💧</div>
-      <div class="billLabel">Water</div>
-    </div>
-    <div class="billType" onclick="selectBillType(this,'Gas','🔥')">
-      <div class="billIcon">🔥</div>
-      <div class="billLabel">Gas</div>
-    </div>
-    <div class="billType" onclick="selectBillType(this,'Broadband','📶')">
-      <div class="billIcon">📶</div>
-      <div class="billLabel">Broadband</div>
-    </div>
-    <div class="billType" onclick="selectBillType(this,'DTH','📺')">
-      <div class="billIcon">📺</div>
-      <div class="billLabel">DTH</div>
-    </div>
-    <div class="billType" onclick="selectBillType(this,'Credit Card','💳')">
-      <div class="billIcon">💳</div>
-      <div class="billLabel">Credit Card</div>
-    </div>
-    <div class="billType" onclick="selectBillType(this,'Insurance','🛡️')">
-      <div class="billIcon">🛡️</div>
-      <div class="billLabel">Insurance</div>
-    </div>
-    <div class="billType" onclick="selectBillType(this,'Landline','☎️')">
-      <div class="billIcon">☎️</div>
-      <div class="billLabel">Landline</div>
-    </div>
-    <div class="billType" onclick="selectBillType(this,'More Bills','➕')">
-      <div class="billIcon">➕</div>
-      <div class="billLabel">More</div>
-    </div>
-  </div>
+  <!-- PAGE 2 : BILL DETAILS -->
+  <div id="billDetailPage" class="hidden">
+    <div class="topbar">
+      <div class="leftTop">
+        <button class="backBtn" id="backToListBtn" type="button">← Back</button>
+      </div>
 
-  <div class="card">
-    <div class="cardTitle">Bill Payment Details</div>
+      <div class="title" id="detailPageTitle">Bill Details</div>
 
-    <div class="infoBox">
-      <div class="infoTop">
-        <div class="infoIcon" id="selectedIcon">⚡</div>
-        <div>
-          <div class="infoTitle" id="selectedTitle">Electricity Bill</div>
-          <div class="infoSub" id="selectedSub">Enter EB board, consumer number and bill amount to continue payment.</div>
+      <div class="rightTop">
+        <button class="homeBtn" id="homeBtnDetail" type="button">Home</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cardTitle">Bill Payment Details</div>
+
+      <div class="infoBox">
+        <div class="infoTop">
+          <div class="infoIcon" id="selectedIcon">⚡</div>
+          <div>
+            <div class="infoTitle" id="selectedTitle">Electricity Bill</div>
+            <div class="infoSub" id="selectedSub">Enter EB board, consumer number and bill amount to continue payment.</div>
+          </div>
+        </div>
+
+        <div class="chips" id="tipsWrap"></div>
+
+        <div class="selectedPreview">
+          <div class="previewHead">
+            <div class="previewType" id="previewType">Selected: Electricity</div>
+            <div class="previewBadge" id="previewBadge">Ready to Pay</div>
+          </div>
+          <div class="previewText" id="previewText"></div>
         </div>
       </div>
 
-      <div class="chips" id="tipsWrap">
-        <div class="chip">Fast Payment</div>
-        <div class="chip">Secure Checkout</div>
-        <div class="chip">Receipt Saved</div>
+      <div class="fieldLabel">Bill Type</div>
+      <input id="billType" class="input" type="text" readonly>
+
+      <div id="providerFieldWrap">
+        <div class="fieldLabel" id="providerLabel">Provider</div>
+        <input id="provider" class="input" type="text" placeholder="Provider name">
       </div>
 
-      <div class="selectedPreview">
-        <div class="previewHead">
-          <div class="previewType" id="previewType">Selected: Electricity</div>
-          <div class="previewBadge" id="previewBadge">Ready to Pay</div>
-        </div>
-        <div class="previewText" id="previewText">
-          Electricity bill pay panna provider, consumer number, amount fill pannunga. Payment success aana wallet balance la amount deduct aagum.
-        </div>
+      <div id="customerFieldWrap">
+        <div class="fieldLabel" id="customerLabel">Customer ID</div>
+        <input id="customerId" class="input" type="text" placeholder="Customer ID">
       </div>
+
+      <div id="extraFieldWrap" class="hidden">
+        <div class="fieldLabel" id="extraLabel">Extra Details</div>
+        <input id="extraField" class="input" type="text" placeholder="Enter extra details">
+      </div>
+
+      <div class="fieldLabel" id="amountLabel">Bill Amount</div>
+      <input id="billAmount" class="input" type="number" min="1" step="0.01" placeholder="Bill amount">
+
+      <div class="fieldLabel">Payment Method</div>
+      <select id="billMethod" class="select">
+        <option value="">Select payment method</option>
+        <option value="Wallet">Wallet</option>
+        <option value="UPI">UPI</option>
+        <option value="Debit Card">Debit Card</option>
+        <option value="Credit Card">Credit Card</option>
+        <option value="Net Banking">Net Banking</option>
+      </select>
+
+      <div class="fieldLabel" id="pinLabel">Enter Password / PIN</div>
+      <input id="billPassword" class="input" type="password" placeholder="Enter password / PIN">
+
+      <div class="error" id="billError">Please fill all fields correctly.</div>
+      <button class="btn" id="payBtn" type="button">Pay Bill</button>
     </div>
 
-    <input id="billType" class="input" type="text" value="Electricity" readonly>
-    <input id="provider" class="input" type="text" placeholder="Provider name (TNEB / EB Board)">
-    <input id="customerId" class="input" type="text" placeholder="Consumer Number / Service Number">
-    <input id="billAmount" class="input" type="number" min="1" step="0.01" placeholder="Bill amount">
-    <select id="billMethod" class="select">
-      <option value="">Select payment method</option>
-      <option value="Wallet">Wallet</option>
-      <option value="UPI">UPI</option>
-      <option value="Debit Card">Debit Card</option>
-      <option value="Credit Card">Credit Card</option>
-      <option value="Net Banking">Net Banking</option>
-    </select>
-    <input id="billPassword" class="input" type="password" placeholder="Enter password / PIN">
-    <div class="error" id="billError">Please fill all fields correctly.</div>
-    <button class="btn" id="payBtn" type="button" onclick="payBill()">Pay Bill</button>
-  </div>
+    <div class="success" id="billSuccess">
+      <div class="successTick">✓</div>
+      <div class="successTitle">Bill Paid Successfully</div>
+      <div class="successSub" id="billSuccessText">Your payment has been completed.</div>
 
-  <div class="success" id="billSuccess">
-    <div class="successTick">✓</div>
-    <div class="successTitle">Bill Paid Successfully</div>
-    <div class="successSub" id="billSuccessText">Your payment has been completed.</div>
-
-    <div class="receiptRow"><div class="muted">Bill Type</div><div class="value" id="rType">-</div></div>
-    <div class="receiptRow"><div class="muted">Provider</div><div class="value" id="rProvider">-</div></div>
-    <div class="receiptRow"><div class="muted">Customer ID</div><div class="value" id="rCustomer">-</div></div>
-    <div class="receiptRow"><div class="muted">Amount</div><div class="value" id="rAmount">-</div></div>
-    <div class="receiptRow"><div class="muted">Method</div><div class="value" id="rMethod">-</div></div>
-    <div class="receiptRow"><div class="muted">Txn ID</div><div class="value" id="rTxn">-</div></div>
-    <div class="receiptRow"><div class="muted">Time</div><div class="value" id="rTime">-</div></div>
-    <div class="receiptRow"><div class="muted">Balance After Payment</div><div class="value" id="rBalance">-</div></div>
+      <div class="receiptRow"><div class="muted">Bill Type</div><div class="value" id="rType">-</div></div>
+      <div class="receiptRow"><div class="muted" id="rProviderLabel">Provider</div><div class="value" id="rProvider">-</div></div>
+      <div class="receiptRow"><div class="muted" id="rCustomerLabel">Customer ID</div><div class="value" id="rCustomer">-</div></div>
+      <div class="receiptRow hidden" id="extraReceiptRow"><div class="muted" id="rExtraLabel">Extra</div><div class="value" id="rExtra">-</div></div>
+      <div class="receiptRow"><div class="muted">Amount</div><div class="value" id="rAmount">-</div></div>
+      <div class="receiptRow"><div class="muted">Method</div><div class="value" id="rMethod">-</div></div>
+      <div class="receiptRow"><div class="muted">Txn ID</div><div class="value" id="rTxn">-</div></div>
+      <div class="receiptRow"><div class="muted">Time</div><div class="value" id="rTime">-</div></div>
+      <div class="receiptRow"><div class="muted">Balance After Payment</div><div class="value" id="rBalance">-</div></div>
+    </div>
   </div>
 
   <div class="panel" id="historyPanel">
     <div class="panelHead">
       <div class="panelTitle">Bill Receipt History</div>
-      <button class="closeBtn" type="button" onclick="closeHistoryPanel()">✕</button>
+      <button class="closeBtn" id="closeHistoryBtn" type="button">✕</button>
     </div>
     <div id="historyList"></div>
   </div>
@@ -688,27 +700,22 @@
   <div class="panel" id="helpPanel">
     <div class="panelHead">
       <div class="panelTitle">Help</div>
-      <button class="closeBtn" type="button" onclick="closeHelpPanel()">✕</button>
+      <button class="closeBtn" id="closeHelpBtn" type="button">✕</button>
     </div>
 
     <div class="helpCard">
       <div class="helpQ">How to pay a bill?</div>
-      <div class="helpA">Bill type select pannunga, provider name, customer ID, amount and payment method enter pannunga. Password / PIN kuduthu Pay Bill press pannunga.</div>
+      <div class="helpA">Main screen la bill card click pannunga. Adutha detail page open aagum. Anga details fill panni Pay Bill press pannunga.</div>
     </div>
 
     <div class="helpCard">
       <div class="helpQ">Receipt save aguma?</div>
-      <div class="helpA">Yes. Neenga pay panna odane receipt history la save agum. Top la iruka ⋯ button use panni History open pannalaam.</div>
+      <div class="helpA">Yes. Payment success aana odane history la save aagum.</div>
     </div>
 
     <div class="helpCard">
       <div class="helpQ">Wrong password vandha?</div>
       <div class="helpA">Session la store panna password match aaganum. Wrong password / PIN kudutha payment proceed aagathu.</div>
-    </div>
-
-    <div class="helpCard">
-      <div class="helpQ">Balance deduct aguma?</div>
-      <div class="helpA">Yes. Payment success aana amount wallet balance la irundhu deduct aagum. Insufficient balance na transaction block aagum.</div>
     </div>
   </div>
 </div>
@@ -717,100 +724,167 @@
 (function () {
   "use strict";
 
-  if (!sessionStorage.getItem("user")) {
-    window.location.href = "index.html";
-    return;
+  function $(id) {
+    return document.getElementById(id);
   }
 
+  const billListPage = $("billListPage");
+  const billDetailPage = $("billDetailPage");
+  const historyPanel = $("historyPanel");
+  const helpPanel = $("helpPanel");
+  const menuBox = $("menuBox");
+  const payBtn = $("payBtn");
+
   let isPaying = false;
+  let currentMeta = null;
+  let currentType = "";
 
   const billMeta = {
     "Electricity": {
       icon: "⚡",
       title: "Electricity Bill",
-      sub: "Enter EB board, consumer number and bill amount to continue payment.",
-      providerPlaceholder: "Provider name (TNEB / EB Board)",
-      customerPlaceholder: "Consumer Number / Service Number",
+      sub: "Enter electricity board, service details and amount to continue payment.",
+      providerLabel: "Electricity Board",
+      providerPlaceholder: "Enter EB board name (TNEB / TANGEDCO)",
+      customerLabel: "Consumer Number",
+      customerPlaceholder: "Enter consumer / service number",
+      extraLabel: "Section / Area",
+      extraPlaceholder: "Enter section / area code",
+      extraVisible: true,
+      amountLabel: "Electricity Bill Amount",
+      pinLabel: "Enter Password / PIN",
       tips: ["EB Payment", "Instant Receipt", "Safe Payment"],
-      preview: "Electricity bill pay panna provider, consumer number, amount fill pannunga. Payment success aana wallet balance la amount deduct aagum."
+      preview: "Electricity bill ku board name, consumer number, area details fill pannunga."
     },
     "Water": {
       icon: "💧",
       title: "Water Bill",
-      sub: "Municipal water board or local water service details enter pannunga.",
-      providerPlaceholder: "Provider name (City Water / Metro Water)",
-      customerPlaceholder: "Connection ID / Consumer Number",
+      sub: "Enter water board details and connection number to pay quickly.",
+      providerLabel: "Water Board",
+      providerPlaceholder: "Enter water board / metro water name",
+      customerLabel: "Connection ID",
+      customerPlaceholder: "Enter connection / consumer ID",
+      extraLabel: "Area / Zone",
+      extraPlaceholder: "Enter zone / region",
+      extraVisible: true,
+      amountLabel: "Water Bill Amount",
+      pinLabel: "Enter Password / PIN",
       tips: ["Water Board", "Quick Payment", "Receipt Saved"],
-      preview: "Water bill pay panna city water board details kudunga. Correct customer ID use pannina receipt history la save aagum."
+      preview: "Water bill ku board name, connection ID, zone details fill pannunga."
     },
     "Gas": {
       icon: "🔥",
       title: "Gas Bill",
-      sub: "Gas agency or gas connection details use panni payment pannalaam.",
-      providerPlaceholder: "Provider name (Indane / HP Gas / Bharat Gas)",
-      customerPlaceholder: "Consumer ID / LPG ID",
+      sub: "Enter gas agency and LPG consumer information to continue.",
+      providerLabel: "Gas Agency",
+      providerPlaceholder: "Enter gas agency (Indane / HP Gas / Bharat Gas)",
+      customerLabel: "LPG Consumer ID",
+      customerPlaceholder: "Enter LPG ID / consumer number",
+      extraLabel: "Registered Mobile",
+      extraPlaceholder: "Enter registered mobile number",
+      extraVisible: true,
+      amountLabel: "Gas Bill Amount",
+      pinLabel: "Enter Password / PIN",
       tips: ["Gas Agency", "Fast Checkout", "Secure Flow"],
-      preview: "Gas bill ku gas agency name, LPG ID enter pannunga. Success aana wallet la irundhu amount minus aagum."
+      preview: "Gas bill ku agency, LPG ID, mobile details fill pannunga."
     },
     "Broadband": {
       icon: "📶",
       title: "Broadband Bill",
-      sub: "Internet broadband account details use panni recharge or bill pay pannunga.",
-      providerPlaceholder: "Provider name (Airtel / JioFiber / ACT)",
-      customerPlaceholder: "Account ID / User ID",
+      sub: "Enter internet provider and account details to pay broadband bill.",
+      providerLabel: "Broadband Provider",
+      providerPlaceholder: "Enter provider (Airtel / JioFiber / ACT)",
+      customerLabel: "Account ID",
+      customerPlaceholder: "Enter account ID / user ID",
+      extraLabel: "Plan Name",
+      extraPlaceholder: "Enter current plan",
+      extraVisible: true,
+      amountLabel: "Broadband Bill Amount",
+      pinLabel: "Enter Password / PIN",
       tips: ["Internet Bill", "Online Payment", "Easy History"],
-      preview: "Broadband bill pay panna account ID and amount enter pannunga. Receipt instant ah generate aagum."
+      preview: "Broadband ku provider, account ID, plan details fill pannunga."
     },
     "DTH": {
       icon: "📺",
       title: "DTH Recharge",
-      sub: "DTH operator and subscriber ID enter panni TV recharge pannunga.",
-      providerPlaceholder: "Provider name (Tata Play / Sun Direct / Dish TV)",
-      customerPlaceholder: "Subscriber ID / VC Number",
+      sub: "Enter operator and subscriber details to continue TV recharge.",
+      providerLabel: "DTH Operator",
+      providerPlaceholder: "Enter operator (Tata Play / Sun Direct)",
+      customerLabel: "Subscriber ID",
+      customerPlaceholder: "Enter subscriber ID / VC number",
+      extraLabel: "Package / Plan",
+      extraPlaceholder: "Enter package name",
+      extraVisible: true,
+      amountLabel: "Recharge Amount",
+      pinLabel: "Enter Password / PIN",
       tips: ["TV Recharge", "Direct Pay", "Receipt Stored"],
-      preview: "DTH recharge ku operator and subscriber ID use pannunga. Payment apram remaining balance update aagum."
+      preview: "DTH ku operator, subscriber ID, plan details fill pannunga."
     },
     "Credit Card": {
       icon: "💳",
       title: "Credit Card Bill",
-      sub: "Bank credit card details use panni due payment complete pannunga.",
-      providerPlaceholder: "Bank name (HDFC / SBI / ICICI)",
-      customerPlaceholder: "Last 4 digits / Card Ref Number",
+      sub: "Enter bank and card reference details to pay your credit card bill.",
+      providerLabel: "Bank Name",
+      providerPlaceholder: "Enter bank name (HDFC / SBI / ICICI)",
+      customerLabel: "Card Number",
+      customerPlaceholder: "Enter card number / last 4 digits",
+      extraLabel: "Card Holder Name",
+      extraPlaceholder: "Enter card holder name",
+      extraVisible: true,
+      amountLabel: "Card Bill Amount",
+      pinLabel: "Enter Password / PIN",
       tips: ["Card Bill", "Safe Payment", "Track Receipts"],
-      preview: "Credit card due pay panna bank name and card reference enter pannunga. Amount wallet balance la irundhu deduct aagum."
+      preview: "Credit card bill ku bank, card number, card holder name fill pannunga."
     },
     "Insurance": {
       icon: "🛡️",
       title: "Insurance Premium",
-      sub: "Insurance premium amount pay panna policy details enter pannunga.",
-      providerPlaceholder: "Provider name (LIC / Star Health / ICICI Lombard)",
-      customerPlaceholder: "Policy Number / Customer ID",
+      sub: "Enter insurance company and policy details for premium payment.",
+      providerLabel: "Insurance Company",
+      providerPlaceholder: "Enter insurance provider (LIC / Star Health)",
+      customerLabel: "Policy Number",
+      customerPlaceholder: "Enter policy number / customer ID",
+      extraLabel: "Policy Holder Name",
+      extraPlaceholder: "Enter policy holder name",
+      extraVisible: true,
+      amountLabel: "Premium Amount",
+      pinLabel: "Enter Password / PIN",
       tips: ["Policy Premium", "Protected Payment", "Saved Record"],
-      preview: "Insurance premium ku policy number and provider correct ah fill pannunga. Successful payment history la save aagum."
+      preview: "Insurance premium ku company, policy number, holder details fill pannunga."
     },
     "Landline": {
       icon: "☎️",
       title: "Landline Bill",
-      sub: "Landline connection bill settle panna operator details kudunga.",
-      providerPlaceholder: "Provider name (BSNL / Airtel)",
-      customerPlaceholder: "Phone Number / Account Number",
+      sub: "Enter landline operator and phone/account number to pay your bill.",
+      providerLabel: "Landline Provider",
+      providerPlaceholder: "Enter provider (BSNL / Airtel)",
+      customerLabel: "Phone Number",
+      customerPlaceholder: "Enter landline / account number",
+      extraLabel: "STD Code",
+      extraPlaceholder: "Enter STD code",
+      extraVisible: true,
+      amountLabel: "Landline Bill Amount",
+      pinLabel: "Enter Password / PIN",
       tips: ["Telephone Bill", "Quick Pay", "Receipt Backup"],
-      preview: "Landline bill ku operator and account number use pannunga. Success apram wallet amount minus aagum."
+      preview: "Landline bill ku provider, phone number, STD code fill pannunga."
     },
     "More Bills": {
       icon: "➕",
       title: "More Bills",
-      sub: "Any other bill type ku provider and customer details add panni pay pannunga.",
-      providerPlaceholder: "Provider / Company name",
-      customerPlaceholder: "Reference ID / Customer ID",
+      sub: "Use custom bill entry for any other provider and reference details.",
+      providerLabel: "Company / Provider",
+      providerPlaceholder: "Enter company / provider name",
+      customerLabel: "Reference ID",
+      customerPlaceholder: "Enter reference / customer ID",
+      extraLabel: "Bill Description",
+      extraPlaceholder: "Enter bill description",
+      extraVisible: true,
+      amountLabel: "Amount",
+      pinLabel: "Enter Password / PIN",
       tips: ["Multi Bills", "Flexible Entry", "Secure Receipt"],
-      preview: "Other bill types kum same payment flow. Provider, customer ID, amount, method fill pannina receipt save aagum."
+      preview: "Other bills ku provider, reference ID, description fill pannunga."
     }
   };
-
-  function $(id) {
-    return document.getElementById(id);
-  }
 
   function escapeHtml(text) {
     return String(text == null ? "" : text)
@@ -846,22 +920,6 @@
 
   function getBalanceAmount() {
     const user = getLoggedUser();
-    let amount = 0;
-
-    try {
-      if (typeof window.getBalanceAmount === "function" && window.getBalanceAmount !== getBalanceAmount) {
-        amount = sanitizeAmount(window.getBalanceAmount());
-        return amount;
-      }
-    } catch (e) {}
-
-    try {
-      if (typeof window.getStoredBalance === "function") {
-        amount = sanitizeAmount(window.getStoredBalance());
-        return amount;
-      }
-    } catch (e) {}
-
     const possibleValues = [
       localStorage.getItem(getUserBalanceKey(user)),
       sessionStorage.getItem("balance"),
@@ -871,83 +929,109 @@
     ];
 
     for (let i = 0; i < possibleValues.length; i++) {
-      const num = sanitizeAmount(possibleValues[i]);
-      if (!isNaN(num)) {
-        amount = num;
-        if (String(possibleValues[i] || "").trim() !== "") break;
+      const raw = possibleValues[i];
+      if (String(raw || "").trim() !== "") {
+        return sanitizeAmount(raw);
       }
     }
 
-    return Number(amount.toFixed(2));
+    return 0;
   }
 
   function saveBalanceAmount(value) {
     const user = getLoggedUser();
     const finalAmount = Number(sanitizeAmount(value).toFixed(2));
 
-    try {
-      if (typeof window.saveBalanceAmount === "function" && window.saveBalanceAmount !== saveBalanceAmount) {
-        window.saveBalanceAmount(finalAmount);
-      }
-    } catch (e) {}
-
-    try {
-      if (typeof window.setStoredBalance === "function") {
-        window.setStoredBalance(finalAmount);
-      }
-    } catch (e) {}
-
-    localStorage.setItem(getUserBalanceKey(user), String(finalAmount.toFixed(2)));
-    localStorage.setItem("balance", String(finalAmount.toFixed(2)));
-    localStorage.setItem("walletBalance", String(finalAmount.toFixed(2)));
-    sessionStorage.setItem("balance", String(finalAmount.toFixed(2)));
-    sessionStorage.setItem("walletBalance", String(finalAmount.toFixed(2)));
-  }
-
-  function renderBalance() {
-    const balance = getBalanceAmount();
-    if ($("walletBalance")) $("walletBalance").textContent = "₹ " + balance.toFixed(2);
-    if ($("currentUser")) $("currentUser").textContent = getLoggedUser() || "-";
+    localStorage.setItem(getUserBalanceKey(user), finalAmount.toFixed(2));
+    localStorage.setItem("balance", finalAmount.toFixed(2));
+    localStorage.setItem("walletBalance", finalAmount.toFixed(2));
+    sessionStorage.setItem("balance", finalAmount.toFixed(2));
+    sessionStorage.setItem("walletBalance", finalAmount.toFixed(2));
   }
 
   function toggleMenu() {
-    const box = $("menuBox");
-    if (!box) return;
-    box.style.display = box.style.display === "block" ? "none" : "block";
+    if (!menuBox) return;
+    menuBox.style.display = menuBox.style.display === "block" ? "none" : "block";
   }
 
   function closeMenu() {
-    const box = $("menuBox");
-    if (box) box.style.display = "none";
+    if (menuBox) menuBox.style.display = "none";
   }
 
-  function selectBillType(el, type, icon) {
-    document.querySelectorAll(".billType").forEach(function (item) {
-      item.classList.remove("active");
-    });
-
-    if (el) el.classList.add("active");
-
-    if ($("billType")) $("billType").value = type;
-    updateBillInfo(type, icon);
+  function clearForm() {
+    $("provider").value = "";
+    $("customerId").value = "";
+    $("extraField").value = "";
+    $("billAmount").value = "";
+    $("billMethod").value = "";
+    $("billPassword").value = "";
   }
 
-  function updateBillInfo(type, icon) {
+  function hidePanels() {
+    historyPanel.style.display = "none";
+    helpPanel.style.display = "none";
+  }
+
+  function openBillDetails(type) {
+    currentType = type;
+    clearForm();
+    hideError();
+    hidePanels();
+
+    $("billSuccess").style.display = "none";
+    billListPage.classList.add("hidden");
+    billDetailPage.classList.remove("hidden");
+
+    updateBillInfo(type);
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function backToBillList() {
+    billDetailPage.classList.add("hidden");
+    billListPage.classList.remove("hidden");
+    $("billSuccess").style.display = "none";
+    hideError();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function updateBillInfo(type) {
     const meta = billMeta[type] || billMeta["More Bills"];
+    currentMeta = meta;
 
-    if ($("selectedIcon")) $("selectedIcon").textContent = icon || meta.icon || "➕";
-    if ($("selectedTitle")) $("selectedTitle").textContent = meta.title;
-    if ($("selectedSub")) $("selectedSub").textContent = meta.sub;
-    if ($("provider")) $("provider").placeholder = meta.providerPlaceholder;
-    if ($("customerId")) $("customerId").placeholder = meta.customerPlaceholder;
-    if ($("previewType")) $("previewType").textContent = "Selected: " + type;
-    if ($("previewText")) $("previewText").textContent = meta.preview || "";
-    if ($("previewBadge")) $("previewBadge").textContent = "Ready to Pay";
+    $("detailPageTitle").textContent = type;
+    $("selectedIcon").textContent = meta.icon || "➕";
+    $("selectedTitle").textContent = meta.title || type;
+    $("selectedSub").textContent = meta.sub || "";
+    $("previewType").textContent = "Selected: " + type;
+    $("previewText").textContent = meta.preview || "";
+    $("previewBadge").textContent = "Ready to Pay";
+    $("billType").value = type;
+
+    $("providerLabel").textContent = meta.providerLabel || "Provider";
+    $("provider").placeholder = meta.providerPlaceholder || "Enter provider";
+
+    $("customerLabel").textContent = meta.customerLabel || "Customer ID";
+    $("customerId").placeholder = meta.customerPlaceholder || "Enter customer ID";
+
+    $("amountLabel").textContent = meta.amountLabel || "Amount";
+    $("billAmount").placeholder = meta.amountLabel || "Amount";
+
+    $("pinLabel").textContent = meta.pinLabel || "Enter Password / PIN";
+    $("billPassword").placeholder = meta.pinLabel || "Enter Password / PIN";
+
+    $("extraLabel").textContent = meta.extraLabel || "Extra Details";
+    $("extraField").placeholder = meta.extraPlaceholder || "Enter extra details";
+
+    if (meta.extraVisible) {
+      $("extraFieldWrap").classList.remove("hidden");
+    } else {
+      $("extraFieldWrap").classList.add("hidden");
+    }
 
     const tipsWrap = $("tipsWrap");
-    if (!tipsWrap) return;
-
     tipsWrap.innerHTML = "";
+
     (meta.tips || []).forEach(function (tip) {
       const div = document.createElement("div");
       div.className = "chip";
@@ -1009,10 +1093,10 @@
   function addToMainHistory(item) {
     try {
       const raw = localStorage.getItem(getTransactionHistoryKey());
-      const history = JSON.parse(raw || "[]");
-      const safeHistory = Array.isArray(history) ? history : [];
+      const parsed = JSON.parse(raw || "[]");
+      const history = Array.isArray(parsed) ? parsed : [];
 
-      safeHistory.unshift({
+      history.unshift({
         type: "Bill Payment",
         title: item.type + " Bill",
         subtitle: item.provider + " • " + item.customerId,
@@ -1026,7 +1110,7 @@
         category: "bill"
       });
 
-      localStorage.setItem(getTransactionHistoryKey(), JSON.stringify(safeHistory));
+      localStorage.setItem(getTransactionHistoryKey(), JSON.stringify(history));
     } catch (e) {
       console.error("Main history save error:", e);
     }
@@ -1034,52 +1118,47 @@
 
   function showError(msg) {
     const error = $("billError");
-    if (!error) return;
     error.textContent = msg;
     error.style.display = "block";
   }
 
   function hideError() {
     const error = $("billError");
-    if (!error) return;
     error.textContent = "";
     error.style.display = "none";
   }
 
-  function clearForm() {
-    if ($("provider")) $("provider").value = "";
-    if ($("customerId")) $("customerId").value = "";
-    if ($("billAmount")) $("billAmount").value = "";
-    if ($("billMethod")) $("billMethod").value = "";
-    if ($("billPassword")) $("billPassword").value = "";
-  }
-
   function setPayingState(state) {
     isPaying = !!state;
-    const btn = $("payBtn");
-    if (!btn) return;
-    btn.disabled = isPaying;
-    btn.textContent = isPaying ? "Processing..." : "Pay Bill";
-    if ($("previewBadge")) {
-      $("previewBadge").textContent = isPaying ? "Processing..." : "Ready to Pay";
-    }
+    payBtn.disabled = isPaying;
+    payBtn.textContent = isPaying ? "Processing..." : "Pay Bill";
+    $("previewBadge").textContent = isPaying ? "Processing..." : "Ready to Pay";
   }
 
   function payBill() {
     if (isPaying) return;
 
     try {
-      const type = String(($("billType") && $("billType").value) || "").trim();
-      const provider = String(($("provider") && $("provider").value) || "").trim();
-      const customerId = String(($("customerId") && $("customerId").value) || "").trim();
-      const amountRaw = String(($("billAmount") && $("billAmount").value) || "").trim();
+      const type = String($("billType").value || "").trim();
+      const provider = String($("provider").value || "").trim();
+      const customerId = String($("customerId").value || "").trim();
+      const extraField = String($("extraField").value || "").trim();
+      const amountRaw = String($("billAmount").value || "").trim();
       const amount = sanitizeAmount(amountRaw);
-      const method = String(($("billMethod") && $("billMethod").value) || "").trim();
-      const pass = String(($("billPassword") && $("billPassword").value) || "").trim();
+      const method = String($("billMethod").value || "").trim();
+      const pass = String($("billPassword").value || "").trim();
+
+      const meta = currentMeta || billMeta[type] || billMeta["More Bills"];
+      const extraRequired = !!meta.extraVisible;
 
       hideError();
 
-      if (!type || !provider || !customerId || !amountRaw || isNaN(amount) || amount <= 0 || !method || !pass) {
+      if (!type || !provider || !customerId || !amountRaw || amount <= 0 || !method || !pass) {
+        showError("Please fill all fields correctly.");
+        return;
+      }
+
+      if (extraRequired && !extraField) {
         showError("Please fill all fields correctly.");
         return;
       }
@@ -1106,7 +1185,11 @@
         username: getLoggedUser(),
         type: type,
         provider: provider,
+        providerLabel: meta.providerLabel || "Provider",
         customerId: customerId,
+        customerLabel: meta.customerLabel || "Customer ID",
+        extraField: extraField,
+        extraLabel: meta.extraLabel || "Extra Details",
         amount: Number(amount.toFixed(2)),
         method: method,
         txn: txn,
@@ -1117,18 +1200,32 @@
       saveBalanceAmount(newBalance);
       addBillToHistory(receipt);
       addToMainHistory(receipt);
-      renderBalance();
 
-      if ($("billSuccess")) $("billSuccess").style.display = "block";
-      if ($("billSuccessText")) $("billSuccessText").textContent = "₹ " + amount.toFixed(2) + " paid for " + type + ". Wallet updated successfully.";
-      if ($("rType")) $("rType").textContent = type;
-      if ($("rProvider")) $("rProvider").textContent = provider;
-      if ($("rCustomer")) $("rCustomer").textContent = customerId;
-      if ($("rAmount")) $("rAmount").textContent = "₹ " + amount.toFixed(2);
-      if ($("rMethod")) $("rMethod").textContent = method;
-      if ($("rTxn")) $("rTxn").textContent = txn;
-      if ($("rTime")) $("rTime").textContent = time;
-      if ($("rBalance")) $("rBalance").textContent = "₹ " + newBalance.toFixed(2);
+      $("billSuccess").style.display = "block";
+      $("billSuccessText").textContent =
+        "₹ " + amount.toFixed(2) + " paid for " + type + ". Wallet updated successfully.";
+
+      $("rType").textContent = type;
+      $("rProviderLabel").textContent = receipt.providerLabel;
+      $("rProvider").textContent = provider;
+      $("rCustomerLabel").textContent = receipt.customerLabel;
+      $("rCustomer").textContent = customerId;
+
+      if (receipt.extraField) {
+        $("extraReceiptRow").classList.remove("hidden");
+        $("rExtraLabel").textContent = receipt.extraLabel;
+        $("rExtra").textContent = receipt.extraField;
+      } else {
+        $("extraReceiptRow").classList.add("hidden");
+        $("rExtraLabel").textContent = "Extra";
+        $("rExtra").textContent = "-";
+      }
+
+      $("rAmount").textContent = "₹ " + amount.toFixed(2);
+      $("rMethod").textContent = method;
+      $("rTxn").textContent = txn;
+      $("rTime").textContent = time;
+      $("rBalance").textContent = "₹ " + newBalance.toFixed(2);
 
       renderBillsHistory();
       clearForm();
@@ -1147,41 +1244,39 @@
 
   function openHistoryPanel() {
     closeMenu();
-    if ($("helpPanel")) $("helpPanel").style.display = "none";
-    if ($("historyPanel")) $("historyPanel").style.display = "block";
+    billDetailPage.classList.add("hidden");
+    billListPage.classList.remove("hidden");
+    helpPanel.style.display = "none";
+    historyPanel.style.display = "block";
     renderBillsHistory();
 
     setTimeout(function () {
-      if ($("historyPanel")) {
-        $("historyPanel").scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+      historyPanel.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
   }
 
   function closeHistoryPanel() {
-    if ($("historyPanel")) $("historyPanel").style.display = "none";
+    historyPanel.style.display = "none";
   }
 
   function openHelpPanel() {
     closeMenu();
-    if ($("historyPanel")) $("historyPanel").style.display = "none";
-    if ($("helpPanel")) $("helpPanel").style.display = "block";
+    billDetailPage.classList.add("hidden");
+    billListPage.classList.remove("hidden");
+    historyPanel.style.display = "none";
+    helpPanel.style.display = "block";
 
     setTimeout(function () {
-      if ($("helpPanel")) {
-        $("helpPanel").scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+      helpPanel.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
   }
 
   function closeHelpPanel() {
-    if ($("helpPanel")) $("helpPanel").style.display = "none";
+    helpPanel.style.display = "none";
   }
 
   function renderBillsHistory() {
     const list = $("historyList");
-    if (!list) return;
-
     const history = getBillsHistory();
 
     if (!history.length) {
@@ -1190,6 +1285,15 @@
     }
 
     list.innerHTML = history.map(function (item) {
+      const extraHtml = item.extraField
+        ? `
+          <div class="metaBox">
+            <div class="metaLabel">${escapeHtml(item.extraLabel || "Extra")}</div>
+            <div class="metaValue">${escapeHtml(item.extraField)}</div>
+          </div>
+        `
+        : "";
+
       return `
         <div class="historyItem">
           <div class="historyTop">
@@ -1202,9 +1306,14 @@
 
           <div class="historyMeta">
             <div class="metaBox">
-              <div class="metaLabel">Customer ID</div>
+              <div class="metaLabel">${escapeHtml(item.providerLabel || "Provider")}</div>
+              <div class="metaValue">${escapeHtml(item.provider)}</div>
+            </div>
+            <div class="metaBox">
+              <div class="metaLabel">${escapeHtml(item.customerLabel || "Customer ID")}</div>
               <div class="metaValue">${escapeHtml(item.customerId)}</div>
             </div>
+            ${extraHtml}
             <div class="metaBox">
               <div class="metaLabel">Method</div>
               <div class="metaValue">${escapeHtml(item.method)}</div>
@@ -1223,29 +1332,51 @@
     }).join("");
   }
 
-  document.addEventListener("click", function (e) {
-    const menuBox = $("menuBox");
-    const menuBtn = document.querySelector(".menuBtn");
+  function bindEvents() {
+    document.querySelectorAll(".billType").forEach(function(card) {
+      card.addEventListener("click", function() {
+        const type = card.getAttribute("data-bill-type");
+        openBillDetails(type);
+      });
+    });
 
-    if (!menuBox || !menuBtn) return;
+    $("backBtnMain").addEventListener("click", function() {
+      history.back();
+    });
 
-    if (!menuBox.contains(e.target) && !menuBtn.contains(e.target)) {
-      menuBox.style.display = "none";
+    $("homeBtnMain").addEventListener("click", goHome);
+    $("homeBtnDetail").addEventListener("click", goHome);
+
+    $("menuBtn").addEventListener("click", function(e) {
+      e.stopPropagation();
+      toggleMenu();
+    });
+
+    $("historyMenuBtn").addEventListener("click", openHistoryPanel);
+    $("helpMenuBtn").addEventListener("click", openHelpPanel);
+    $("closeHistoryBtn").addEventListener("click", closeHistoryPanel);
+    $("closeHelpBtn").addEventListener("click", closeHelpPanel);
+    $("backToListBtn").addEventListener("click", backToBillList);
+    $("payBtn").addEventListener("click", payBill);
+
+    document.addEventListener("click", function(e) {
+      if (!menuBox.contains(e.target) && e.target !== $("menuBtn")) {
+        menuBox.style.display = "none";
+      }
+    });
+  }
+
+  function init() {
+    if (!sessionStorage.getItem("user")) {
+      window.location.href = "index.html";
+      return;
     }
-  });
 
-  window.goHome = goHome;
-  window.toggleMenu = toggleMenu;
-  window.selectBillType = selectBillType;
-  window.payBill = payBill;
-  window.openHistoryPanel = openHistoryPanel;
-  window.closeHistoryPanel = closeHistoryPanel;
-  window.openHelpPanel = openHelpPanel;
-  window.closeHelpPanel = closeHelpPanel;
+    bindEvents();
+    renderBillsHistory();
+  }
 
-  updateBillInfo("Electricity", "⚡");
-  renderBalance();
-  renderBillsHistory();
+  init();
 })();
 </script>
 
