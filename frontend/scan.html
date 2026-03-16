@@ -1194,7 +1194,7 @@
           const pa = url.searchParams.get("pa");
           const pn = url.searchParams.get("pn");
           return pa || pn || t;
-        } catch {
+        } catch (e){
           return t;
         }
       }

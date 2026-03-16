@@ -660,7 +660,7 @@
 <div class="modalOverlay" id="balanceModal">
   <div class="modalBox">
     <div class="modalTitle">Secure Balance</div>
-    <div class="modalSub">Password enter pannina apram than amount show agum.</div>
+    <div class="modalSub">The amount will be shown only after entering the password.</div>
 
     <input
       id="balancePasswordInput"
@@ -690,7 +690,7 @@
 
     <div id="quickPayFormWrap">
       <div class="modalTitle">Quick Pay</div>
-      <div class="modalSub">User ah select pannita. Amount, PIN, bank, method select panni pay pannalaam.</div>
+      <div class="modalSub">The user is selected. Enter the amount, PIN, bank, and method to make the payment.</div>
 
       <div class="payUserCard">
         <div class="payAvatar" id="quickPayAvatar">A</div>
@@ -1047,7 +1047,7 @@ function validateQuickPayForm() {
   if (!method) return "Select payment method";
   if (!currentUser) return "Login required";
   if (String(currentUser).toLowerCase() === String(currentQuickReceiver).toLowerCase()) {
-    return "Own account ku pay panna mudiyadhu";
+    return "You cannot pay your own account";
   }
 
   const correctPin = String(getDashboardPassword()).trim();
