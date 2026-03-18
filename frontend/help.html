@@ -1,350 +1,1226 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>❓ Help & Support - ST PAY</title>
+  <title>Help & Support - ST PAY</title>
   <script src="script.js"></script>
 
   <style>
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    :root{
+      --bg:#f6f8fc;
+      --bg2:#eef3ff;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --soft:#f3f4f6;
+      --black:#111827;
+      --blue:#2563eb;
+      --blueSoft:#dbeafe;
+      --green:#16a34a;
+      --greenSoft:#dcfce7;
+      --amber:#d97706;
+      --amberSoft:#fef3c7;
+      --red:#dc2626;
+      --redSoft:#fee2e2;
+      --shadow:0 18px 45px rgba(15,23,42,0.08);
+      --radius:22px;
+    }
+
     body{
       margin:0;
       font-family:'Segoe UI',sans-serif;
       min-height:100vh;
-      background:#ffffff;
-      color:#111;
+      background:
+        radial-gradient(circle at top right, rgba(37,99,235,0.08), transparent 25%),
+        linear-gradient(180deg,var(--bg2),var(--bg));
+      color:var(--text);
       display:flex;
       justify-content:center;
       padding:14px;
-      box-sizing:border-box;
     }
-    .app{ width:420px; max-width:100%; }
+
+    .app{
+      width:420px;
+      max-width:100%;
+    }
 
     .top{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      padding:8px 0 12px 0;
+      margin-bottom:14px;
       position:sticky;
       top:0;
-      background:#fff;
-      z-index:5;
+      z-index:50;
+      padding:10px 12px;
+      background:rgba(246,248,252,0.92);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      border:1px solid rgba(229,231,235,0.85);
+      border-radius:18px;
+      box-shadow:0 10px 28px rgba(15,23,42,.06);
     }
-    .title{ font-weight:900; letter-spacing:0.4px; }
+
+    .titleWrap{
+      min-width:0;
+    }
+
+    .title{
+      font-weight:900;
+      font-size:20px;
+      letter-spacing:.3px;
+    }
+
+    .sub{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:2px;
+    }
+
+    .btn,.btnSoft,.btnDanger{
+      border:none;
+      cursor:pointer;
+      border-radius:14px;
+      font-weight:800;
+      padding:11px 14px;
+      transition:.18s ease;
+      font-family:inherit;
+    }
 
     .btn{
-      border:none;
-      background:#000;
+      background:var(--black);
       color:#fff;
-      font-weight:800;
-      border-radius:12px;
-      padding:10px 12px;
-      cursor:pointer;
-    }
-    .btnGray{
-      background:#f2f2f2;
-      color:#111;
-      border:1px solid #e5e5e5;
-      font-weight:800;
-      border-radius:12px;
-      padding:10px 12px;
-      cursor:pointer;
+      box-shadow:0 10px 24px rgba(0,0,0,.14);
     }
 
-    .card{
-      background:#f4f4f4;
-      border:1px solid #e7e7e7;
-      border-radius:18px;
-      padding:14px;
-      box-shadow:0 10px 24px rgba(0,0,0,0.08);
-      margin-top:10px;
+    .btn:hover{ transform:translateY(-1px); }
+
+    .btnSoft{
+      background:#fff;
+      color:var(--text);
+      border:1px solid var(--line);
     }
 
-    .search{
+    .btnDanger{
+      background:var(--red);
+      color:#fff;
+    }
+
+    .hero{
+      background:linear-gradient(135deg,#111827,#2563eb);
+      color:#fff;
+      border-radius:28px;
+      padding:18px;
+      box-shadow:0 20px 45px rgba(37,99,235,.18);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .hero::before,
+    .hero::after{
+      content:"";
+      position:absolute;
+      border-radius:50%;
+      background:rgba(255,255,255,.08);
+    }
+
+    .hero::before{
+      width:120px;
+      height:120px;
+      right:-25px;
+      top:-25px;
+    }
+
+    .hero::after{
+      width:80px;
+      height:80px;
+      left:-20px;
+      bottom:-20px;
+    }
+
+    .heroTop{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+      position:relative;
+      z-index:1;
+    }
+
+    .heroTitle{
+      font-size:22px;
+      font-weight:900;
+      line-height:1.2;
+    }
+
+    .heroDesc{
+      margin-top:6px;
+      font-size:13px;
+      opacity:.9;
+      line-height:1.5;
+      max-width:260px;
+    }
+
+    .badge{
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.18);
+      color:#fff;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:12px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .searchBox{
+      margin-top:14px;
       display:flex;
       gap:10px;
-      margin-top:10px;
+      position:relative;
+      z-index:1;
     }
-    .search input{
+
+    .searchInput{
       flex:1;
-      padding:12px;
-      border-radius:12px;
-      border:1px solid #d8d8d8;
-      background:#fff;
+      border:none;
       outline:none;
+      border-radius:16px;
+      padding:14px 14px;
       font-size:14px;
-      box-sizing:border-box;
+      background:#fff;
+      color:var(--text);
+      box-shadow:0 12px 25px rgba(0,0,0,.12);
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid #edf0f5;
+      border-radius:var(--radius);
+      padding:14px;
+      box-shadow:var(--shadow);
+      margin-top:14px;
     }
 
     .sectionTitle{
-      margin-top:14px;
-      font-weight:900;
-      font-size:14px;
-    }
-
-    /* 3-outline row */
-    .rowItem{
-      margin-top:10px;
-      background:#fff;
-      border:1px solid #e7e7e7;            /* outline 1 */
-      border-left:4px solid #dcdcdc;        /* outline 2 */
-      border-radius:16px;
-      padding:12px 12px;
-      box-shadow:0 6px 14px rgba(0,0,0,0.06);/* outline 3 */
-      cursor:pointer;
-      user-select:none;
-    }
-
-    .rowHead{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
+      margin-bottom:10px;
+    }
+
+    .sectionTitle h3{
+      margin:0;
+      font-size:15px;
       font-weight:900;
     }
-    .rowHead .left{
+
+    .sectionTitle span{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .chips{
       display:flex;
+      gap:8px;
+      overflow:auto;
+      padding-bottom:4px;
+      scrollbar-width:none;
+    }
+    .chips::-webkit-scrollbar{ display:none; }
+
+    .chip{
+      border:none;
+      background:var(--soft);
+      color:var(--text);
+      border-radius:999px;
+      padding:10px 13px;
+      font-size:12px;
+      font-weight:800;
+      cursor:pointer;
+      white-space:nowrap;
+      border:1px solid transparent;
+    }
+
+    .chip.active{
+      background:var(--black);
+      color:#fff;
+      border-color:var(--black);
+    }
+
+    .quickGrid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
       gap:10px;
+    }
+
+    .quickCard{
+      background:linear-gradient(180deg,#ffffff,#f8fafc);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      cursor:pointer;
+      box-shadow:0 8px 20px rgba(15,23,42,.05);
+      transition:.18s ease;
+      min-height:112px;
+    }
+
+    .quickCard:hover{
+      transform:translateY(-2px);
+      border-color:#d7dce5;
+    }
+
+    .quickIcon{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      background:var(--black);
+      color:#fff;
+      display:flex;
       align-items:center;
+      justify-content:center;
+      font-size:18px;
+      margin-bottom:10px;
+    }
+
+    .quickCard b{
+      display:block;
+      font-size:14px;
+      line-height:1.35;
+    }
+
+    .quickCard small{
+      display:block;
+      margin-top:6px;
+      color:var(--muted);
+      line-height:1.4;
+      font-size:12px;
+      font-weight:600;
+    }
+
+    .faqList{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:6px;
+    }
+
+    .faqItem{
+      border:1px solid var(--line);
+      border-left:4px solid #d1d5db;
+      border-radius:18px;
+      background:#fff;
+      overflow:hidden;
+      box-shadow:0 10px 20px rgba(15,23,42,.05);
+    }
+
+    .faqHead{
+      width:100%;
+      border:none;
+      background:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:14px 14px;
+      cursor:pointer;
+      text-align:left;
+      font-family:inherit;
+    }
+
+    .faqLeft{
+      display:flex;
+      align-items:center;
+      gap:12px;
       min-width:0;
     }
-    .ico{
-      width:34px; height:34px;
-      border-radius:12px;
-      background:#000;
+
+    .faqIco{
+      width:38px;
+      height:38px;
+      border-radius:13px;
+      background:var(--black);
       color:#fff;
       display:flex;
       align-items:center;
       justify-content:center;
       font-size:16px;
-      flex:0 0 34px;
+      flex:0 0 38px;
     }
-    .arrow{font-size:18px;color:#444;font-weight:900;}
-    .desc{
-      margin-top:8px;
-      color:#555;
-      font-size:13px;
-      line-height:1.45;
-      display:none;
-    }
-    .rowItem.open .desc{ display:block; }
 
-    .grid{
-      margin-top:12px;
+    .faqText{
+      min-width:0;
+    }
+
+    .faqText b{
+      display:block;
+      font-size:14px;
+      line-height:1.35;
+    }
+
+    .faqText span{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin-top:3px;
+      line-height:1.35;
+    }
+
+    .arrow{
+      font-size:20px;
+      font-weight:900;
+      color:#4b5563;
+      transition:.18s ease;
+      flex:0 0 auto;
+    }
+
+    .faqItem.open .arrow{
+      transform:rotate(90deg);
+    }
+
+    .faqBody{
+      display:none;
+      padding:0 14px 14px 14px;
+      color:#374151;
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    .faqItem.open .faqBody{
+      display:block;
+    }
+
+    .faqBody .mini{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .miniTag{
+      background:#f8fafc;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:7px 10px;
+      font-size:11px;
+      font-weight:800;
+      color:#374151;
+    }
+
+    .empty{
+      display:none;
+      text-align:center;
+      padding:18px;
+      border:1px dashed #d1d5db;
+      border-radius:18px;
+      color:var(--muted);
+      background:#fafafa;
+      margin-top:10px;
+    }
+
+    .contactGrid{
       display:grid;
-      grid-template-columns:repeat(2,1fr);
+      grid-template-columns:1fr 1fr;
       gap:10px;
     }
-    .tile{
-      background:#000;
-      color:#fff;
+
+    .contactCard{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:18px;
+      padding:14px;
+    }
+
+    .contactCard .icon{
+      width:40px;
+      height:40px;
+      border-radius:14px;
+      background:var(--blueSoft);
+      color:var(--blue);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+      margin-bottom:10px;
+      font-weight:900;
+    }
+
+    .contactCard b{
+      display:block;
+      font-size:14px;
+      margin-bottom:4px;
+    }
+
+    .contactCard div,
+    .contactCard small{
+      color:var(--muted);
+      line-height:1.5;
+      font-size:12px;
+    }
+
+    .tips{
+      display:grid;
+      gap:10px;
+    }
+
+    .tip{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      background:#fff;
+      border:1px solid var(--line);
       border-radius:16px;
       padding:12px;
-      font-weight:900;
-      cursor:pointer;
-      box-shadow:0 10px 24px rgba(0,0,0,0.12);
     }
-    .tile small{
+
+    .tipMark{
+      width:30px;
+      height:30px;
+      border-radius:10px;
+      background:var(--greenSoft);
+      color:var(--green);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      flex:0 0 30px;
+    }
+
+    .tip b{
       display:block;
-      margin-top:6px;
-      font-weight:600;
-      opacity:0.8;
+      font-size:13px;
+      margin-bottom:3px;
+    }
+
+    .tip small{
+      color:var(--muted);
+      line-height:1.45;
+      display:block;
+      font-size:12px;
+    }
+
+    .footerActions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:14px;
     }
 
     .note{
-      margin-top:10px;
+      margin-top:12px;
+      color:var(--muted);
       font-size:12px;
-      color:#666;
-      line-height:1.45;
+      line-height:1.6;
+      text-align:center;
     }
 
-    .footerBtns{
-      display:flex;
-      gap:10px;
-      margin-top:12px;
+    .modal{
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,.45);
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      z-index:100;
+      padding:14px;
     }
-    .footerBtns .btn,
-    .footerBtns .btnGray{ flex:1; }
+
+    .modal.show{ display:flex; }
+
+    .sheet{
+      width:420px;
+      max-width:100%;
+      background:#fff;
+      border-radius:24px 24px 18px 18px;
+      padding:16px;
+      box-shadow:0 25px 60px rgba(0,0,0,.20);
+      animation:up .18s ease;
+    }
+
+    @keyframes up{
+      from{ transform:translateY(24px); opacity:.6; }
+      to{ transform:translateY(0); opacity:1; }
+    }
+
+    .sheetTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+
+    .sheetTop b{
+      font-size:17px;
+    }
+
+    .closeX{
+      border:none;
+      background:#f3f4f6;
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      font-size:18px;
+      cursor:pointer;
+      font-weight:900;
+    }
+
+    .field{
+      margin-top:10px;
+    }
+
+    .label{
+      font-size:12px;
+      color:#4b5563;
+      font-weight:800;
+      margin-bottom:6px;
+      display:block;
+    }
+
+    .input,.select,.textarea{
+      width:100%;
+      border:1px solid #dbe1ea;
+      border-radius:14px;
+      padding:12px 13px;
+      outline:none;
+      font-size:14px;
+      font-family:inherit;
+      background:#fff;
+      color:var(--text);
+    }
+
+    .textarea{
+      min-height:120px;
+      resize:vertical;
+    }
+
+    .counter{
+      margin-top:6px;
+      text-align:right;
+      font-size:11px;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .reportPreview{
+      margin-top:12px;
+      background:#f8fafc;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      font-size:12px;
+      line-height:1.55;
+      color:#374151;
+      white-space:pre-wrap;
+      max-height:180px;
+      overflow:auto;
+    }
+
+    .sheetBtns{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:14px;
+    }
 
     @media(max-width:360px){
-      .grid{grid-template-columns:1fr;}
+      .quickGrid,
+      .contactGrid,
+      .footerActions,
+      .sheetBtns{
+        grid-template-columns:1fr;
+      }
+      .heroTop{
+        flex-direction:column;
+        align-items:flex-start;
+      }
     }
   </style>
 </head>
-
 <body>
+
 <div class="app">
 
   <div class="top">
-    <div class="title">❓ Help & Support</div>
+    <div class="titleWrap">
+      <div class="title">Help & Support</div>
+      <div class="sub">Find answers, report issues, and get assistance</div>
+    </div>
     <button class="btn" onclick="back()">Back</button>
   </div>
 
-  <div class="card">
-    <div style="font-weight:900;">How can we help you?</div>
-
-    <div class="search">
-      <input id="q" placeholder="Search help topics..." oninput="filterFAQ()">
-      <button class="btnGray" onclick="clearSearch()">Clear</button>
+  <div class="hero">
+    <div class="heroTop">
+      <div>
+        <div class="heroTitle">How can we help you today?</div>
+        <div class="heroDesc">
+          Search help topics, explore common solutions, or create a support report for ST PAY.
+        </div>
+      </div>
+      <div class="badge">24/7 Support</div>
     </div>
 
-    <div class="sectionTitle">Quick Actions</div>
-    <div class="grid">
-      <div class="tile" onclick="go('transaction.html')">💸 Payment Help
-        <small>Issues with sending money</small>
+    <div class="searchBox">
+      <input
+        id="searchInput"
+        class="searchInput"
+        type="text"
+        placeholder="Search help topics, payments, QR, login, history..."
+        oninput="filterFaqs()"
+      />
+      <button class="btnSoft" onclick="clearSearch()">Clear</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="sectionTitle">
+      <h3>Browse by Category</h3>
+      <span>Filter support topics</span>
+    </div>
+
+    <div class="chips" id="chips">
+      <button class="chip active" data-category="all" onclick="selectCategory(this)">All</button>
+      <button class="chip" data-category="account" onclick="selectCategory(this)">Account</button>
+      <button class="chip" data-category="payments" onclick="selectCategory(this)">Payments</button>
+      <button class="chip" data-category="scanner" onclick="selectCategory(this)">Scanner</button>
+      <button class="chip" data-category="history" onclick="selectCategory(this)">History</button>
+      <button class="chip" data-category="files" onclick="selectCategory(this)">Files</button>
+      <button class="chip" data-category="security" onclick="selectCategory(this)">Security</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="sectionTitle">
+      <h3>Quick Actions</h3>
+      <span>Open related pages</span>
+    </div>
+
+    <div class="quickGrid">
+      <div class="quickCard" onclick="go('transaction.html')">
+        <div class="quickIcon">💸</div>
+        <b>Payment Help</b>
+        <small>Failed transfer, pending payment, bank or wallet issues.</small>
       </div>
-      <div class="tile" onclick="go('receive.html')">⬇ Receive Help
-        <small>UPI ID / QR issues</small>
+
+      <div class="quickCard" onclick="go('receive.html')">
+        <div class="quickIcon">⬇️</div>
+        <b>Receive Money</b>
+        <small>QR, UPI ID, incoming payment, and receiving support.</small>
       </div>
-      <div class="tile" onclick="go('filetransfer.html')">📎 File Transfer
-        <small>Send docs / media</small>
+
+      <div class="quickCard" onclick="go('filetransfer.html')">
+        <div class="quickIcon">📎</div>
+        <b>File Transfer</b>
+        <small>Media, documents, upload types, and sharing options.</small>
       </div>
-      <div class="tile" onclick="go('settings.html')">⚙ Settings
-        <small>Privacy & security</small>
+
+      <div class="quickCard" onclick="go('settings.html')">
+        <div class="quickIcon">⚙️</div>
+        <b>Privacy & Settings</b>
+        <small>Security preferences, login controls, and app settings.</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="sectionTitle">
+      <h3>Frequently Asked Questions</h3>
+      <span id="faqCount">8 topics</span>
+    </div>
+
+    <div class="faqList" id="faqList">
+
+      <div class="faqItem faq" data-category="account" data-search="otp login not working verification code sign in autofill sms">
+        <button class="faqHead" onclick="toggleFaq(this)">
+          <div class="faqLeft">
+            <div class="faqIco">🔐</div>
+            <div class="faqText">
+              <b>OTP login is not working</b>
+              <span>Issues with sign-in, verification, or OTP entry</span>
+            </div>
+          </div>
+          <div class="arrow">›</div>
+        </button>
+        <div class="faqBody">
+          OTP is simulated and may appear through an alert, console message, or internal flow depending on your implementation.
+          <br><br>
+          Suggested checks:
+          <br>• Make sure the login page is loaded correctly.
+          <br>• Refresh the browser and try again.
+          <br>• Allow popups if your version uses alert-based OTP.
+          <br>• Confirm the required fields are not empty before generating the OTP.
+          <div class="mini">
+            <div class="miniTag">Login</div>
+            <div class="miniTag">OTP</div>
+            <div class="miniTag">Verification</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faqItem faq" data-category="payments" data-search="payment failed backend server not reachable flask api fetch error 404 500 cors">
+        <button class="faqHead" onclick="toggleFaq(this)">
+          <div class="faqLeft">
+            <div class="faqIco">💸</div>
+            <div class="faqText">
+              <b>Payment failed or backend is not reachable</b>
+              <span>API, Flask, server connection, and fetch issues</span>
+            </div>
+          </div>
+          <div class="arrow">›</div>
+        </button>
+        <div class="faqBody">
+          Confirm that your backend server is running correctly before testing payment actions.
+          <br><br>
+          Recommended steps:
+          <br>• Run <b>python app.py</b> in the backend folder.
+          <br>• Verify the API base URL is correct in <b>script.js</b>.
+          <br>• Check browser console for fetch, CORS, or 404 errors.
+          <br>• If the frontend is hosted separately and the backend is local, they cannot communicate directly without a deployed backend.
+          <div class="mini">
+            <div class="miniTag">Flask</div>
+            <div class="miniTag">API</div>
+            <div class="miniTag">CORS</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faqItem faq" data-category="scanner" data-search="scan camera not opening qr scanner permission live server localhost https">
+        <button class="faqHead" onclick="toggleFaq(this)">
+          <div class="faqLeft">
+            <div class="faqIco">📷</div>
+            <div class="faqText">
+              <b>Scanner page cannot access the camera</b>
+              <span>Camera permission, HTTPS, localhost, and QR scan support</span>
+            </div>
+          </div>
+          <div class="arrow">›</div>
+        </button>
+        <div class="faqBody">
+          Camera access works only in secure contexts such as <b>localhost</b> or <b>HTTPS</b>.
+          <br><br>
+          Best practice:
+          <br>• Use Live Server or localhost during development.
+          <br>• Do not open the file with <b>file://</b>.
+          <br>• Check browser permission settings and allow camera access.
+          <br>• If needed, refresh once after granting permission.
+          <div class="mini">
+            <div class="miniTag">Camera</div>
+            <div class="miniTag">QR Scan</div>
+            <div class="miniTag">Permission</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faqItem faq" data-category="history" data-search="history missing transactions not showing payments add money activity localstorage cache">
+        <button class="faqHead" onclick="toggleFaq(this)">
+          <div class="faqLeft">
+            <div class="faqIco">📜</div>
+            <div class="faqText">
+              <b>Transaction history is missing</b>
+              <span>Payments, add money logs, and activity records</span>
+            </div>
+          </div>
+          <div class="arrow">›</div>
+        </button>
+        <div class="faqBody">
+          In this version, history is often stored in <b>localStorage</b>. If the browser data is cleared, the history may be removed.
+          <br><br>
+          Check the following:
+          <br>• Use the same browser and same origin.
+          <br>• Confirm that save functions are writing to localStorage.
+          <br>• Verify that your history page reads the correct keys.
+          <br>• Do not switch between unrelated ports or domains while testing.
+          <div class="mini">
+            <div class="miniTag">History</div>
+            <div class="miniTag">localStorage</div>
+            <div class="miniTag">Activity</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faqItem faq" data-category="files" data-search="file transfer upload image audio video document preview unsupported format">
+        <button class="faqHead" onclick="toggleFaq(this)">
+          <div class="faqLeft">
+            <div class="faqIco">📎</div>
+            <div class="faqText">
+              <b>File transfer options are limited</b>
+              <span>Upload categories, media support, and file preview</span>
+            </div>
+          </div>
+          <div class="arrow">›</div>
+        </button>
+        <div class="faqBody">
+          File transfer features depend on the input type, accepted file formats, and preview logic used in your page.
+          <br><br>
+          Recommended upgrades:
+          <br>• Add accept filters for images, audio, video, and documents.
+          <br>• Show file name, type, and size before upload.
+          <br>• Add a preview section for supported media.
+          <br>• Validate file size before submission.
+          <div class="mini">
+            <div class="miniTag">Upload</div>
+            <div class="miniTag">Preview</div>
+            <div class="miniTag">Media</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faqItem faq" data-category="security" data-search="security safe secure password pin otp phishing link fraud privacy">
+        <button class="faqHead" onclick="toggleFaq(this)">
+          <div class="faqLeft">
+            <div class="faqIco">🛡️</div>
+            <div class="faqText">
+              <b>How to keep ST PAY secure</b>
+              <span>PIN, OTP, privacy, and fraud prevention guidance</span>
+            </div>
+          </div>
+          <div class="arrow">›</div>
+        </button>
+        <div class="faqBody">
+          Follow these basic safety steps to reduce risk:
+          <br>• Never share OTP, PIN, or password.
+          <br>• Avoid unknown links and suspicious payment requests.
+          <br>• Use trusted networks for sensitive actions.
+          <br>• Sign out after use on shared systems.
+          <br>• Review recent activity regularly.
+          <div class="mini">
+            <div class="miniTag">PIN Safety</div>
+            <div class="miniTag">Fraud</div>
+            <div class="miniTag">Privacy</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faqItem faq" data-category="payments" data-search="pending transaction payment delayed wallet bank processing timeout">
+        <button class="faqHead" onclick="toggleFaq(this)">
+          <div class="faqLeft">
+            <div class="faqIco">⏳</div>
+            <div class="faqText">
+              <b>A payment is pending for too long</b>
+              <span>Delayed transfer, processing timeout, or wallet sync issue</span>
+            </div>
+          </div>
+          <div class="arrow">›</div>
+        </button>
+        <div class="faqBody">
+          A pending transaction may occur if the request was submitted but not confirmed by the backend or service flow.
+          <br><br>
+          Try this:
+          <br>• Refresh your dashboard.
+          <br>• Check if the transaction was recorded in history.
+          <br>• Confirm backend connectivity.
+          <br>• Prevent duplicate retries until status is verified.
+          <div class="mini">
+            <div class="miniTag">Pending</div>
+            <div class="miniTag">Timeout</div>
+            <div class="miniTag">Sync</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faqItem faq" data-category="account" data-search="session expired auto logout dashboard redirect login sessionstorage">
+        <button class="faqHead" onclick="toggleFaq(this)">
+          <div class="faqLeft">
+            <div class="faqIco">👤</div>
+            <div class="faqText">
+              <b>Why am I being redirected to the login page?</b>
+              <span>Session expiration, missing user data, or access checks</span>
+            </div>
+          </div>
+          <div class="arrow">›</div>
+        </button>
+        <div class="faqBody">
+          If your page checks <b>sessionStorage.getItem("user")</b>, it will redirect to the login page when no user session is present.
+          <br><br>
+          Suggested checks:
+          <br>• Make sure login saves the username properly.
+          <br>• Do not manually clear browser storage during testing.
+          <br>• Verify that protected pages use the same storage key.
+          <div class="mini">
+            <div class="miniTag">Session</div>
+            <div class="miniTag">Redirect</div>
+            <div class="miniTag">Login State</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="empty" id="emptyState">
+      No help topics matched your search.<br>
+      Try keywords like <b>payment</b>, <b>QR</b>, <b>login</b>, <b>history</b>, or <b>security</b>.
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="sectionTitle">
+      <h3>Contact Support</h3>
+      <span>Contact information</span>
+    </div>
+
+    <div class="contactGrid">
+      <div class="contactCard">
+        <div class="icon">📧</div>
+        <b>Email Support</b>
+        <div>support@stpay.com</div>
+        <small>For general support and issue reporting</small>
+      </div>
+
+      <div class="contactCard">
+        <div class="icon">☎️</div>
+        <b>Phone Support</b>
+        <div>+91 90000 00000</div>
+        <small>Available Monday to Saturday, 9 AM to 6 PM</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="sectionTitle">
+      <h3>Safety Tips</h3>
+      <span>Recommended guidance</span>
+    </div>
+
+    <div class="tips">
+      <div class="tip">
+        <div class="tipMark">✓</div>
+        <div>
+          <b>Protect login credentials</b>
+          <small>Never share passwords, OTP codes, or security PINs with anyone.</small>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tipMark">✓</div>
+        <div>
+          <b>Review payment details carefully</b>
+          <small>Always confirm recipient name, amount, and destination before sending funds.</small>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tipMark">✓</div>
+        <div>
+          <b>Use trusted devices</b>
+          <small>Avoid sensitive actions on unknown or public systems without proper protection.</small>
+        </div>
       </div>
     </div>
 
-    <div class="sectionTitle">FAQ</div>
-
-    <!-- FAQ items -->
-    <div class="rowItem faq" data-text="login otp not coming otp auto fill">
-      <div class="rowHead" onclick="toggle(this)">
-        <div class="left"><div class="ico">🔐</div>OTP Login not working</div>
-        <div class="arrow">›</div>
-      </div>
-      <div class="desc">
-        Demo app-la OTP console/alert la show aagum. Real SMS illa.<br>
-        ✅ OTP send pannitu notification tap pannina auto-fill varum (demo).<br>
-        If permission problem: browser refresh + allow popups.
-      </div>
-    </div>
-
-    <div class="rowItem faq" data-text="payment failed backend not reachable server error 404">
-      <div class="rowHead" onclick="toggle(this)">
-        <div class="left"><div class="ico">💸</div>Payment failed / Backend not reachable</div>
-        <div class="arrow">›</div>
-      </div>
-      <div class="desc">
-        Flask backend run aaganu confirm pannu:<br>
-        <b>python app.py</b> → should show <b>http://127.0.0.1:5000</b><br>
-        Then frontend la fetch API correct-a point aaganum.<br>
-        ⚠️ Netlify la host pannina backend localhost connect aagathu (CORS + server location).
-      </div>
-    </div>
-
-    <div class="rowItem faq" data-text="scan camera not opening permission https live server">
-      <div class="rowHead" onclick="toggle(this)">
-        <div class="left"><div class="ico">📷</div>Scan page camera open aagala</div>
-        <div class="arrow">›</div>
-      </div>
-      <div class="desc">
-        Camera access only <b>https</b> or <b>localhost</b> la work aagum.<br>
-        ✅ VS Code Live Server: <b>http://127.0.0.1:5500/scan.html</b><br>
-        ❌ file:// open pannina camera permission varadhu.
-      </div>
-    </div>
-
-    <div class="rowItem faq" data-text="history missing not showing add money payments files">
-      <div class="rowHead" onclick="toggle(this)">
-        <div class="left"><div class="ico">📜</div>History show aagala</div>
-        <div class="arrow">›</div>
-      </div>
-      <div class="desc">
-        History localStorage la save aagum. Browser cache clear pannina data poidum.<br>
-        ✅ Latest history.html page la Pay/File/AddMoney tabs irukum.<br>
-        Same browser + same origin (localhost/5500) use pannunga.
-      </div>
-    </div>
-
-    <div class="rowItem faq" data-text="file transfer video audio image document types">
-      <div class="rowHead" onclick="toggle(this)">
-        <div class="left"><div class="ico">📎</div>File transfer options (video/audio/docs)</div>
-        <div class="arrow">›</div>
-      </div>
-      <div class="desc">
-        File upload input types set pannina different options varum.<br>
-        (Next step) naan filetransfer.html la categories + preview add pannidren.
-      </div>
-    </div>
-
-    <div class="rowItem faq" data-text="security safe secure upi pin password tips">
-      <div class="rowHead" onclick="toggle(this)">
-        <div class="left"><div class="ico">🛡️</div>Security tips</div>
-        <div class="arrow">›</div>
-      </div>
-      <div class="desc">
-        ✅ OTP / PIN share pannatha.<br>
-        ✅ Unknown links click pannatha.<br>
-        ✅ Public Wi-Fi la payments avoid pannu.<br>
-        ✅ Logout after use (especially demo shared PC).
-      </div>
-    </div>
-
-    <div class="sectionTitle">Contact</div>
-    <div class="rowItem">
-      <div class="rowHead" onclick="toggle(this)">
-        <div class="left"><div class="ico">☎</div>Support details</div>
-        <div class="arrow">›</div>
-      </div>
-      <div class="desc">
-        📧 Email: <b>support@stpay.demo</b><br>
-        ☎ Phone: <b>+91 90000 00000</b> (demo)<br>
-        ⏰ Working: Mon–Sat 9AM–6PM<br><br>
-        *This is demo info. Real API connect panna next step.*
-      </div>
-    </div>
-
-    <div class="footerBtns">
-      <button class="btnGray" onclick="reportIssue()">Report Issue</button>
-      <button class="btn" onclick="go('dashboard.html')">Go Home</button>
+    <div class="footerActions">
+      <button class="btnSoft" onclick="openReportModal()">Report an Issue</button>
+      <button class="btn" onclick="go('dashboard.html')">Go to Dashboard</button>
     </div>
 
     <div class="note">
-      ✅ Demo project: localStorage based.<br>
-      Next: backend connect + real OTP provider (Twilio/fast2sms/email) integrate pannalam.
+      This support center is designed for ST PAY.
+      You can extend it further by connecting a real backend, database, email support system, OTP provider, and ticket management workflow.
     </div>
   </div>
 
 </div>
 
+<div class="modal" id="reportModal">
+  <div class="sheet">
+    <div class="sheetTop">
+      <b>Create Support Report</b>
+      <button class="closeX" onclick="closeReportModal()">×</button>
+    </div>
+
+    <div class="field">
+      <label class="label">Issue Type</label>
+      <select class="select" id="issueType" onchange="updatePreview()">
+        <option value="Payment Issue">Payment Issue</option>
+        <option value="Login Issue">Login Issue</option>
+        <option value="Scanner Issue">Scanner Issue</option>
+        <option value="History Issue">History Issue</option>
+        <option value="File Transfer Issue">File Transfer Issue</option>
+        <option value="Security Concern">Security Concern</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="label">Priority</label>
+      <select class="select" id="priority" onchange="updatePreview()">
+        <option value="Low">Low</option>
+        <option value="Medium" selected>Medium</option>
+        <option value="High">High</option>
+        <option value="Critical">Critical</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="label">Subject</label>
+      <input class="input" id="subject" placeholder="Enter a short issue title" oninput="updatePreview()" />
+    </div>
+
+    <div class="field">
+      <label class="label">Description</label>
+      <textarea
+        class="textarea"
+        id="description"
+        maxlength="500"
+        placeholder="Describe the issue clearly. Mention the page, action, and what happened."
+        oninput="updatePreview();updateCounter()"
+      ></textarea>
+      <div class="counter" id="counter">0 / 500</div>
+    </div>
+
+    <div class="reportPreview" id="reportPreview"></div>
+
+    <div class="sheetBtns">
+      <button class="btnSoft" onclick="copyReport()">Copy Report</button>
+      <button class="btn" onclick="downloadReport()">Download Text</button>
+    </div>
+  </div>
+</div>
+
 <script>
   if(!sessionStorage.getItem("user")){
-    window.location="index.html";
+    window.location = "index.html";
   }
 
-  function back(){ window.location="dashboard.html"; }
-  function go(p){ window.location = p; }
+  let activeCategory = "all";
 
-  function toggle(head){
-    const item = head.closest(".rowItem");
+  function back(){
+    window.location = "dashboard.html";
+  }
+
+  function go(page){
+    window.location = page;
+  }
+
+  function toggleFaq(btn){
+    const item = btn.closest(".faqItem");
     item.classList.toggle("open");
   }
 
-  function clearSearch(){
-    document.getElementById("q").value="";
-    filterFAQ();
+  function selectCategory(btn){
+    document.querySelectorAll(".chip").forEach(ch => ch.classList.remove("active"));
+    btn.classList.add("active");
+    activeCategory = btn.getAttribute("data-category") || "all";
+    filterFaqs();
   }
 
-  function filterFAQ(){
-    const q = (document.getElementById("q").value || "").toLowerCase().trim();
-    document.querySelectorAll(".faq").forEach(el=>{
-      const t = (el.getAttribute("data-text") || "").toLowerCase();
-      el.style.display = (!q || t.includes(q)) ? "block" : "none";
+  function clearSearch(){
+    document.getElementById("searchInput").value = "";
+    filterFaqs();
+  }
+
+  function filterFaqs(){
+    const query = (document.getElementById("searchInput").value || "").toLowerCase().trim();
+    const faqs = document.querySelectorAll(".faq");
+    let visibleCount = 0;
+
+    faqs.forEach(item => {
+      const text = (item.getAttribute("data-search") || "").toLowerCase();
+      const category = item.getAttribute("data-category") || "";
+      const matchesSearch = !query || text.includes(query);
+      const matchesCategory = activeCategory === "all" || category === activeCategory;
+
+      if(matchesSearch && matchesCategory){
+        item.style.display = "block";
+        visibleCount++;
+      }else{
+        item.style.display = "none";
+        item.classList.remove("open");
+      }
+    });
+
+    document.getElementById("faqCount").textContent = visibleCount + (visibleCount === 1 ? " topic" : " topics");
+    document.getElementById("emptyState").style.display = visibleCount ? "none" : "block";
+  }
+
+  function openReportModal(){
+    document.getElementById("reportModal").classList.add("show");
+    updatePreview();
+    updateCounter();
+  }
+
+  function closeReportModal(){
+    document.getElementById("reportModal").classList.remove("show");
+  }
+
+  function updateCounter(){
+    const value = document.getElementById("description").value || "";
+    document.getElementById("counter").textContent = value.length + " / 500";
+  }
+
+  function getReportText(){
+    const user = sessionStorage.getItem("user") || "Guest User";
+    const type = document.getElementById("issueType").value;
+    const priority = document.getElementById("priority").value;
+    const subject = document.getElementById("subject").value.trim() || "No subject provided";
+    const description = document.getElementById("description").value.trim() || "No description provided";
+
+    return (
+`ST PAY SUPPORT REPORT
+
+User: ${user}
+Issue Type: ${type}
+Priority: ${priority}
+Subject: ${subject}
+Page: help.html
+Time: ${new Date().toLocaleString()}
+
+Description:
+${description}
+
+Environment:
+Browser: ${navigator.userAgent}
+Origin: ${location.origin}
+Path: ${location.pathname}
+
+Status:
+This report was generated from the ST PAY Help & Support page.`
+    );
+  }
+
+  function updatePreview(){
+    document.getElementById("reportPreview").textContent = getReportText();
+  }
+
+  function copyReport(){
+    const text = getReportText();
+    navigator.clipboard.writeText(text).then(() => {
+      alert("Support report copied successfully.");
+    }).catch(() => {
+      alert("Copy failed. Please copy the report manually.");
     });
   }
 
-  function reportIssue(){
-    const msg =
-`ST PAY Issue Report (demo)
-User: ${sessionStorage.getItem("user") || "User"}
-Time: ${new Date().toLocaleString()}
-Problem: (type here)`;
-
-    // copy template to clipboard
-    navigator.clipboard?.writeText(msg);
-    alert("Issue template copied ✔\nPaste it in your notes or message.");
+  function downloadReport(){
+    const text = getReportText();
+    const blob = new Blob([text], { type:"text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "stpay-support-report.txt";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
+
+  document.getElementById("reportModal").addEventListener("click", function(e){
+    if(e.target === this){
+      closeReportModal();
+    }
+  });
+
+  filterFaqs();
+  updatePreview();
+  updateCounter();
 </script>
 
 </body>

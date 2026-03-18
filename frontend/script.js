@@ -215,12 +215,25 @@ function setTextIfExists(id, value) {
 }
 
 function safeJson(res) {
-  return res.json().then(function (data) {
-    return data;
-  }).catch(function (e) {
-    console.log("JSON parse error:", e);
-    return {};
-  });
+  try {
+    if (!res) return Promise.resolve({});
+    if (res.status === 204) return Promise.resolve({});
+    return res.text().then(function (txt) {
+      if (!txt || !txt.trim()) return {};
+      try {
+        return JSON.parse(txt);
+      } catch (e) {
+        console.log("JSON parse error:", e);
+        return {};
+      }
+    }).catch(function (e) {
+      console.log("JSON read error:", e);
+      return {};
+    });
+  } catch (e) {
+    console.log("safeJson error:", e);
+    return Promise.resolve({});
+  }
 }
 
 function strContains(text, search) {
@@ -841,11 +854,70 @@ function quickPay(name) {
 
 
 /* ------------------------------
+   HELP PAGE COMPATIBILITY
+------------------------------ */
+
+function back() {
+  if (window.history.length > 1) {
+    window.history.back();
+  } else {
+    window.location = "dashboard.html";
+  }
+}
+
+function go(page) {
+  window.location = page;
+}
+
+function toggle(head) {
+  if (!head) return;
+  var item = head.closest ? head.closest(".rowItem") : null;
+  if (item && item.classList) {
+    item.classList.toggle("open");
+  }
+}
+
+function filterFAQ() {
+  var input =
+    document.getElementById("q") ||
+    document.getElementById("searchInput");
+
+  var q = ((input && input.value) || "").toLowerCase().trim();
+
+  var items = document.querySelectorAll(".faq");
+  var shown = 0;
+
+  for (var i = 0; i < items.length; i++) {
+    var el = items[i];
+    var text =
+      (el.getAttribute("data-text") || "") + " " +
+      (el.getAttribute("data-search") || "") + " " +
+      (el.innerText || el.textContent || "");
+
+    text = String(text).toLowerCase();
+
+    var show = !q || strContains(text, q);
+    el.style.display = show ? "block" : "none";
+    if (show) shown++;
+  }
+
+  var empty = document.getElementById("emptyState");
+  if (empty) {
+    empty.style.display = shown ? "none" : "block";
+  }
+}
+
+
+/* ------------------------------
    SEARCH FILTER
 ------------------------------ */
 
 function applySearch() {
-  var input = document.getElementById("searchBox");
+  var input =
+    document.getElementById("searchBox") ||
+    document.getElementById("searchInput") ||
+    document.getElementById("q");
+
   if (!input) return;
 
   var q = (input.value || "").trim().toLowerCase();
@@ -875,12 +947,23 @@ function applySearch() {
     hide = q && !strContains(text, q);
     if (el.classList) el.classList.toggle("hidden", hide);
   }
+
+  if (document.querySelector(".faq")) {
+    filterFAQ();
+  }
 }
 
 function clearSearch() {
-  var input = document.getElementById("searchBox");
-  if (input) input.value = "";
+  var input1 = document.getElementById("searchBox");
+  var input2 = document.getElementById("searchInput");
+  var input3 = document.getElementById("q");
+
+  if (input1) input1.value = "";
+  if (input2) input2.value = "";
+  if (input3) input3.value = "";
+
   applySearch();
+  filterFAQ();
 }
 
 
@@ -1374,6 +1457,10 @@ window.addEventListener("DOMContentLoaded", function () {
 
     if (quickReceiver && receiverInput && !receiverInput.value) {
       receiverInput.value = quickReceiver;
+    }
+
+    if (document.querySelector(".faq")) {
+      filterFAQ();
     }
   });
 });
