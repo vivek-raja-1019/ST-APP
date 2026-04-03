@@ -114,5 +114,23 @@
     "desc": "Airtel • 1234554432",
     "category": "recharge",
     "icon": "📱"
+  },
+  {
+    "type": "pay",
+    "id": "TXN20260325103419243132",
+    "reference": "REF-19243132",
+    "hash": "0xtxn20260325103419243132",
+    "sender": "Vivek",
+    "receiver": "Aravind",
+    "from": "Vivek",
+    "to": "Aravind",
+    "user": "Vivek",
+    "amount": 100.0,
+    "status": "success",
+    "date": "2026-03-25 10:34:19",
+    "time": "2026-03-25 10:34:19",
+    "balance_after": 4131.0,
+    "block_no": 7,
+    "title": "Sent to Aravind"
   }
 ]
